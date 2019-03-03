@@ -1,0 +1,117 @@
+{% load static %}
+
+<!DOCTYPE HTML>
+<!--
+    Phantom by HTML5 UP
+    html5up.net | @ajlkn
+    Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+    <title>{% block title %}DAFI{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <noscript><link rel="stylesheet" href="{% static 'css/noscript.css' %}" /></noscript>
+</head>
+
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header">
+            <div class="inner">
+                <a href="{% url 'main:index' %}" class="logo">
+                    <span class="symbol">
+                        <img src="{% static 'images/logo.svg' %}" alt="" />
+                    </span>
+
+                    <span class="title">DAFI</span>
+                </a>
+
+                <nav>
+                    <ul>
+                        <li><a href="#menu">Menu</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <nav id="menu">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="{% url 'main:index' %}">Home</a></li>
+            </ul>
+        </nav>
+
+        <div id="main">
+            <div class="inner">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+        <footer id="footer">
+            <div class="inner">
+                <section>
+                    <h2>Get in touch</h2>
+                    <form method="post" action="#">
+                        <div class="fields">
+                            <div class="field half">
+                                <input type="text" name="name" id="name" placeholder="Name" />
+                            </div>
+                            <div class="field half">
+                                <input type="email" name="email" id="email" placeholder="Email" />
+                            </div>
+                            <div class="field">
+                                <textarea name="message" id="message" placeholder="Message"></textarea>
+                            </div>
+                        </div>
+                        <ul class="actions">
+                            <li><input type="submit" value="Send" class="primary" /></li>
+                        </ul>
+                    </form>
+                </section>
+                <section>
+                    <h2>Follow</h2>
+                    <ul class="icons">
+                        <li><a href="https://www.twitter.com/dafi_um" class="icon style2 fa-twitter" target="_blank">
+                            <span class="label">Twitter</span>
+                        </a></li>
+
+                        <li><a href="https://www.facebook.com/dafi.um/" class="icon style2 fa-facebook" target="_blank">
+                            <span class="label">Facebook</span>
+                        </a></li>
+
+                        <li><a href="https://www.instagram.com/dafi_um" class="icon style2 fa-instagram" target="_blank">
+                            <span class="label">Instagram</span>
+                        </a></li>
+
+                        <li><a href="https://www.github.com/dafi-um" class="icon style2 fa-github" target="_blank">
+                            <span class="label">GitHub</span>
+                        </a></li>
+
+                        <li><a href="#" class="icon style2 fa-phone" target="_blank">
+                            <span class="label">Phone</span>
+                        </a></li>
+
+                        <li><a href="mailto:dafi@um.es" class="icon style2 fa-envelope-o" target="_blank">
+                            <span class="label">Email</span>
+                        </a></li>
+                    </ul>
+                </section>
+
+                <ul class="copyright">
+                    <li><i class="fa fa-code"></i> with <i class="fa fa-heart"></i> in Murcia</li>
+                    <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/browser.min.js' %}"></script>
+    <script src="{% static 'js/breakpoints.min.js' %}"></script>
+    <script src="{% static 'js/util.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
