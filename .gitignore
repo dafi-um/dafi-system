@@ -1,3 +1,7 @@
-venv
+# IDEs
 .vscode/**
-**/__pycache__/**
+
+# Python
+venv
+__pycache__
+db.sqlite3*
