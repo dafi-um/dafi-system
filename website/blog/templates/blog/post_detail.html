@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - El Blog de DAFI{% endblock title %}
+
+{% block content %}
+    <a href="{% url 'blog:list' %}" class="button small" title="Volver al Blog">Volver al Blog</a>
+
+    <h1>{{ post.title }}</h1>
+
+    <p>{{ post.text }}</p>
+{% endblock content %}
