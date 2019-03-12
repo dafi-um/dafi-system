@@ -5,3 +5,11 @@
 venv
 __pycache__
 db.sqlite3*
+
+# Dist
+website/static
+
+# Run
+*.log
+*.pid
+*.sock
