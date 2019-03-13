@@ -1,146 +1,95 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
-    <div class="inner">
-        <header>
-            <h1>Delegación de Alumnos de la Facultad de Informática.</h1>
-            <p>Somos la Delegación de Alumnos de la Facultad de Informática, máximo órgano de representación de los alumnos de nuestra Facultad. Nuestro propósito es ayudar al alumnado, respondiendo a las dudas sobre el funcionamiento de la facultad, resolviendo posibles problemas y actuando como intermediarios entre el Equipo Directivo y el alumnado.</p>
-        </header>
+{% block main %}
+	<section id="banner">
+		<div class="inner">
+			<h1>Delegación de Alumnos&nbsp;<br />Facultad de Informática</h1>
+			<!--<ul class="actions">
+				<li><a href="#" class="button alt">¿Empezamos?</a></li>
+			</ul>-->
+		</div>
+	</section>
 
-        <section class="tiles">
-            <article class="style1">
-                <span class="image">
-                    <img src="{% static 'images/pic01.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Magna</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
+    <section id="one">
+        <div class="inner">
+            <header>
+                <h2>¿Quiénes somos?</h2>
+            </header>
+
+            <p>Somos la Delegación de Alumnos de la Facultad de Informática, máximo órgano de representación de los alumnos de nuestra Facultad. Nuestro propósito es ayudar al alumnado, respondiendo a las dudas sobre el funcionamiento de la facultad, resolviendo posibles problemas y actuando como intermediarios entre el Equipo Directivo y el alumnado.</p>
+
+            <ul class="actions">
+                <li><a href="#" class="button alt">Learn More</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="two">
+        <div class="inner">
+            <article>
+                <div class="content">
+                    <header>
+                        <h3>Pellentesque adipis</h3>
+                    </header>
+                    <div class="image fit">
+                        <img src="{% static 'images/people.jpg' %}" alt="" />
                     </div>
-                </a>
+                    <p>Cumsan mollis eros. Pellentesque a diam sit amet mi magna ullamcorper vehicula. Integer adipiscin sem. Nullam quis massa sit amet lorem ipsum feugiat tempus.</p>
+                </div>
             </article>
-            <article class="style2">
-                <span class="image">
-                    <img src="{% static 'images/pic02.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Lorem</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
+            <article class="alt">
+                <div class="content">
+                    <header>
+                        <h3>Morbi interdum mol</h3>
+                    </header>
+                    <div class="image fit">
+                        <img src="{% static 'images/people.jpg' %}" alt="" />
                     </div>
-                </a>
+                    <p>Cumsan mollis eros. Pellentesque a diam sit amet mi magna ullamcorper vehicula. Integer adipiscin sem. Nullam quis massa sit amet lorem ipsum feugiat tempus.</p>
+                </div>
             </article>
-            <article class="style3">
-                <span class="image">
-                    <img src="{% static 'images/pic03.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Feugiat</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
+        </div>
+    </section>
+
+    <section id="three">
+        <div class="inner">
+            <article>
+                <div class="content">
+                    <span class="icon fa-laptop"></span>
+                    <header>
+                        <h3>Tempus Feugiat</h3>
+                    </header>
+                    <p>Morbi interdum mollis sapien. Sed ac risus. Phasellus lacinia, magna lorem ullamcorper laoreet, lectus arcu.</p>
+                    <ul class="actions">
+                        <li><a href="#" class="button alt">Learn More</a></li>
+                    </ul>
+                </div>
             </article>
-            <article class="style4">
-                <span class="image">
-                    <img src="{% static 'images/pic04.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Tempus</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
+            <article>
+                <div class="content">
+                    <span class="icon fa-diamond"></span>
+                    <header>
+                        <h3>Aliquam Nulla</h3>
+                    </header>
+                    <p>Ut convallis, sem sit amet interdum consectetuer, odio augue aliquam leo, nec dapibus tortor nibh sed.</p>
+                    <ul class="actions">
+                        <li><a href="#" class="button alt">Learn More</a></li>
+                    </ul>
+                </div>
             </article>
-            <article class="style5">
-                <span class="image">
-                    <img src="{% static 'images/pic05.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Aliquam</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
+            <article>
+            <div class="content">
+                    <span class="icon fa-laptop"></span>
+                    <header>
+                        <h3>Sed Magna</h3>
+                    </header>
+                    <p>Suspendisse mauris. Fusce accumsan mollis eros. Pellentesque a diam sit amet mi ullamcorper vehicula.</p>
+                    <ul class="actions">
+                        <li><a href="#" class="button alt">Learn More</a></li>
+                    </ul>
+                </div>
             </article>
-            <article class="style6">
-                <span class="image">
-                    <img src="{% static 'images/pic06.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Veroeros</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-            <article class="style2">
-                <span class="image">
-                    <img src="{% static 'images/pic07.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Ipsum</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-            <article class="style3">
-                <span class="image">
-                    <img src="{% static 'images/pic08.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Dolor</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-            <article class="style1">
-                <span class="image">
-                    <img src="{% static 'images/pic09.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Nullam</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-            <article class="style5">
-                <span class="image">
-                    <img src="{% static 'images/pic10.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Ultricies</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-            <article class="style6">
-                <span class="image">
-                    <img src="{% static 'images/pic11.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Dictum</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-            <article class="style4">
-                <span class="image">
-                    <img src="{% static 'images/pic12.jpg' %}" alt="" />
-                </span>
-                <a href="generic.html">
-                    <h2>Pretium</h2>
-                    <div class="content">
-                        <p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
-                    </div>
-                </a>
-            </article>
-        </section>
-    </div>
-{% endblock content %}
+        </div>
+    </section>
+{% endblock main %}
