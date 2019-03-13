@@ -1,8 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'generic.html' %}
 
 {% block title %}El Blog de DAFI{% endblock title %}
 
 {% block content %}
+    <header class="major special">
+        <h1>El Blog de DAFI</h1>
+        <p>Noticias frescas (a veces)</p>
+    </header>
+
     {% if post_list %}
         <ul class="alt">
         {% for post in post_list %}

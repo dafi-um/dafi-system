@@ -1,11 +1,16 @@
-{% extends 'base.html' %}
+{% extends 'generic.html' %}
 
 {% block title %}{{ post.title }} - El Blog de DAFI{% endblock title %}
 
 {% block content %}
-    <a href="{% url 'blog:list' %}" class="button small" title="Volver al Blog">Volver al Blog</a>
+    <header class="major special">
+        <div style="display: flex;justify-content: space-between;">
+            <h1>{{ post.title }}</h1>
+            <p><a href="{% url 'blog:list' %}" class="button alt" title="Volver al Blog">Volver al Blog</a></p>
+        </div>
 
-    <h1>{{ post.title }}</h1>
+        <p>This is a subtitle</p>
+    </header>
 
     <p>{{ post.text }}</p>
 {% endblock content %}
