@@ -8,6 +8,7 @@ db.sqlite3*
 
 # Dist
 website/static
+website/media
 
 # Run
 *.log

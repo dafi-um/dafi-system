@@ -59,6 +59,10 @@ server {
   location ^~ /static {
     alias /PATH_TO_PROJECT/website/static;
   }
+
+  location ^~ /media {
+    alias /PATH_TO_PROJECT/website/media;
+  }
 }
 ```
 
