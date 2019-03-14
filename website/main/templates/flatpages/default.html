@@ -1,0 +1,11 @@
+{% extends 'generic.html' %}
+
+{% block title %}{{ flatpage.title }} - DAFI{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <h1>{{ flatpage.title }}</h1>
+    </header>
+
+    {{ flatpage.content }}
+{% endblock content %}
