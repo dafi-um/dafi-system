@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'main.apps.MainConfig',
     'blog.apps.BlogConfig',
+    'pagedown',
+    'markdown_deux'
 ]
 
 MIDDLEWARE = [
