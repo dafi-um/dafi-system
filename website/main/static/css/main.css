@@ -1731,6 +1731,10 @@
 		padding: 0.5em 0 0.5em 2em;
 	}
 
+		blockquote p {
+			margin-bottom: 0;
+		}
+
 	code {
 		border-radius: 0;
 		border: solid 1px;
@@ -3545,10 +3549,6 @@
 			#banner {
 				padding: 12em 0 10em 0;
 			}
-
-				#banner br {
-					display: none;
-				}
 
 		}
 
