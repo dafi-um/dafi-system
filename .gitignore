@@ -7,8 +7,8 @@ __pycache__
 db.sqlite3*
 
 # Dist
-website/static
-website/media
+/static
+/media
 
 # Run
 *.log
