@@ -1,13 +1,13 @@
 DAFI Website
 ============
 
+## Requirements
+
+You'll need Python 3.6 or higher and a compatible version of pip to run this project.
+
 ## Deployment
 
-Follow these steps after pulling from the repo:
-
-```
-python manage.py collectstatic
-```
+Run the `deploy.sh` script to install all the dependencies using pip and configure the Django installation.
 
 ### Nginx
 
@@ -57,38 +57,19 @@ server {
   }
 
   location ^~ /static {
-    alias /PATH_TO_PROJECT/website/static;
+    alias /PATH_TO_PROJECT/static;
   }
 
   location ^~ /media {
-    alias /PATH_TO_PROJECT/website/media;
+    alias /PATH_TO_PROJECT/media;
   }
 }
 ```
 
 ### UWSGI
 
-Here's the basic configuration for UWSGI:
-
-```ini
-[uwsgi]
-
-# Django-related settings
-chdir           = /PATH_TO_PROJECT/website
-module          = website.wsgi
-home            = /PATH_TO_PROJECT/venv
-
-# process-related settings
-master          = true
-processes       = 10
-socket          = /PATH_TO_PROJECT/web_dafi.sock
-# 666 if the user running uwsgi is not in the www-data group else 664
-chmod-socket    = 666
-vacuum          = true
-```
-
-To run the daemon just execute:
+To run the daemon execute:
 
 ```bash
-venv/bin/uwsgi --ini app_uwsgi.ini --uid www-data --gid www-data --daemonize uwsgi_webdafi.log --pidfile uwsgi_webdafi.pid
+venv/bin/uwsgi --ini app_socket.ini --uid www-data --gid www-data --daemonize uwsgi_webdafi.log --pidfile uwsgi_webdafi.pid
 ```
