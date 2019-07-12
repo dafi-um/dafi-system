@@ -11,7 +11,7 @@
     {% if post_list %}
         <ul class="alt">
         {% for post in post_list %}
-            <li><a href="{% url 'blog:detail' post.id %}">{{ post.title }}</a></li>
+            <li><a href="{% url 'blog:detail' post.slug %}">{{ post.title }}</a></li>
         {% endfor %}
         </ul>
     {% else %}

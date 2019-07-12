@@ -7,7 +7,7 @@ from .models import Post
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'pub_date')
+    list_display = ('title', 'slug', 'pub_date')
     list_filter = ['pub_date']
 
     formfield_overrides = {
@@ -15,5 +15,7 @@ class PostAdmin(admin.ModelAdmin):
             'widget': AdminPagedownWidget
         }
     }
+
+    prepopulated_fields = {'slug': ('title',)}
 
 admin.site.register(Post, PostAdmin)
