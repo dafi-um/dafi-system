@@ -25,6 +25,9 @@ if __name__ == '__main__':
 
     updater = Updater(token=token, use_context=True)
 
+    # Fixes bug in python <= 3.5: parent module not initiated
+    import_module('bot.handlers')
+
     for name in handlers:
         mod = import_module('.' + name, 'bot.handlers')
 

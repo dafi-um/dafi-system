@@ -14,7 +14,6 @@ def generate_blog_list():
     else:
         buttons = []
 
-        p: Post
         for p in posts:
             txt = '{} ({})'.format(p.title, p.pub_date.strftime('%d %b %y'))
             buttons.append([InlineKeyboardButton(txt, callback_data='blog=' + p.slug)])
@@ -29,7 +28,7 @@ def blog_list(update, context):
     update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
 
 def blog_detail(update, context):
-    post: Post = None
+    post = None
     slug = update.callback_query.data.replace('blog=', '')
 
     msg = '_No se ha encontrado el artículo que buscabas_'

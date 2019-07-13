@@ -1,9 +1,8 @@
-from telegram.error import (TelegramError, Unauthorized, BadRequest,
-                            TimedOut, ChatMigrated, NetworkError)
+from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError
 from telegram.ext import CommandHandler
 
 def start(update, context):
-    update.message.reply_text("Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?".format(update.message.chat.first_name))
+    update.message.reply_text("Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?".format(update.message.from_user.first_name))
 
 def error_callback(bot, update, error):
     try:
