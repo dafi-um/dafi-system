@@ -4,11 +4,15 @@
 # Python
 venv
 __pycache__
+*.pyc
 db.sqlite3*
 
 # Dist
 /static
 /media
+
+# Config
+.env
 
 # Run
 *.log
