@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'users.apps.UsersConfig',
     'main.apps.MainConfig',
     'blog.apps.BlogConfig',
     'pagedown',
@@ -106,6 +107,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# User model
+# https://docs.djangoproject.com/en/2.2/topics/auth/customizing/
+
+AUTH_USER_MODEL = 'users.User'
 
 
 # Internationalization
