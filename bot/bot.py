@@ -1,8 +1,6 @@
 from os import environ, getenv
 from importlib import import_module
 
-from dotenv import load_dotenv
-
 from django import setup as django_setup
 
 from telegram.ext import Updater, CommandHandler
@@ -15,7 +13,6 @@ handlers = [
 if __name__ == '__main__':
     environ.setdefault('DJANGO_SETTINGS_MODULE', 'website.settings')
 
-    load_dotenv()
     django_setup()
 
     token = getenv('BOT_TOKEN')

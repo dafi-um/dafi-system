@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import environ
+
+env = environ.Env(
+    DEBUG=(bool, False),
+    DOMAIN=(str, None)
+)
+
+environ.Env.read_env('.env')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,13 +27,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'btac)p_zi41a$4utw=svx6ws94r#xk3wlne@ory%i-_%rk=1aj'
+SECRET_KEY = env('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
+
+DOMAIN = env('DOMAIN')
+
+if DOMAIN is not None: ALLOWED_HOSTS.append(DOMAIN)
 
 
 # Application definition
@@ -110,9 +120,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # User model
-# https://docs.djangoproject.com/en/2.2/topics/auth/customizing/
+# https://docs.djangoproject.com/en/2.1/topics/auth/customizing/
 
 AUTH_USER_MODEL = 'users.User'
+
+
+# Auth security
+# https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
+
+CSRF_COOKIE_SECURE = not DEBUG
+
+SESSION_COOKIE_SECURE = not DEBUG
 
 
 # Internationalization
