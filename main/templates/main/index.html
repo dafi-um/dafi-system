@@ -31,15 +31,23 @@
         <div class="inner">
             <article>
                 <div class="content">
-                    <header>
-                        <h3>Pellentesque adipis</h3>
-                    </header>
-                    <div class="image fit">
-                        <img src="{% static 'images/people.jpg' %}" alt="" />
-                    </div>
-                    <p>Cumsan mollis eros. Pellentesque a diam sit amet mi magna ullamcorper vehicula. Integer adipiscin sem. Nullam quis massa sit amet lorem ipsum feugiat tempus.</p>
+                    {% if last_post %}
+                        <header>
+                            <h3><a href="{% url 'blog:detail' last_post.slug %}" title="El Blog de DAFI">Última entrada del Blog</a></h3>
+                            <p>{{ last_post.title }} - {{ last_post.pub_date | date:'j/m/Y H:i' }}</p>
+                        </header>
+                        <p>{{ last_post.content|truncatechars:200 }}</p>
+                        <a class="button small" href="{% url 'blog:detail' last_post.slug %}" title="{{ last_post.title }}">Leer más</a>
+                    {% else %}
+                        <header>
+                            <h3><a href="{% url 'blog:list' %}" title="El Blog de DAFI">El Blog de DAFI</a></h3>
+                        </header>
+                        <p>No hay entradas disponibles :(</p>
+                        <a class="button alt" href="{% url 'blog:list' %}" title="El Blog de DAFI">Ir al Blog</a>
+                    {% endif %}
                 </div>
             </article>
+
             <article class="alt">
                 <div class="content">
                     <header>
