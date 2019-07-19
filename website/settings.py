@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'main.apps.MainConfig',
     'blog.apps.BlogConfig',
+    'clubs.apps.ClubsConfig',
     'django_cleanup.apps.CleanupConfig',
     'pagedown',
     'markdown_deux',
