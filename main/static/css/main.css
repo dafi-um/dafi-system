@@ -3959,3 +3959,17 @@
 			}
 
 		}
+
+/* Custom */
+
+	#meetings li {
+		padding-top: 1em;
+	}
+
+		#meetings li:first-child {
+			padding-top: 0.5em;
+		}
+
+		#meetings li p {
+			margin-bottom: 0;
+		}

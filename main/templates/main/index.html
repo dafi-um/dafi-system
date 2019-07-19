@@ -58,10 +58,22 @@
                     <header>
                         <h3>Próximas quedadas</h3>
                     </header>
-                    <div class="image fit">
-                        <img src="{% static 'images/people.jpg' %}" alt="" />
-                    </div>
-                    <p>Cumsan mollis eros. Pellentesque a diam sit amet mi magna ullamcorper vehicula. Integer adipiscin sem. Nullam quis massa sit amet lorem ipsum feugiat tempus.</p>
+                    {% if meetings %}
+                        <ul id="meetings" class="alt">
+                        {% for m in meetings %}
+                            <li>
+                                <header>
+                                    <h5>{{ m.title }}</h5>
+                                    <p>{{ m.club.name }}</p>
+                                </header>
+
+                                <p>En {{ m.place }} el {{ m.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No hay reuniones planeadas.</p>
+                    {% endif %}
                 </div>
             </article>
         </div>
