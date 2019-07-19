@@ -36,6 +36,11 @@
                             <h3><a href="{% url 'blog:detail' last_post.slug %}" title="El Blog de DAFI">Última entrada del Blog</a></h3>
                             <p>{{ last_post.title }} - {{ last_post.pub_date | date:'j/m/Y H:i' }}</p>
                         </header>
+                        {% if last_post.image %}
+                            <div class="image">
+                                <img style="max-height: 200px;" src="{{ last_post.image.url }}" alt="{{ last_post.title }}" />
+                            </div>
+                        {% endif %}
                         <p>{{ last_post.content|truncatechars:200 }}</p>
                         <a class="button small" href="{% url 'blog:detail' last_post.slug %}" title="{{ last_post.title }}">Leer más</a>
                     {% else %}
@@ -51,7 +56,7 @@
             <article class="alt">
                 <div class="content">
                     <header>
-                        <h3>Morbi interdum mol</h3>
+                        <h3>Próximas quedadas</h3>
                     </header>
                     <div class="image fit">
                         <img src="{% static 'images/people.jpg' %}" alt="" />

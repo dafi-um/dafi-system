@@ -15,5 +15,11 @@
         </p>
     </header>
 
+    {% if post.image %}
+        <div class="image fit">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" />
+        </div>
+    {% endif %}
+
     <p>{{ post.content | markdown }}</p>
 {% endblock content %}

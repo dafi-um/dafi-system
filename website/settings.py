@@ -54,8 +54,9 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'main.apps.MainConfig',
     'blog.apps.BlogConfig',
+    'django_cleanup.apps.CleanupConfig',
     'pagedown',
-    'markdown_deux'
+    'markdown_deux',
 ]
 
 MIDDLEWARE = [
