@@ -1,0 +1,18 @@
+{% extends 'generic.html' %}
+
+{% block title %}{{ club.name }} - Los Clubes de DAFI{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split alt">
+            <h1>{{ club.name }}</h1>
+            <p><a href="{% url 'clubs:list' %}" class="button alt" title="Volver a la lista">Volver a la lista</a></p>
+        </div>
+
+        {% if club.manager.first_name %}
+            <p>Gestor: {{ club.manager.get_full_name }}</p>
+        {% endif %}
+    </header>
+
+    <p>{{ club.description }}</p>
+{% endblock content %}

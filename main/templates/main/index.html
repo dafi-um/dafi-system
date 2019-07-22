@@ -64,7 +64,7 @@
                             <li>
                                 <header>
                                     <h5>{{ m.title }}</h5>
-                                    <p>{{ m.club.name }}</p>
+                                    <p><a href="{% url 'clubs:detail' m.club.slug %}" title="{{ m.club.name }}">{{ m.club.name }}</a></p>
                                 </header>
 
                                 <p>En {{ m.place }} el {{ m.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
@@ -73,6 +73,7 @@
                         </ul>
                     {% else %}
                         <p>No hay reuniones planeadas.</p>
+                        <a class="button alt" href="{% url 'clubs:list' %}" title="Los Clubes de DAFI">Ver los Clubes</a>
                     {% endif %}
                 </div>
             </article>

@@ -1,0 +1,19 @@
+{% extends 'generic.html' %}
+
+{% block title %}Los Clubes de DAFI{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Nuestros Clubes</h1>
+    </header>
+
+    {% if club_list %}
+        <ul class="alt">
+        {% for club in club_list %}
+            <li><a href="{% url 'clubs:detail' club.slug %}">{{ club.name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay clubes disponibles.</p>
+    {% endif %}
+{% endblock content %}

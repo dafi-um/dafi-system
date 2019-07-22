@@ -9,6 +9,7 @@ admin.site.site_header = 'Administración de DAFI'
 urlpatterns = [
     path('', include('main.urls')),
     path('blog/', include('blog.urls')),
+    path('clubs/', include('clubs.urls')),
     path('admin/', admin.site.urls),
     path('p/<path:url>', views.flatpage),
 ]
