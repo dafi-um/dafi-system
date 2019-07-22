@@ -8,7 +8,7 @@ class Club(models.Model):
     '''
 
     name = models.CharField('nombre', max_length=64)
-    slug = models.SlugField('slug', max_length=64, primary_key=True)
+    slug = models.SlugField('slug', max_length=64)
     description = models.TextField('descripción', max_length=300)
     manager = models.ForeignKey(get_user_model(),
                                on_delete=models.CASCADE,
