@@ -1,5 +1,12 @@
-{% extends 'base.html' %}
+{% extends 'generic.html' %}
 
 {% block content %}
-    <h2>ERROR 404: Not Found</h2>
+    <header class="major special">
+        <div class="split">
+            <h1>ERROR 404: No Encontrado</h1>
+            <p><a href="{% url 'main:index' %}" class="button alt" title="Volver al inicio">Volver al inicio</a></p>
+        </div>
+    </header>
+
+    <p>Parece que no hemos encontrado lo que buscaba, sumimasen.</p>
 {% endblock %}

@@ -3962,6 +3962,29 @@
 
 /* Custom */
 
+	.split {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	@media screen and (max-width: 480px) {
+		.split {
+			display: block;
+		}
+
+		.split:not(.alt) {
+			text-align: center;
+		}
+
+			.split :last-child {
+				margin-top: 1em;
+			}
+
+			.split.alt :last-child {
+				display: none;
+			}
+	}
+
 	#meetings li {
 		padding-top: 1em;
 	}
