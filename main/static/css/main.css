@@ -3743,6 +3743,37 @@
 
 		}
 
+/* Login */
+
+	#login {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: flex-end;
+	}
+
+		#login p {
+			flex-grow: 1;
+			margin: 0 1em 0 0;
+		}
+
+		#login .nonfield {
+			display: none;
+		}
+
+	@media screen and (max-width: 480px) {
+
+		#login {
+			flex-direction: column;
+			align-items: unset;
+		}
+
+			#login p {
+				margin: 0 0 2em 0;
+			}
+
+	}
+
 /* Footer */
 
 	#footer {
@@ -3968,6 +3999,7 @@
 	}
 
 	@media screen and (max-width: 480px) {
+
 		.split {
 			display: block;
 		}
@@ -3983,6 +4015,7 @@
 			.split.alt :last-child {
 				display: none;
 			}
+
 	}
 
 	#meetings li {
