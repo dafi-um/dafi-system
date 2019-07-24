@@ -7,9 +7,18 @@
         <p>Los datos de acceso no son correctos. Prueba de nuevo.</p>
     {% endif %}
 
-    <form id="login" method="post">
+    <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        <div class="field half first">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+
+        <div class="field half">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
 
         <button type="submit">Entrar</button>
     </form>

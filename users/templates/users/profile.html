@@ -2,9 +2,18 @@
 
 {% block content %}
     <header class="major special">
-        <h1>Mi Perfil</h1>
-    </header>
+        <div class="split">
+            <h1>Mi Perfil</h1>
 
-    <p><a class="button" href="{% url 'password_change' %}" title="Cambiar contraseña">Cambiar contraseña</a></p>
-    <p><a class="button" href="{% url 'logout' %}" title="Cerrar sesión">Cerrar sesión</a></p>
+            <div class="actions">
+                <a class="button alt" href="{% url 'password_change' %}" title="Cambiar contraseña">Cambiar contraseña</a>
+                {% if user.is_staff %}
+                    <a class="button alt" href="/admin/" title="Admin">Admin</a>
+                {% endif %}
+                <a class="button alt" href="{% url 'logout' %}" title="Cerrar sesión">Cerrar sesión</a>
+            </div>
+        </div>
+
+        <p>Has iniciado sesión como {{ user.get_full_name }} ({{ user.username }}).</p>
+    </header>
 {% endblock content %}
