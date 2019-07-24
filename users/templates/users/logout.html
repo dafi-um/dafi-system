@@ -1,0 +1,11 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Sesión terminada</h1>
+    </header>
+
+    <p>Has cerrado sesión correctamente.</p>
+
+    <p><a href="{% url 'login' %}" title="Iniciar sesión de nuevo">Iniciar sesión de nuevo</a></p>
+{% endblock content %}

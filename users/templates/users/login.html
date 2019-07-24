@@ -1,0 +1,18 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <h2>Acceder a mi cuenta</h2>
+
+    {% if form.errors %}
+        <p>Los datos de acceso no son correctos. Prueba de nuevo.</p>
+    {% endif %}
+
+    <form id="login" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Entrar</button>
+    </form>
+
+    <p><a href="{% url 'password_reset' %}">He olvidado mi contraseña</a></p>
+{% endblock content %}

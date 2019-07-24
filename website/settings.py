@@ -121,10 +121,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# User model
+# Auth customization
 # https://docs.djangoproject.com/en/2.1/topics/auth/customizing/
 
 AUTH_USER_MODEL = 'users.User'
+
+LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'profile'
 
 
 # Auth security

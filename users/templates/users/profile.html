@@ -1,0 +1,10 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Mi Perfil</h1>
+    </header>
+
+    <p><a class="button" href="{% url 'password_change' %}" title="Cambiar contraseña">Cambiar contraseña</a></p>
+    <p><a class="button" href="{% url 'logout' %}" title="Cerrar sesión">Cerrar sesión</a></p>
+{% endblock content %}
