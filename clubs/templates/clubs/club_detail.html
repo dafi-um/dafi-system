@@ -4,9 +4,11 @@
 
 {% block content %}
     <header class="major special">
-        <div class="split alt">
+        <div class="split">
             <h1>{{ club.name }}</h1>
-            <p><a href="{% url 'clubs:list' %}" class="button alt" title="Volver a la lista">Volver a la lista</a></p>
+            {% if user == club.manager %}
+                <p><a class="button alt" href="{% url 'clubs:meetings_add' club.id %}" title="Organizar quedada">Organizar quedada</a></p>
+            {% endif %}
         </div>
 
         {% if club.manager.first_name %}

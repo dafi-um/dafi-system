@@ -5,10 +5,7 @@
 
 {% block content %}
     <header class="major special">
-        <div class="split alt">
-            <h1>{{ post.title }}</h1>
-            <p><a href="{% url 'blog:list' %}" class="button alt" title="Volver al Blog">Volver al Blog</a></p>
-        </div>
+        <h1>{{ post.title }}</h1>
 
         <p>Publicado el {{ post.pub_date | date:'j M Y H:i' }}
             {% if post.author.first_name %} por {{ post.author.get_full_name }}{% endif %}

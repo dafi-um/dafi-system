@@ -3973,16 +3973,8 @@
 			display: block;
 		}
 
-		.split:not(.alt) {
-			text-align: center;
-		}
-
 			.split :last-child {
 				margin-top: 1em;
-			}
-
-			.split.alt :last-child {
-				display: none;
 			}
 
 	}
