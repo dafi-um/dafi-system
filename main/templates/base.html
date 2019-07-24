@@ -29,8 +29,12 @@ Released for free under the Creative Commons Attribution 3.0 license (templated.
 				<a href="{% url 'main:index' %}">Inicio</a>
 				<a href="{% url 'blog:list' %}">Blog</a>
 				<a href="{% url 'clubs:list' %}">Clubes</a>
-				<a href="{% url 'main:index' %}">La Delegación</a>
-				<a href="{% url 'main:index' %}">Los Estudiantes</a>
+				{% if user.is_authenticated %}
+					<a href="{% url 'profile' %}" title="Mi Perfil">Mi Perfil</a>
+					<a href="{% url 'logout' %}" title="Cerrar Sesión">Cerrar Sesión</a>
+				{% else %}
+					<a href="{% url 'login' %}" title="Iniciar Sesión">Iniciar Sesión</a>
+				{% endif %}
 			</nav>
 		</div>
 	</header>
