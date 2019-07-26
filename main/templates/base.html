@@ -31,6 +31,11 @@ Released for free under the Creative Commons Attribution 3.0 license (templated.
 				<a href="{% url 'clubs:list' %}">Clubes</a>
 				{% if user.is_authenticated %}
 					<a href="{% url 'profile' %}" title="Mi Perfil">Mi Perfil</a>
+
+					{% if user.is_staff %}
+						<a href="/admin/" title="Admin">Admin</a>
+					{% endif %}
+
 					<a href="{% url 'logout' %}" title="Cerrar Sesión">Cerrar Sesión</a>
 				{% else %}
 					<a href="{% url 'login' %}" title="Iniciar Sesión">Iniciar Sesión</a>
@@ -45,11 +50,11 @@ Released for free under the Creative Commons Attribution 3.0 license (templated.
 	<section id="footer">
 		<div class="inner">
 			<header>
-				<h2>Get in Touch</h2>
+				<h2>Ponerse en contacto</h2>
 			</header>
 			<form method="post" action="#">
 				<div class="field half first">
-					<label for="name">Name</label>
+					<label for="name">Nombre</label>
 					<input type="text" name="name" id="name" />
 				</div>
 				<div class="field half">
@@ -57,11 +62,11 @@ Released for free under the Creative Commons Attribution 3.0 license (templated.
 					<input type="text" name="email" id="email" />
 				</div>
 				<div class="field">
-					<label for="message">Message</label>
+					<label for="message">Mensaje</label>
 					<textarea name="message" id="message" rows="6"></textarea>
 				</div>
 				<ul class="actions">
-					<li><input type="submit" value="Send Message" class="alt" /></li>
+					<li><input type="submit" value="Enviar Mensaje" class="alt" /></li>
 				</ul>
 			</form>
 			<div class="copyright">
