@@ -9,7 +9,7 @@ def users_link(update, context):
     username = update.message.from_user.username
     id = update.message.from_user.id
 
-    user: User = User.objects.filter(telegram_user=update.message.from_user.username).first()
+    user = User.objects.filter(telegram_user=update.message.from_user.username).first()
 
     if user and not user.telegram_id:
         buttons = [[
@@ -29,7 +29,7 @@ def users_link(update, context):
     update.message.reply_text(msg, reply_markup=reply_markup)
 
 def users_unlink(update, context):
-    user: User = User.objects.filter(telegram_id=update.message.from_user.id).first()
+    user = User.objects.filter(telegram_id=update.message.from_user.id).first()
 
     if user:
         buttons = [[

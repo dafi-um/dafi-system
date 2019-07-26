@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 def start(update, context):
-    user: User = User.objects.filter(telegram_user=update.message.from_user.username).first()
+    user = User.objects.filter(telegram_user=update.message.from_user.username).first()
 
     update.message.reply_text('Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?'.format(update.message.from_user.first_name))
 
