@@ -8,6 +8,7 @@ from telegram.ext import Updater, CommandHandler
 handlers = [
     'basic',
     'blog',
+    'users',
 ]
 
 if __name__ == '__main__':
