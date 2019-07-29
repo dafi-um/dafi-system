@@ -1,0 +1,12 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>ERROR 403: Acceso Denegado</h1>
+            <p><a href="{% url 'main:index' %}" class="button alt" title="Volver al inicio">Volver al inicio</a></p>
+        </div>
+    </header>
+
+    <p>Parece que intentas acceder a un recurso para el que no tienes permisos. Si crees que esto es un error, contacta con un administrador del sitio.</p>
+{% endblock %}
