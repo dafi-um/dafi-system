@@ -1,0 +1,20 @@
+{% extends 'generic.html' %}
+
+{% block title %}{{ view.title }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>{{ view.title }}</h1>
+            <p><a class="button alt" href="{% url 'clubs:detail' view.kwargs.slug %}" title="Volver al Club">Volver al Club</a></p>
+        </div>
+        <p>Club: {{ view.kwargs.slug }}</p>
+    </header>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <input class="button" type="submit" value="{{ view.submit_btn }}" />
+    </form>
+{% endblock content %}

@@ -7,7 +7,7 @@
         <div class="split">
             <h1>{{ club.name }}</h1>
             {% if user == club.manager %}
-                <p><a class="button alt" href="{% url 'clubs:meetings_add' club.id %}" title="Organizar quedada">Organizar quedada</a></p>
+                <p><a class="button alt" href="{% url 'clubs:meeting_add' club.slug %}" title="Organizar quedada">Organizar quedada</a></p>
             {% endif %}
         </div>
 
@@ -17,4 +17,30 @@
     </header>
 
     <p>{{ club.description }}</p>
+
+    {% for m in club.meetings.all|dictsortreversed:'moment' %}
+        {% if forloop.first %}
+            <hr style="margin: 0.5em 0;" />
+
+            <ul id="meetings" class="alt">
+        {% endif %}
+
+        <li>
+            <header>
+                <h5>{{ m.title }}</h5>
+                {% if user == club.manager %}
+                    <p>
+                        <a href="{% url 'clubs:meeting_edit' club.slug m.id %}" title="Editar">Editar</a>&nbsp;|&nbsp;
+                        <a href="{% url 'clubs:meeting_delete' club.slug m.id %}" title="Eliminar">Eliminar</a>
+                    </p>
+                {% endif %}
+            </header>
+
+            <p>En {{ m.place }} el {{ m.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
+        </li>
+
+        {% if forloop.last %}
+            </ul>
+        {% endif %}
+    {% endfor %}
 {% endblock content %}

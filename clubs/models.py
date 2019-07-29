@@ -23,7 +23,7 @@ class ClubMeeting(models.Model):
     Club meeting
     '''
 
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, verbose_name='club')
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, verbose_name='club', related_name='meetings')
     title = models.CharField('título', max_length=200, blank=True)
     place = models.CharField('lugar', max_length=120)
     moment = models.DateTimeField('fecha')

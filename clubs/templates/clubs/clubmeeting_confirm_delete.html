@@ -1,0 +1,20 @@
+{% extends 'generic.html' %}
+
+{% block title %}Eliminar una quedada{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Eliminar una quedada</h1>
+            <p><a class="button alt" href="{% url 'clubs:detail' view.kwargs.slug %}" title="Volver al Club">Volver al Club</a></p>
+        </div>
+        <p>Club: {{ view.kwargs.slug }}</p>
+    </header>
+
+    <form method="post">
+        {% csrf_token %}
+        <p>Vas a eliminar la quedada del {{ object.moment | date:'j/m/Y H:i' }} en {{ object.place }}. ¿Quieres continuar?</p>
+
+        <input class="button" type="submit" value="Eliminar quedada" />
+    </form>
+{% endblock content %}
