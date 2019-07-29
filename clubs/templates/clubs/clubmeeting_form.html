@@ -6,9 +6,9 @@
     <header class="major special">
         <div class="split">
             <h1>{{ view.title }}</h1>
-            <p><a class="button alt" href="{% url 'clubs:detail' view.kwargs.slug %}" title="Volver al Club">Volver al Club</a></p>
+            <p><a class="button alt" href="{% url 'clubs:detail' club.slug %}" title="Volver al Club">Volver al Club</a></p>
         </div>
-        <p>Club: {{ view.kwargs.slug }}</p>
+        <p>Club: {{ club.name }}</p>
     </header>
 
     <form method="post">

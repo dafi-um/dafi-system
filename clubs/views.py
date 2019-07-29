@@ -26,6 +26,11 @@ class ClubMeetingMixin(UserPassesTestMixin):
 
         return self._club
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['club'] = self.get_club()
+        return context
+
     def test_func(self):
         club = self.get_club()
 
