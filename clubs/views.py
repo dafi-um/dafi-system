@@ -39,11 +39,12 @@ class MeetingAddView(ClubMeetingMixin, CreateView):
     title = 'Agregar quedada'
     submit_btn = 'Crear'
 
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('clubs:meeting_edit', args=[self.kwargs['slug'], self.object.id])
+
     def form_valid(self, form):
-        meeting = form.save(commit=False)
-        meeting.club = self.get_club()
-        meeting.save()
-        return HttpResponseRedirect(reverse('clubs:meeting_edit', args=[self.kwargs['slug'], meeting.id]))
+        form.instance.club = self.get_club()
+        return super().form_valid(form)
 
 
 class MeetingEditView(ClubMeetingMixin, UpdateView):
@@ -59,4 +60,6 @@ class MeetingEditView(ClubMeetingMixin, UpdateView):
 
 class MeetingDeleteView(ClubMeetingMixin, DeleteView):
     model = ClubMeeting
-    success_url = reverse_lazy('clubs:list')
+
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('clubs:detail', args=[self.kwargs['slug']])
