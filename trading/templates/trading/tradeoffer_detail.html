@@ -1,0 +1,43 @@
+{% extends 'generic.html' %}
+
+{% block title %}Oferta de Permuta #{{ object.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Oferta de Permuta Nº {{ object.id }}</h1>
+
+            <div>
+                {% if user == object.user %}
+                    {% if object.client_answer %}
+                        <a class="button special" href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuesta</a>
+                    {% else %}
+                        <a class="button alt" href="{% url 'trading:tradeoffer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
+                    {% endif %}
+                {% else %}
+                    <a class="button special" href="{% url 'trading:tradeoffer_accept' object.id %}" title="Aceptar esta oferta">Me Interesa</a>
+                {% endif %}
+
+                <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
+            </div>
+        </div>
+
+        <p>Creado por {{ object.user.get_full_name }} el {{ object.pub_date | date:'j M Y H:i' }}</p>
+    </header>
+
+    {% if not object.answer %}
+        {% for answer in object.answers.all %}
+            {% if forloop.first %}
+                <div class="wrapper box style1" style="box-shadow: 0 0 10px #444;">
+                    <h4>¡Hay respuestas disponibles para esta oferta!</h4>
+            {% endif %}
+
+            <p>{{ answer.user.get_full_name }} respondió el {{ answer.pub_date | date:'j M Y \a \l\a\s H:i' }} - <a href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuesta</a>
+            </p>
+
+            {% if forloop.last %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endblock content %}

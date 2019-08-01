@@ -1,0 +1,23 @@
+{% extends 'generic.html' %}
+
+{% block title %}Ofertas de Permutas{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Ofertas disponibles de Permutas</h1>
+            <a class="button alt" href="{% url 'trading:tradeoffer_create' %}" title="Crear oferta">Crear oferta</a>
+        </div>
+        {# <p>El uso de esta herramienta está sujeto a <a href="{% url 'flatpages' 'trading-conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>.</p> #}
+    </header>
+
+    {% if tradeoffer_list %}
+        <ul class="alt">
+        {% for offer in tradeoffer_list %}
+            <li><a href="{% url 'trading:detail' offer.id %}">Oferta #{{ offer.id }} - {{ offer.user.get_full_name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay ofertas disponibles.</p>
+    {% endif %}
+{% endblock content %}

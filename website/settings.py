@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'blog.apps.BlogConfig',
     'clubs.apps.ClubsConfig',
+    'trading.apps.TradingConfig',
     'django_cleanup.apps.CleanupConfig',
     'pagedown',
     'markdown_deux',

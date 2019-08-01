@@ -28,6 +28,7 @@ Released for free under the Creative Commons Attribution 3.0 license (templated.
 			<nav id="nav">
 				<a href="{% url 'main:index' %}">Inicio</a>
 				<a href="{% url 'blog:list' %}">Blog</a>
+				<a href="{% url 'trading:list' %}">Permutas</a>
 				<a href="{% url 'clubs:list' %}">Clubes</a>
 				{% if user.is_authenticated %}
 					<a href="{% url 'profile' %}" title="Mi Perfil">Mi Perfil</a>
