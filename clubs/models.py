@@ -10,12 +10,18 @@ class Club(models.Model):
     name = models.CharField('nombre', max_length=64)
     slug = models.SlugField('slug', max_length=64)
     description = models.TextField('descripción', max_length=300)
+    telegram_group = models.CharField('grupo telegram', max_length=64, blank=True)
+    telegram_channel = models.CharField('canal telegram', max_length=64, blank=True)
     manager = models.ForeignKey(get_user_model(),
                                on_delete=models.CASCADE,
                                verbose_name='gestor')
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = 'club'
+        verbose_name_plural = 'clubes'
 
 
 class ClubMeeting(models.Model):
@@ -30,3 +36,6 @@ class ClubMeeting(models.Model):
 
     def __str__(self):
         return '{} en {} ({})'.format(self.club.name, self.place, self.moment.strftime('%d %b %Y %H:%M'))
+
+    class Meta:
+        verbose_name = 'quedada'

@@ -11,9 +11,14 @@
             {% endif %}
         </div>
 
-        {% if club.manager.first_name %}
-            <p>Gestor: {{ club.manager.get_full_name }}</p>
-        {% endif %}
+        <p>
+            Gestor: {{ club.manager.get_full_name }}
+            {% if user == club.manager %}
+                - Club ID: {{ club.slug }}
+                {% if club.telegram_group %}- Grupo de Telegram: {{ club.telegram_group }}{% endif %}
+                {% if club.telegram_channel %}- Canal de Telegram: {{ club.telegram_channel }}{% endif %}
+            {% endif %}
+        </p>
     </header>
 
     <p>{{ club.description }}</p>
