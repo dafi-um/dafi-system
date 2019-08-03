@@ -1,0 +1,12 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>ERROR 500: Error del Servidor</h1>
+            <p><a href="{% url 'main:index' %}" class="button alt" title="Volver al inicio">Volver al inicio</a></p>
+        </div>
+    </header>
+
+    <p>Algo se ha roto en el lado del servidor. ¿Has sido tú? ¿He sido yo? Nunca lo sabremos...</p>
+{% endblock %}
