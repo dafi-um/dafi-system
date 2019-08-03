@@ -6,7 +6,9 @@
     <header class="major special">
         <div class="split">
             <h1>Ofertas disponibles de Permutas</h1>
-            <a class="button alt" href="{% url 'trading:tradeoffer_create' %}" title="Crear oferta">Crear oferta</a>
+            {% if user.is_authenticated %}
+                <a class="button alt" href="{% url 'trading:tradeoffer_create' %}" title="Crear oferta">Crear oferta</a>
+            {% endif %}
         </div>
         {# <p>El uso de esta herramienta está sujeto a <a href="{% url 'flatpages' 'trading-conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>.</p> #}
     </header>
