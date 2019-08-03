@@ -46,3 +46,51 @@ class TradeOffer(models.Model):
     class Meta:
         verbose_name = 'oferta de permuta'
         verbose_name_plural = 'ofertas de permuta'
+
+
+class TradeOfferLine(models.Model):
+    '''
+    Trading Offer Line
+    '''
+
+    offer = models.ForeignKey(TradeOffer, on_delete=models.PROTECT, related_name='lines', verbose_name='oferta')
+    year = models.IntegerField('año')
+    subjects = models.CharField('asignaturas', max_length=64)
+    curr_group = models.IntegerField('grupo actual')
+    curr_subgroup = models.IntegerField('subgrupo actual')
+    wanted_groups = models.CharField('grupos buscados', max_length=10)
+
+    def get_subjects(self):
+        return Subject.objects.filter(pk__in=self.subjects.split(','))
+
+    def set_subjects(self, value):
+        if value is None or len(value) < 1:
+            self.subjects = ''
+        elif isinstance(value, models.QuerySet):
+            self.subjects = ','.join(str(x.id) for x in value)
+        else:
+            self.subjects = ','.join(str(x) for x in value)
+
+    def get_wanted_groups(self):
+        if self.wanted_groups is None or len(self.wanted_groups) < 1:
+            return []
+
+        return [int(x) for x in self.wanted_groups.split(',')]
+
+    def get_wanted_groups_str(self):
+        return ' ó '.join(x for x in self.wanted_groups.split(','))
+
+    def set_wanted_groups(self, value):
+        if value is None or len(value) < 1:
+            self.wanted_groups = ''
+        else:
+            self.wanted_groups = ','.join(str(x) for x in value)
+
+    def __str__(self):
+        return 'Línea oferta {}: {} (grupo {}.{} a grupo(s) {})'.format(self.offer.id, self.subjects, self.curr_group, self.curr_subgroup, self.wanted_groups)
+
+    class Meta:
+        ordering = ['year']
+
+        verbose_name = 'línea de oferta de permuta'
+        verbose_name_plural = 'líneas de oferta de permuta'

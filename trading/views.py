@@ -8,5 +8,7 @@ class IndexView(ListView):
         return TradeOffer.objects.filter(is_answer=False)
 
 
-class DetailView(DetailView):
+class TradeOfferDetailView(DetailView):
+    model = TradeOffer
+
     model = TradeOffer
