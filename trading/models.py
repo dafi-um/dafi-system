@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from main.models import Subject
+from heart.models import Subject
 
 
 class TradePeriod(models.Model):

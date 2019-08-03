@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'users.apps.UsersConfig',
     'main.apps.MainConfig',
+    'heart.apps.HeartConfig',
     'blog.apps.BlogConfig',
     'clubs.apps.ClubsConfig',
     'trading.apps.TradingConfig',
