@@ -4,7 +4,7 @@ from .models import Subject
 
 
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ('code', 'acronym', 'year', 'quarter')
+    list_display = ('code', 'name', 'year', 'quarter')
     list_filter = ['year', 'quarter']
 
 

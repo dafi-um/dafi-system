@@ -18,7 +18,6 @@ class Subject(models.Model):
     quarter = models.IntegerField('cuatrimestre', choices=QUARTERS, default=1)
     year = models.IntegerField('año', validators=[MinValueValidator(1), MaxValueValidator(4)])
     groups = models.IntegerField('número de grupos', validators=[MinValueValidator(1), MaxValueValidator(4)])
-    subgroups = models.IntegerField('subgrupos por grupo', validators=[MinValueValidator(1), MaxValueValidator(4)])
 
     def __str__(self):
         return '{} {} ({})'.format(self.code, self.name, self.acronym)
