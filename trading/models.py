@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
 
 from heart.models import Subject
 
@@ -12,6 +13,11 @@ class TradePeriod(models.Model):
     name = models.CharField('nombre', max_length=120)
     start = models.DateTimeField('fecha de inicio')
     end = models.DateTimeField('fecha de fin')
+
+    @classmethod
+    def get_current(cls):
+        now = timezone.now()
+        return cls.objects.filter(start__lt=now, end__gt=now).first()
 
     def __str__(self):
         return 'Periodo ' + self.name
