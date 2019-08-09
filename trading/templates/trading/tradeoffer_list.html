@@ -10,7 +10,7 @@
                 <a class="button alt" href="{% url 'trading:tradeoffer_create' %}" title="Crear oferta">Crear oferta</a>
             {% endif %}
         </div>
-        <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
+        <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
     </header>
 
     {% if tradeoffer_list %}
