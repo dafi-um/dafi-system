@@ -1919,6 +1919,8 @@
 		input[type="reset"]:disabled,
 		input[type="button"].disabled,
 		input[type="button"]:disabled,
+		input[type="checkbox"].disabled + label,
+		input[type="checkbox"]:disabled + label,
 		button.disabled,
 		button:disabled,
 		.button.disabled,
