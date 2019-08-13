@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Subject, Room
+from .models import Year, Subject, Room
 
 
 class SubjectAdmin(admin.ModelAdmin):
@@ -12,5 +12,6 @@ class RoomAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'members')
 
 
+admin.site.register(Year)
 admin.site.register(Subject, SubjectAdmin)
 admin.site.register(Room, RoomAdmin)

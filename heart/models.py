@@ -1,8 +1,32 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.functional import cached_property
 
 User = get_user_model()
+
+
+class Year(models.Model):
+    '''
+    Academic Year
+    '''
+
+    id = models.IntegerField('año', primary_key=True, validators=[MinValueValidator(1), MaxValueValidator(4)])
+    groups = models.IntegerField('número de grupos', validators=[MinValueValidator(1), MaxValueValidator(4)])
+    subgroups = models.IntegerField('número de subgrupos', validators=[MinValueValidator(1), MaxValueValidator(3)])
+
+    def groups_range(self):
+        return range(1, self.groups + 1)
+
+    def subgroups_range(self):
+        return range(1, self.subgroups + 1)
+
+    def __str__(self):
+        return 'Año {}'.format(self.id)
+
+    class Meta:
+        verbose_name = 'año'
 
 
 class Subject(models.Model):
@@ -19,8 +43,24 @@ class Subject(models.Model):
     name = models.CharField('nombre', max_length=64)
     acronym = models.CharField('siglas', max_length=6)
     quarter = models.IntegerField('cuatrimestre', choices=QUARTERS, default=1)
-    year = models.IntegerField('año', validators=[MinValueValidator(1), MaxValueValidator(4)])
-    groups = models.IntegerField('número de grupos', validators=[MinValueValidator(1), MaxValueValidator(4)])
+    year = models.ForeignKey(Year, models.PROTECT, related_name='subjects', verbose_name='año')
+
+    @classmethod
+    def get_grouped(cls):
+        d = cache.get('grouped_subjects')
+
+        if not d:
+            d = {}
+
+            for s in cls.objects.all():
+                if s.year not in d:
+                    d[s.year] = []
+
+                d[s.year].append(s)
+
+            cache.set('grouped_subjects', d)
+
+        return d
 
     def __str__(self):
         return '{} {} ({})'.format(self.code, self.name, self.acronym)
