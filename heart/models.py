@@ -16,17 +16,21 @@ class Year(models.Model):
     groups = models.IntegerField('número de grupos', validators=[MinValueValidator(1), MaxValueValidator(4)])
     subgroups = models.IntegerField('número de subgrupos', validators=[MinValueValidator(1), MaxValueValidator(3)])
 
+    class Meta:
+        verbose_name = 'año'
+
+    def __str__(self):
+        return 'Año {}'.format(self.id)
+
+    @cached_property
+    def i(self):
+        return self.id - 1
+
     def groups_range(self):
         return range(1, self.groups + 1)
 
     def subgroups_range(self):
         return range(1, self.subgroups + 1)
-
-    def __str__(self):
-        return 'Año {}'.format(self.id)
-
-    class Meta:
-        verbose_name = 'año'
 
 
 class Subject(models.Model):
