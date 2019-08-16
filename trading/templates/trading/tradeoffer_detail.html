@@ -9,9 +9,10 @@
 
             <div>
                 {% if user == object.user %}
-                    {% if object.client_answer %}
-                        <a class="button special" href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuesta</a>
+                    {% if object.answer %}
+                        <a class="button special" href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuestas</a>
                     {% else %}
+                        <a class="button alt" href="{% url 'trading:tradeoffer_delete' object.id %}" title="Eliminar oferta">Eliminar oferta</a>
                         <a class="button alt" href="{% url 'trading:tradeoffer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
                     {% endif %}
                 {% else %}

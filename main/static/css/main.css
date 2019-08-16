@@ -3985,6 +3985,8 @@
 
 	}
 
+/* Clubs */
+
 	#meetings li {
 		padding-top: 1em;
 	}
@@ -3995,4 +3997,35 @@
 
 		#meetings li p {
 			margin-bottom: 0;
+		}
+
+/* Trading */
+
+	#get-started {
+		color: #fff;
+	}
+
+		#get-started p {
+			margin-bottom: 0.25em;
+		}
+
+	.year-block {
+		box-shadow: inset 0 0 0 2px #e5474b;
+		padding: 1em;
+		margin-bottom: 0.5em;
+	}
+
+		.year-block .split h4, a {
+			margin-bottom: 0;
+			line-height: 1.25;
+		}
+
+			.year-block .split a {
+				cursor: pointer;
+			}
+
+		.year-block .subjects {
+			margin-top: 0.5em;
+			padding-top: 0.5em;
+			border-top: 2px solid #e5474b;
 		}

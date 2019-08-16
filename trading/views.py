@@ -1,11 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import ValidationError
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.base import ContextMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 
-from .forms import TradeOfferForm
-from .models import TradeOffer, TradePeriod
+from heart.models import Year
+
+from .forms import TradeOfferLineSet
+from .models import TradeOffer, TradeOfferLine, TradePeriod
 
 
 class TradingPeriodMixin(ContextMixin):
@@ -13,7 +17,7 @@ class TradingPeriodMixin(ContextMixin):
         self._current_period = False
         return super().__init__(*args, **kwargs)
 
-    def _get_current_period(self):
+    def get_current_period(self):
         if self._current_period is False:
             self._current_period = TradePeriod.get_current()
 
@@ -21,11 +25,11 @@ class TradingPeriodMixin(ContextMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['period'] = self._get_current_period()
+        context['period'] = self.get_current_period()
         return context
 
     def get_template_names(self):
-        if not self._get_current_period():
+        if not self.get_current_period():
             return ['trading/tradeperiod.html']
 
         return super().get_template_names()
@@ -40,44 +44,116 @@ class TradeOfferDetailView(TradingPeriodMixin, DetailView):
     model = TradeOffer
 
 
-class TradeOfferMixin(TradingPeriodMixin, UserPassesTestMixin):
-    def test_func(self):
-        return not self.object.answer and self.request.user == self.object.user
-
-
-class TradeOfferAddView(TradingPeriodMixin, LoginRequiredMixin, CreateView):
-    model = TradeOffer
-    form_class = TradeOfferForm
-
-    title = 'Agregar oferta'
-    submit_btn = 'Crear'
-
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:tradeoffer_edit', args=[self.object.id])
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+class TradeOfferEditMixin(TradingPeriodMixin):
+    template_name = 'trading/tradeoffer_form.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['years'] = range(1, 5)
+        context['offer'] = self.get_offer()
+        context['lines'] = self.get_lines()
         return context
 
+    def post(self, request, **kwargs):
+        valid = []
+        deleted = []
 
-class TradeOfferEditView(TradeOfferMixin, UpdateView):
+        for line in self.get_lines():
+            line.curr_group = request.POST.get('{}-curr_group'.format(line.i), 1)
+            line.curr_subgroup = request.POST.get('{}-curr_subgroup'.format(line.i), 1)
+
+            line.subjects = ','.join(request.POST.getlist('{}-subjects'.format(line.i)))
+            line.wanted_groups = ','.join(request.POST.getlist('{}-wanted_groups'.format(line.i)))
+
+            try:
+                line.full_clean(exclude=['offer'])
+                valid.append(line)
+            except ValidationError as e:
+                pass
+
+        if valid:
+            offer = self.get_offer()
+            offer.save()
+
+            for line in valid:
+                line.offer = offer
+                line.save()
+
+            return redirect(self.get_success_url(**kwargs))
+
+        return super().get(request, **kwargs)
+
+
+class TradeOfferAddView(LoginRequiredMixin, TradeOfferEditMixin, TemplateView):
+    title = 'Crear una Oferta de Permuta'
+    submit_btn = 'Crear Oferta'
+    is_creation = True
+
+    def __init__(self, *args, **kwargs):
+        self._offer = None
+        self._lines = None
+        return super().__init__(*args, **kwargs)
+
+    def get_offer(self):
+        if not self._offer:
+            self._offer = TradeOffer(user=self.request.user, period=self.get_current_period())
+
+        return self._offer
+
+    def get_lines(self):
+        if not self._lines:
+            self._lines = []
+
+            for year in Year.objects.all():
+                self._lines.append(TradeOfferLine(offer=self.get_offer(), year=year))
+
+        return self._lines
+
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('trading:detail', args=[self.get_offer().id])
+
+
+class TradeOfferEditView(TradeOfferEditMixin, DetailView):
     model = TradeOffer
-    fields = ['name']
 
-    title = 'Editar oferta'
+    title = 'Editar una Oferta de Permuta'
     submit_btn = 'Guardar'
 
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+    def get_offer(self):
+        return self.get_object()
+
+    def get_lines(self):
+        return self.get_offer().lines.all()
+
     def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:tradeoffer_edit', args=[self.object.id])
+        return reverse_lazy('trading:tradeoffer_edit', args=[self.get_offer().id])
 
 
-class TradeOfferDeleteView(TradeOfferMixin, DeleteView):
+class TradeOfferDeleteView(TradingPeriodMixin, DetailView):
+    template_name = 'trading/tradeoffer_delete.html'
+
     model = TradeOffer
 
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:list')
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+    def post(self, request, **kwargs):
+        offer = self.get_object()
+
+        if offer.answer:
+            return redirect(offer)
+
+        for line in offer.lines.all():
+            line.delete()
+
+        offer.delete()
+
+        return redirect('trading:list')
+
+    def get(self, request, *args, **kwargs):
+        if self.get_object().answer:
+            return redirect(self.get_object())
+
+        return super().get(request, *args, **kwargs)

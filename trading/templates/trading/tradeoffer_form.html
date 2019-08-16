@@ -1,0 +1,133 @@
+{% extends 'generic.html' %}
+
+{% block title %}Crear Oferta de Permuta{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>{{ view.title }}</h1>
+
+            <div>
+                {% if not view.is_creation %}
+                    <a class="button alt" href="{% url 'trading:tradeoffer_delete' offer.id %}" title="Eliminar">Eliminar</a>
+                {% endif %}
+
+                <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
+            </div>
+        </div>
+        <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
+    </header>
+
+    {% if view.is_creation %}
+        <div id="get-started" class="box wrapper style1">
+            <h3>Instrucciones de uso</h3>
+            <p>Para cada año realiza las siguientes acciones:</p>
+            <ol>
+                <li>Introduce el grupo y subgrupo que te han asignado.</li>
+                <li>Selecciona las asignaturas en las que estás matriculado.</li>
+                <li>Selecciona los grupos que te gustaría tener para cada bloque.</li>
+            </ol>
+        </div>
+    {% endif %}
+
+    <form id="app" method="post">
+        {% for line in lines %}
+            <div class="year-block">
+                <div class="split">
+                    <h4>Año {{ line.year.id }}</h4>
+                    <a v-on:click="block_{{ line.i }} = !block_{{ line.i }}">Mostrar/ocultar</a>
+                </div>
+
+                <div class="subjects" v-show="block_{{ line.i }}">
+                    <div class="field half first">
+                        <label for="{{ line.i }}-curr_group">Grupo actual:</label>
+                        <div class="select-wrapper">
+                            <select
+                                name="{{ line.i }}-curr_group"
+                                id="{{ line.i }}-curr_group"
+                                v-model="group[{{ line.i }}]"
+                                @change="uncheck_invalid({{ line.i }})">
+
+                                {% for i in line.year.groups_range %}
+                                    <option value="{{ i }}" {% if i == line.curr_group %}selected{% endif %}>Grupo {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field half">
+                        <label for="{{ line.i }}-curr_subgroup">Subgrupo actual:</label>
+                        <div class="select-wrapper">
+                            <select name="{{ line.i }}-curr_subgroup" id="{{ line.i }}-curr_subgroup">
+                                {% for i in line.year.subgroups_range %}
+                                    <option value="{{ i }}" {% if i == line.curr_subgroup %}selected{% endif %}>Subgrupo {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Grupos buscados:</label>
+
+                        {% for i in line.year.groups_range %}
+                            <input
+                                type="checkbox"
+                                name="{{ line.i }}-wanted_groups"
+                                id="{{ line.i }}-wanted_{{ i }}"
+                                value="{{ i }}"
+                                v-model="wanted[{{ line.i }}]"
+                                :disabled="group[{{ line.i }}] == {{ i }}"
+                                {% if i in line.get_wanted_groups %}checked{% endif %} />
+
+                            <label for="{{ line.i }}-wanted_{{ i }}">Grupo {{ i }}</label>
+                        {% endfor %}
+                    </div>
+
+                    <label>Asignaturas:</label>
+
+                    {% for subject in line.year.subjects.all %}
+                        <div>
+                            <input
+                                type="checkbox"
+                                name="{{ line.i }}-subjects"
+                                value="{{ subject.code }}"
+                                id="{{ line.i }}-subject_{{ subject.code }}"
+                                {% if subject.code in line.get_subjects_list %}checked{% endif %} />
+
+                            <label for="{{ line.i }}-subject_{{ subject.code }}">[{{ subject.code }}] {{ subject.name }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        {% csrf_token %}
+
+        <input class="button alt" type="submit" value="{{ view.submit_btn }}" />
+    </form>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                'block_0': {% if lines.0.subjects or not lines.1.subjects and not lines.2.subjects %}true{% else %}false{% endif %},
+                'block_1': {% if lines.1.subjects %}true{% else %}false{% endif %},
+                'block_2': {% if lines.2.subjects %}true{% else %}false{% endif %},
+
+                group: [
+                    {{ lines.0.curr_group }}, {{ lines.1.curr_group }}, {{ lines.2.curr_group }},
+                ],
+
+                wanted: [
+                    [{{ lines.0.wanted_groups }}], [{{ lines.1.wanted_groups }}], [{{ lines.2.wanted_groups }}],
+                ]
+            },
+            methods: {
+                uncheck_invalid: function(id) {
+                    this.wanted[id] = this.wanted[id].filter(i => i !== this.group[id]);
+                }
+            }
+        });
+    </script>
+{% endblock content %}
