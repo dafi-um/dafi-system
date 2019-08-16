@@ -1,14 +1,12 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.base import ContextMixin
-from django.views.generic.edit import CreateView, UpdateView
 
 from heart.models import Year
 
-from .forms import TradeOfferLineSet
 from .models import TradeOffer, TradeOfferLine, TradePeriod
 
 
