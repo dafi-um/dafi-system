@@ -8,11 +8,12 @@
             <h1>{{ view.title }}</h1>
 
             <div>
-                {% if not view.is_creation %}
+                {% if view.is_creation %}
+                    <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
+                {% else %}
                     <a class="button alt" href="{% url 'trading:tradeoffer_delete' offer.id %}" title="Eliminar">Eliminar</a>
+                    <a class="button alt" href="{% url 'trading:detail' offer.id %}" title="Volver a la oferta">Volver a la oferta</a>
                 {% endif %}
-
-                <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
             </div>
         </div>
         <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
