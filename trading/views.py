@@ -53,7 +53,9 @@ class TradeOfferEditMixin(TradingPeriodMixin):
 
     def post(self, request, **kwargs):
         valid = []
-        deleted = []
+
+        num_lines = 0
+        deleted = 0
 
         for line in self.get_lines():
             line.curr_group = request.POST.get('{}-curr_group'.format(line.i), 1)
@@ -62,15 +64,27 @@ class TradeOfferEditMixin(TradingPeriodMixin):
             line.subjects = ','.join(request.POST.getlist('{}-subjects'.format(line.i)))
             line.wanted_groups = ','.join(request.POST.getlist('{}-wanted_groups'.format(line.i)))
 
+            if line.id:
+                num_lines += 1
+
             try:
                 line.full_clean(exclude=['offer'])
                 valid.append(line)
             except ValidationError as e:
-                pass
+                if line.id and not line.subjects:
+                    line.delete()
+                    deleted += 1
+
+        offer = self.get_offer()
+
+        if offer.id and deleted == num_lines:
+            offer.delete()
+
+            return redirect('trading:list')
 
         if valid:
-            offer = self.get_offer()
-            offer.save()
+            if not offer.id:
+                offer.save()
 
             for line in valid:
                 line.offer = offer
@@ -116,6 +130,10 @@ class TradeOfferEditView(TradeOfferEditMixin, DetailView):
     title = 'Editar una Oferta de Permuta'
     submit_btn = 'Guardar'
 
+    def __init__(self, *args, **kwargs):
+        self._lines = None
+        return super().__init__(*args, **kwargs)
+
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
 
@@ -123,7 +141,18 @@ class TradeOfferEditView(TradeOfferEditMixin, DetailView):
         return self.get_object()
 
     def get_lines(self):
-        return self.get_offer().lines.all()
+        if not self._lines:
+            self._lines = []
+
+            lines = {x.year.id: x for x in self.get_offer().lines.all()}
+
+            for year in Year.objects.all():
+                if year.id in lines:
+                    self._lines.append(lines[year.id])
+                else:
+                    self._lines.append(TradeOfferLine(offer=self.get_offer(), year=year))
+
+        return self._lines
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('trading:tradeoffer_edit', args=[self.get_offer().id])
