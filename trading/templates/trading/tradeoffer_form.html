@@ -89,7 +89,10 @@
                         {% endfor %}
                     </div>
 
-                    <label>Asignaturas:</label>
+                    <div class="split">
+                        <label>Asignaturas:</label>
+                        <a v-on:click="mark_all({{ line.i }});">Marcar/desmarcar todos</a>
+                    </div>
 
                     {% for subject in line.year.subjects.all %}
                         <div>
@@ -97,6 +100,7 @@
                                 type="checkbox"
                                 name="{{ line.i }}-subjects"
                                 value="{{ subject.code }}"
+                                class="{{ line.i }}-subjects"
                                 id="{{ line.i }}-subject_{{ subject.code }}"
                                 {% if subject.code in line.get_subjects_list %}checked{% endif %} />
 
@@ -127,12 +131,26 @@
 
                 wanted: [
                     [{{ lines.0.wanted_groups }}], [{{ lines.1.wanted_groups }}], [{{ lines.2.wanted_groups }}],
-                ]
+                ],
+
+                toggle: [
+                    true, true, true,
+                ],
             },
             methods: {
                 uncheck_invalid: function(id) {
                     this.wanted[id] = this.wanted[id].filter(i => i !== this.group[id]);
-                }
+                },
+
+                mark_all: function(id) {
+                    var checks = document.querySelectorAll('input[name="' + id + '-subjects"]');
+
+                    for (var i = 0; i < checks.length; i++) {
+                        checks[i].checked = this.toggle[id];
+                    }
+
+                    this.toggle[id] = !this.toggle[id];
+                },
             }
         });
     </script>
