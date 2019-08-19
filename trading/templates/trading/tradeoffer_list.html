@@ -14,11 +14,16 @@
     </header>
 
     {% if tradeoffer_list %}
-        <ul class="alt">
-        {% for offer in tradeoffer_list %}
-            <li><a href="{% url 'trading:detail' offer.id %}">Oferta #{{ offer.id }} - {{ offer.user.get_full_name }}</a></li>
+        {% for object in tradeoffer_list %}
+            <div class="box wrapper style3">
+                <div class="split">
+                    <h3><a href="{% url 'trading:detail' object.id %}">Oferta #{{ object.id }} - {{ object.user.get_full_name }}</a></h3>
+                    <a class="button special small" href="{% url 'trading:detail' object.id %}">Ver Oferta</a>
+                </div>
+
+                {% include 'trading/tradeoffer.html' %}
+            </div>
         {% endfor %}
-        </ul>
     {% else %}
         <p>No hay ofertas disponibles.</p>
     {% endif %}

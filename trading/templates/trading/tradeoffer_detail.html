@@ -42,33 +42,5 @@
         {% endfor %}
     {% endif %}
 
-    <table>
-        <thead>
-            <tr>
-                <th>Curso</th>
-                <th>Asignaturas</th>
-                <th>Grupo actual</th>
-                <th>Grupos buscados</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for line in object.lines.all %}
-                <tr>
-                    <td><p>{{ line.year }}</p></td>
-                    <td>
-                        {% for subject in line.get_subjects %}
-                            <p>{{ subject.name }}</p>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <p>{{ line.curr_group }}.{{ line.curr_subgroup }}</p>
-                    </td>
-                    <td>
-                        {{ line.get_wanted_groups_str }}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% include 'trading/tradeoffer.html' %}
 {% endblock content %}
