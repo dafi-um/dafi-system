@@ -1903,7 +1903,7 @@
 		input[type="button"].small,
 		button.small,
 		.button.small {
-			font-size: 0.8em;
+			font-size: 0.7em;
 		}
 
 		input[type="submit"].big,
@@ -3100,6 +3100,29 @@
 
 		}
 
+/* Utilities */
+
+	.center {
+		text-align: center;
+	}
+
+	.split {
+		display: flex;
+		justify-content: space-between;
+	}
+
+		@media screen and (max-width: 480px) {
+
+			.split {
+				display: block;
+			}
+
+				.split :last-child {
+					margin-top: 1em;
+				}
+
+		}
+
 /* Header */
 
 	body {
@@ -3965,25 +3988,6 @@
 			}
 
 		}
-
-/* Custom */
-
-	.split {
-		display: flex;
-		justify-content: space-between;
-	}
-
-	@media screen and (max-width: 480px) {
-
-		.split {
-			display: block;
-		}
-
-			.split :last-child {
-				margin-top: 1em;
-			}
-
-	}
 
 /* Clubs */
 
