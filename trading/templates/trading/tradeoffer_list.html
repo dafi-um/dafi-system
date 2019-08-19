@@ -24,6 +24,18 @@
                 {% include 'trading/tradeoffer.html' %}
             </div>
         {% endfor %}
+
+        {% if is_paginated %}
+            <p class="center">
+                {% for page in paginator.page_range %}
+                    {% if page == page_obj.number %}
+                        <span><b>{{ page_obj.number }}</b></span>
+                    {% else %}
+                        <a href="?page={{ page }}" title="Página {{ page }}">{{ page }}</a>
+                    {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
     {% else %}
         <p>No hay ofertas disponibles.</p>
     {% endif %}
