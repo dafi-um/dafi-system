@@ -14,6 +14,6 @@
             </div>
         </div>
 
-        <p>Has iniciado sesión como {{ user.get_full_name }} ({{ user.username }}).</p>
+        <p>Has iniciado sesión como {{ user | nice_name }}.</p>
     </header>
 {% endblock content %}

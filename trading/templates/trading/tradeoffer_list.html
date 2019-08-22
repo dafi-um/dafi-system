@@ -1,4 +1,5 @@
 {% extends 'generic.html' %}
+{% load users_tags %}
 
 {% block title %}Ofertas de Permutas{% endblock title %}
 
@@ -17,7 +18,7 @@
         {% for object in tradeoffer_list %}
             <div class="box wrapper style3">
                 <div class="split">
-                    <h3><a href="{% url 'trading:detail' object.id %}">Oferta #{{ object.id }} - {{ object.user.get_full_name }}</a></h3>
+                    <h3><a href="{% url 'trading:detail' object.id %}">Oferta #{{ object.id }} - {{ object.user | nice_name }}</a></h3>
                     <a class="button special small" href="{% url 'trading:detail' object.id %}">Ver Oferta</a>
                 </div>
 

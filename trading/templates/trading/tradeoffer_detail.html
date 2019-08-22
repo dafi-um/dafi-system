@@ -1,4 +1,5 @@
 {% extends 'generic.html' %}
+{% load users_tags %}
 
 {% block title %}Oferta de Permuta #{{ object.id }}{% endblock title %}
 
@@ -23,7 +24,7 @@
             </div>
         </div>
 
-        <p>Creado por {{ object.user.get_full_name }} el {{ object.pub_date | date:'j M Y H:i' }}</p>
+        <p>Creado por {{ object.user | nice_name }} el {{ object.pub_date | date:'j M Y H:i' }}</p>
     </header>
 
     {% if not object.answer %}
@@ -33,7 +34,7 @@
                     <h4>¡Hay respuestas disponibles para esta oferta!</h4>
             {% endif %}
 
-            <p>{{ answer.user.get_full_name }} respondió el {{ answer.pub_date | date:'j M Y \a \l\a\s H:i' }} - <a href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuesta</a>
+            <p>{{ answer.user | nice_name }} respondió el {{ answer.pub_date | date:'j M Y \a \l\a\s H:i' }} - <a href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuesta</a>
             </p>
 
             {% if forloop.last %}
