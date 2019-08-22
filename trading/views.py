@@ -34,10 +34,10 @@ class TradingPeriodMixin(ContextMixin):
 
 
 class IndexView(TradingPeriodMixin, ListView):
-    paginate_by = 2
+    paginate_by = 10
 
     def get_queryset(self):
-        return TradeOffer.objects.filter(is_answer=False)
+        return TradeOffer.objects.filter(answer=None, period=self.get_current_period())
 
 
 class TradeOfferDetailView(TradingPeriodMixin, DetailView):
