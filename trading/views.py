@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -160,10 +160,13 @@ class TradeOfferEditView(TradeOfferEditMixin, DetailView):
         return reverse_lazy('trading:tradeoffer_edit', args=[self.get_offer().id])
 
 
-class TradeOfferDeleteView(TradingPeriodMixin, DetailView):
+class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
     template_name = 'trading/tradeoffer_delete.html'
 
     model = TradeOffer
+
+    def test_func(self):
+        return self.request.user == self.get_object().user
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)

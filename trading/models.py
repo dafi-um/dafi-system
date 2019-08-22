@@ -46,6 +46,8 @@ class TradeOffer(models.Model):
         verbose_name = 'oferta de permuta'
         verbose_name_plural = 'ofertas de permuta'
 
+        ordering = ['id']
+
     def __str__(self):
         return 'Oferta {}: {} en {}'.format(self.id, self.user, self.period.name)
 
