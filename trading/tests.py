@@ -33,12 +33,20 @@ class TradeOfferTestCase(TestCase):
 
         line = TradeOfferLine(year=year, curr_group=1, curr_subgroup=1, wanted_groups='2')
 
+        with self.assertRaisesMessage(ValidationError, 'Valor de asignaturas inválido'):
+            line.subjects = 'not_valid'
+            line.full_clean(['offer'])
+
         with self.assertRaisesMessage(ValidationError, 'Código de asignatura incorrecto'):
             line.subjects = '3'
             line.full_clean(['offer'])
 
         with self.assertRaisesMessage(ValidationError, 'La asignatura 2 es de un año distinto'):
             line.subjects = '2'
+            line.full_clean(['offer'])
+
+        with self.assertRaisesMessage(ValidationError, 'La asignatura 2 es de un año distinto'):
+            line.subjects = '1,2'
             line.full_clean(['offer'])
 
         try:
@@ -54,12 +62,21 @@ class TradeOfferTestCase(TestCase):
 
         line = TradeOfferLine(year=year, curr_group=1, curr_subgroup=1, subjects='1')
 
-        line.wanted_groups = 'not_valid'
+        with self.assertRaisesMessage(ValidationError, 'Valor de grupos buscados inválido'):
+            line.wanted_groups = 'not_valid'
+            line.full_clean(['offer'])
+
         self.assertEquals(line.get_wanted_groups(), [])
 
         with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
             line.wanted_groups = '3'
             line.full_clean(['offer'])
+
+        with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
+            line.wanted_groups = '2,3'
+            line.full_clean(['offer'])
+
+        self.assertEquals(line.get_wanted_groups(), [2, 3], 'Comma separated list not parsed properly')
 
         with self.assertRaisesMessage(ValidationError, 'El grupo actual no puede estar en los grupos buscados'):
             line.wanted_groups = '1'

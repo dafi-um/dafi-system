@@ -88,6 +88,9 @@ class TradeOfferLine(models.Model):
         if self.wanted_groups:
             l = self.get_wanted_groups()
 
+            if not l:
+                errors['wanted_groups'] = 'Valor de grupos buscados inválido'
+
             for g in l:
                 if g < 1 or g > self.year.groups:
                     errors['wanted_groups'] = 'El grupo {} no existe en {}'.format(g, self.year)
@@ -96,14 +99,18 @@ class TradeOfferLine(models.Model):
 
         if self.subjects:
             l = len(self.get_subjects_list())
-            q = self.get_subjects()
 
-            if q.count() != l:
-                errors['subjects'] = 'Código de asignatura incorrecto'
+            if l:
+                q = self.get_subjects()
 
-            for s in q:
-                if s.year != self.year:
-                    errors['subjects'] = 'La asignatura {} es de un año distinto'.format(s.code)
+                if q.count() != l:
+                    errors['subjects'] = 'Código de asignatura incorrecto'
+
+                for s in q:
+                    if s.year != self.year:
+                        errors['subjects'] = 'La asignatura {} es de un año distinto'.format(s.code)
+            else:
+                errors['subjects'] = 'Valor de asignaturas inválido'
 
         if errors:
             raise ValidationError(errors)
