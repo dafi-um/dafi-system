@@ -82,18 +82,17 @@ class TradeOfferLine(models.Model):
         if self.curr_subgroup < 1 or self.curr_subgroup > self.year.subgroups:
             errors['curr_subgroup'] = 'El subgrupo {} no existe en {}'.format(self.curr_subgroup, self.year)
 
-        if self.curr_group < 1 or self.curr_subgroup > self.year.groups:
-            errors['curr_group'] = 'El grupo {} no existe en {}'.format(self.curr_subgroup, self.year)
+        if self.curr_group < 1 or self.curr_group > self.year.groups:
+            errors['curr_group'] = 'El grupo {} no existe en {}'.format(self.curr_group, self.year)
 
         if self.wanted_groups:
             l = self.get_wanted_groups()
 
-            if not l:
-                errors['wanted_groups'] = 'El contenido del campo es inválido'
-            else:
                 for g in l:
                     if g < 1 or g > self.year.groups:
                         errors['wanted_groups'] = 'El grupo {} no existe en {}'.format(g, self.year)
+                elif g == self.curr_group:
+                    errors['wanted_groups'] = 'El grupo actual no puede estar en los grupos buscados'
 
         if self.subjects:
             l = len(self.get_subjects_list())

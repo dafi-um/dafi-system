@@ -26,80 +26,67 @@ class TradeOfferTestCase(TestCase):
 
         TradePeriod.objects.create(name='Period 1', start=start, end=end)
 
-    def test_validation_offer_and_lines(self):
-        '''Trade offers and their lines are properly created'''
+    def test_tradeofferline_validate_subjects(self):
+        '''TradeOfferLine validates subjects properly'''
 
-        user = User.objects.get()
         year = Year.objects.get(pk=1)
-        period = TradePeriod.objects.get()
 
-        offer = TradeOffer(user=user, period=period)
+        line = TradeOfferLine(year=year, curr_group=1, curr_subgroup=1, wanted_groups='2')
 
-        try:
-            offer.full_clean()
-        except Exception:
-            self.fail('TradeOffer full_clean failed unexpectedly')
+        with self.assertRaisesMessage(ValidationError, 'Código de asignatura incorrecto'):
+            line.subjects = '3'
+            line.full_clean(['offer'])
 
-        offer.save()
-        self.assertEqual(offer.id, 1)
-
-        line = TradeOfferLine(offer=offer, year=year)
-
-        self.assertRaises(ValidationError, line.full_clean)
-
-        line.subjects = '3'
-        line.curr_group = '3'
-        line.curr_subgroup = '3'
-        line.wanted_groups = '3'
-
-        self.assertRaises(ValidationError, line.full_clean)
-
-        try:
-            line.full_clean()
-        except ValidationError as e:
-            errors = e.message_dict
-
-        self.assertIn('subjects', errors, 'non-existing subject')
-        self.assertIn('curr_group', errors, 'group out of range')
-        self.assertIn('curr_subgroup', errors, 'subgroup out of range')
-        self.assertIn('wanted_groups', errors, 'wanted group out of range')
-
-        try:
+        with self.assertRaisesMessage(ValidationError, 'La asignatura 2 es de un año distinto'):
             line.subjects = '2'
-            line.full_clean()
-        except ValidationError as e:
-            errors = e.message_dict
-
-        self.assertIn('subjects', errors, 'subject from another year')
+            line.full_clean(['offer'])
 
         try:
             line.subjects = '1'
-            line.full_clean()
-        except ValidationError as e:
-            errors = e.message_dict
+            line.full_clean(['offer'])
+        except ValidationError:
+            self.fail('Subject is valid but validation failed')
 
-        self.assertNotIn('subjects', errors, 'valid subject')
+    def test_tradeofferline_validate_groups(self):
+        '''TradeOfferLine validates groups properly'''
 
-        try:
-            line.curr_group = '1'
-            line.curr_subgroup = '1'
-            line.full_clean()
-        except ValidationError as e:
-            errors = e.message_dict
+        year = Year.objects.get(pk=1)
 
-        self.assertNotIn('curr_group', errors, 'valid group')
-        self.assertNotIn('curr_subgroup', errors, 'valid subgroup')
+        line = TradeOfferLine(year=year, curr_group=1, curr_subgroup=1, subjects='1')
 
-        try:
+        line.wanted_groups = 'not_valid'
+        self.assertEquals(line.get_wanted_groups(), [])
+
+        with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
+            line.wanted_groups = '3'
+            line.full_clean(['offer'])
+
+        with self.assertRaisesMessage(ValidationError, 'El grupo actual no puede estar en los grupos buscados'):
             line.wanted_groups = '1'
-            line.full_clean()
-        except ValidationError as e:
-            errors = e.message_dict
-
-        self.assertIn('wanted_groups', errors, 'wanted group equals current group')
+            line.full_clean(['offer'])
 
         try:
             line.wanted_groups = '2'
-            line.full_clean()
-        except ValidationError as e:
-            self.fail('Line validation failed unexpectedly')
+            line.full_clean(['offer'])
+        except ValidationError:
+            self.fail('Wanted groups is valid but validation failed')
+
+        with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
+            line.curr_group = '3'
+            line.full_clean(['offer'])
+
+        try:
+            line.curr_group = '1'
+            line.full_clean(['offer'])
+        except ValidationError:
+            self.fail('Current group is valid but validation failed')
+
+        with self.assertRaisesMessage(ValidationError, 'El subgrupo 3 no existe en Año 1'):
+            line.curr_subgroup = '3'
+            line.full_clean(['offer'])
+
+        try:
+            line.curr_subgroup = '1'
+            line.full_clean(['offer'])
+        except ValidationError:
+            self.fail('Current subgroup is valid but validation failed')
