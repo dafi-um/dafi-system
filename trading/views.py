@@ -56,7 +56,6 @@ class TradeOfferEditMixin(TradingPeriodMixin):
     def post(self, request, **kwargs):
         valid = []
 
-        num_lines = 0
         deleted = 0
 
         for line in self.get_lines():
@@ -65,9 +64,6 @@ class TradeOfferEditMixin(TradingPeriodMixin):
 
             line.subjects = ','.join(request.POST.getlist('{}-subjects'.format(line.i)))
             line.wanted_groups = ','.join(request.POST.getlist('{}-wanted_groups'.format(line.i)))
-
-            if line.id:
-                num_lines += 1
 
             try:
                 line.full_clean(exclude=['offer'])
@@ -79,11 +75,6 @@ class TradeOfferEditMixin(TradingPeriodMixin):
 
         offer = self.get_offer()
 
-        if offer.id and deleted == num_lines:
-            offer.delete()
-
-            return redirect('trading:list')
-
         if valid:
             if not offer.id:
                 offer.save()
@@ -93,6 +84,10 @@ class TradeOfferEditMixin(TradingPeriodMixin):
                 line.save()
 
             return redirect(self.get_success_url(**kwargs))
+        elif deleted:
+            offer.delete()
+
+            return redirect('trading:list')
 
         return super().get(request, **kwargs)
 
