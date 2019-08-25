@@ -14,24 +14,70 @@ User = get_user_model()
 
 class TradeOfferTestCase(TestCase):
     def setUp(self):
-        User.objects.create(username='tester', email='test@test.com', password='1234')
+        self.user = User.objects.create(username='tester', email='test@test.com', password='1234')
 
-        Year.objects.create(id=1, groups=2, subgroups=2)
-        Year.objects.create(id=2, groups=2, subgroups=2)
-        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=Year.objects.get(pk=1))
-        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=Year.objects.get(pk=2))
+        self.year1 = Year.objects.create(id=1, groups=2, subgroups=2)
+        self.year2 = Year.objects.create(id=2, groups=3, subgroups=3)
+
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=self.year1)
+        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=self.year2)
 
         start = timezone.now() - timedelta(hours=2)
         end = timezone.now() + timedelta(hours=2)
 
-        TradePeriod.objects.create(name='Period 1', start=start, end=end)
+        self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
+
+    def test_tradeofferline_getters(self):
+        '''TradeOfferLine getters return correct values'''
+
+        line = TradeOfferLine()
+
+        # wanted groups
+        line.wanted_groups = ''
+        self.assertEquals(line.get_wanted_groups(), [])
+        self.assertEquals(line.get_wanted_groups_str(), '')
+
+        line.wanted_groups = '1'
+        self.assertEquals(line.get_wanted_groups(), [1])
+        self.assertEquals(line.get_wanted_groups_str(), '1')
+
+        line.wanted_groups = '1,2'
+        self.assertEquals(line.get_wanted_groups(), [1,2])
+        self.assertEquals(line.get_wanted_groups_str(), '1 ó 2')
+
+        line.wanted_groups = '1,a'
+        self.assertEquals(line.get_wanted_groups(), [])
+        self.assertEquals(line.get_wanted_groups_str(), '')
+
+        line.wanted_groups = 'not_valid'
+        self.assertEquals(line.get_wanted_groups(), [])
+        self.assertEquals(line.get_wanted_groups_str(), '')
+
+        # subjects
+        line.subjects = ''
+        self.assertEquals(line.get_subjects_list(), [])
+        self.assertEquals(line.get_subjects().count(), 0)
+
+        line.subjects = '1'
+        self.assertEquals(line.get_subjects_list(), [1])
+        self.assertEquals(line.get_subjects().count(), 1)
+
+        line.subjects = '1,2'
+        self.assertEquals(line.get_subjects_list(), [1,2])
+        self.assertEquals(line.get_subjects().count(), 2)
+
+        line.subjects = '1,a'
+        self.assertEquals(line.get_subjects_list(), [])
+        self.assertEquals(line.get_subjects().count(), 0)
+
+        line.subjects = 'not_valid'
+        self.assertEquals(line.get_subjects_list(), [])
+        self.assertEquals(line.get_subjects().count(), 0)
 
     def test_tradeofferline_validate_subjects(self):
         '''TradeOfferLine validates subjects properly'''
 
-        year = Year.objects.get(pk=1)
-
-        line = TradeOfferLine(year=year, curr_group=1, curr_subgroup=1, wanted_groups='2')
+        line = TradeOfferLine(year=self.year1, curr_group=1, curr_subgroup=1, wanted_groups='2')
 
         with self.assertRaisesMessage(ValidationError, 'Valor de asignaturas inválido'):
             line.subjects = 'not_valid'
@@ -58,15 +104,11 @@ class TradeOfferTestCase(TestCase):
     def test_tradeofferline_validate_groups(self):
         '''TradeOfferLine validates groups properly'''
 
-        year = Year.objects.get(pk=1)
-
-        line = TradeOfferLine(year=year, curr_group=1, curr_subgroup=1, subjects='1')
+        line = TradeOfferLine(year=self.year1, curr_group=1, curr_subgroup=1, subjects='1')
 
         with self.assertRaisesMessage(ValidationError, 'Valor de grupos buscados inválido'):
             line.wanted_groups = 'not_valid'
             line.full_clean(['offer'])
-
-        self.assertEquals(line.get_wanted_groups(), [])
 
         with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
             line.wanted_groups = '3'

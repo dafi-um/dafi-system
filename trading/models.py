@@ -90,12 +90,12 @@ class TradeOfferLine(models.Model):
 
             if not l:
                 errors['wanted_groups'] = 'Valor de grupos buscados inválido'
-
-            for g in l:
-                if g < 1 or g > self.year.groups:
-                    errors['wanted_groups'] = 'El grupo {} no existe en {}'.format(g, self.year)
-                elif g == self.curr_group:
-                    errors['wanted_groups'] = 'El grupo actual no puede estar en los grupos buscados'
+            elif self.curr_group in l:
+                errors['wanted_groups'] = 'El grupo actual no puede estar en los grupos buscados'
+            else:
+                for g in l:
+                    if g < 1 or g > self.year.groups:
+                        errors['curr_group'] = 'El grupo {} no existe en {}'.format(g, self.year)
 
         if self.subjects:
             l = len(self.get_subjects_list())
