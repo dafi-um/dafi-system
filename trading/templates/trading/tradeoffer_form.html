@@ -11,8 +11,8 @@
                 {% if view.is_creation %}
                     <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
                 {% else %}
-                    <a class="button alt" href="{% url 'trading:tradeoffer_delete' offer.id %}" title="Eliminar">Eliminar</a>
-                    <a class="button alt" href="{% url 'trading:detail' offer.id %}" title="Volver a la oferta">Volver a la oferta</a>
+                    <a class="button alt" href="{% url 'trading:offer_delete' offer.id %}" title="Eliminar">Eliminar</a>
+                    <a class="button alt" href="{% url 'trading:offer_detail' offer.id %}" title="Volver a la oferta">Volver a la oferta</a>
                 {% endif %}
             </div>
         </div>
@@ -35,6 +35,25 @@
             </ol>
         {% endif %}
     </div>
+
+    {% if errors %}
+        <div id="errors" class="box wrapper style1">
+            <h3>Errores</h3>
+            <p>Se han encontrado los siguientes errores:</p>
+            <ul>
+                {% for year in errors %}
+                    <li>
+                        <span>Año {{ forloop.counter }}</span>
+                        <ul>
+                            {% for error in year %}
+                                <li>{{ error.1.0 }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
     <form id="app" method="post">
         {% for line in lines %}

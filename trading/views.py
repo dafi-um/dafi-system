@@ -47,10 +47,16 @@ class TradeOfferDetailView(TradingPeriodMixin, DetailView):
 class TradeOfferEditMixin(TradingPeriodMixin):
     template_name = 'trading/tradeoffer_form.html'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._errors = []
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['offer'] = self.get_offer()
         context['lines'] = self.get_lines()
+        context['errors'] = self._errors
         return context
 
     def post(self, request, **kwargs):
@@ -69,7 +75,9 @@ class TradeOfferEditMixin(TradingPeriodMixin):
                 line.full_clean(exclude=['offer'])
                 valid.append(line)
             except ValidationError as e:
-                if line.id and not line.subjects:
+                if line.get_subjects_list():
+                    self._errors.append(e)
+                elif line.id:
                     line.delete()
                     deleted += 1
 
