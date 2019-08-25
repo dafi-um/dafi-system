@@ -13,11 +13,11 @@
                     {% if object.answer %}
                         <a class="button special" href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuestas</a>
                     {% else %}
-                        <a class="button alt" href="{% url 'trading:tradeoffer_delete' object.id %}" title="Eliminar oferta">Eliminar oferta</a>
-                        <a class="button alt" href="{% url 'trading:tradeoffer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
+                        <a class="button alt" href="{% url 'trading:offer_delete' object.id %}" title="Eliminar oferta">Eliminar oferta</a>
+                        <a class="button alt" href="{% url 'trading:offer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
                     {% endif %}
                 {% else %}
-                    <a class="button special" href="{% url 'trading:tradeoffer_accept' object.id %}" title="Aceptar esta oferta">Me Interesa</a>
+                    <a class="button special" href="{% url 'trading:answer_create' object.id %}" title="Aceptar esta oferta">Me Interesa</a>
                 {% endif %}
 
                 <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>

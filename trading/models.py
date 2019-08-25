@@ -52,7 +52,7 @@ class TradeOffer(models.Model):
         return 'Oferta {}: {} en {}'.format(self.id, self.user, self.period.name)
 
     def get_absolute_url(self):
-        return reverse('trading:detail', kwargs={'pk': self.pk})
+        return reverse('trading:offer_detail', kwargs={'pk': self.pk})
 
 
 class TradeOfferLine(models.Model):

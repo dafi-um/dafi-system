@@ -118,7 +118,7 @@ class TradeOfferAddView(LoginRequiredMixin, TradeOfferEditMixin, TemplateView):
         return self._lines
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:detail', args=[self.get_offer().id])
+        return reverse_lazy('trading:offer_detail', args=[self.get_offer().id])
 
 
 class TradeOfferEditView(TradeOfferEditMixin, DetailView):
@@ -152,7 +152,7 @@ class TradeOfferEditView(TradeOfferEditMixin, DetailView):
         return self._lines
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:tradeoffer_edit', args=[self.get_offer().id])
+        return reverse_lazy('trading:offer_edit', args=[self.get_offer().id])
 
 
 class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):

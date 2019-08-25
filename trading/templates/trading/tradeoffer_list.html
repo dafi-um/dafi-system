@@ -7,9 +7,7 @@
     <header class="major special">
         <div class="split">
             <h1>Ofertas disponibles de Permutas</h1>
-            {% if user.is_authenticated %}
-                <a class="button alt" href="{% url 'trading:tradeoffer_create' %}" title="Crear oferta">Crear oferta</a>
-            {% endif %}
+            <a class="button alt" href="{% url 'trading:offer_create' %}" title="Crear oferta">Crear oferta</a>
         </div>
         <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
     </header>
@@ -18,8 +16,15 @@
         {% for object in tradeoffer_list %}
             <div class="box wrapper style3">
                 <div class="split">
-                    <h3><a href="{% url 'trading:detail' object.id %}">Oferta #{{ object.id }} - {{ object.user | nice_name }}</a></h3>
-                    <a class="button special small" href="{% url 'trading:detail' object.id %}">Ver Oferta</a>
+                    <h3><a href="{% url 'trading:offer_detail' object.id %}">Oferta #{{ object.id }} - {{ object.user | nice_name }}</a></h3>
+                    <div>
+                        {% if user != object.user %}
+                            <a class="button special small" href="{% url 'trading:answer_create' object.id %}" title="Responder a la oferta">¡Me interesa!</a>
+                        {% else %}
+                            <a class="button alt small" href="{% url 'trading:offer_edit' object.id %}" title="Editar la oferta">Editar Oferta</a>
+                        {% endif %}
+                        <a class="button alt small" href="{% url 'trading:offer_detail' object.id %}">Ver Oferta</a>
+                    </div>
                 </div>
 
                 {% include 'trading/tradeoffer.html' %}

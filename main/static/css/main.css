@@ -2674,7 +2674,7 @@
 
 		.wrapper.style1 {
 			background-color: #e5474b;
-			color: #f2a3a5;
+			color: #fff;
 		}
 
 			.wrapper.style1 input, .wrapper.style1 select, .wrapper.style1 textarea {
@@ -4005,13 +4005,10 @@
 
 /* Trading */
 
-	#get-started {
-		color: #fff;
+	#get-started p,
+	#errors p {
+		margin-bottom: 0.25em;
 	}
-
-		#get-started p {
-			margin-bottom: 0.25em;
-		}
 
 	.year-block {
 		box-shadow: inset 0 0 0 2px #e5474b;

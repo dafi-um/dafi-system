@@ -6,7 +6,7 @@
     <header class="major special">
         <div class="split">
             <h1>Eliminar la Oferta de Permuta Nº {{ object.id }}</h1>
-            <a class="button alt" href="{% url 'trading:detail' object.id %}" title="Volver a la oferta">Volver a la oferta</a>
+            <a class="button alt" href="{% url 'trading:offer_detail' object.id %}" title="Volver a la oferta">Volver a la oferta</a>
         </div>
 
         <p>Creada el {{ object.pub_date | date:'j M Y H:i' }}</p>
