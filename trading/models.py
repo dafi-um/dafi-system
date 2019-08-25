@@ -133,7 +133,7 @@ class TradeOfferLine(models.Model):
             return []
 
     def get_wanted_groups_str(self):
-        return ' ó '.join(x for x in self.wanted_groups.split(','))
+        return ' ó '.join(str(x) for x in self.get_wanted_groups())
 
     @cached_property
     def i(self):
