@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from heart.models import Subject, Year
 
-from .models import TradeOffer, TradeOfferLine, TradePeriod
+from .models import TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod
 
 User = get_user_model()
 
@@ -149,3 +149,55 @@ class TradeOfferTestCase(TestCase):
             line.full_clean(['offer'])
         except ValidationError:
             self.fail('Current subgroup is valid but validation failed')
+
+    def test_tradeofferanswer_getter_setter_groups(self):
+        '''TradeOfferAnswer groups getter and setter works properly'''
+
+        answer = TradeOfferAnswer()
+
+        for case in [{}, {1: [2, 1]}, {1: [2, 1], 2: [2, 1]}]:
+            answer.set_groups(case)
+            self.assertEquals(answer.get_groups(), case, 'getter does not returns correct output')
+
+        answer.set_groups({})
+        self.assertEquals(answer.groups, '', 'setter does not sets empty field for falsy objects')
+
+    def test_tradeofferanswer_validate_groups(self):
+        '''TradeOfferAnswer validates groups properly'''
+
+        offer = TradeOffer.objects.create(user=self.user, period=self.period)
+
+        TradeOfferLine.objects.create(offer=offer, year=self.year1, curr_group='1', curr_subgroup='1', wanted_groups='2', subjects='1')
+        TradeOfferLine.objects.create(offer=offer, year=self.year2, curr_group='1', curr_subgroup='1', wanted_groups='2,3', subjects='2')
+
+        answer = TradeOfferAnswer(offer=offer)
+
+        for case in [{1: [2, 1], 2: [2, 1]}, {1: [2, 2], 2: [3, 3]}]:
+            answer.set_groups(case)
+
+            try:
+                answer.full_clean(['user'])
+            except ValidationError:
+                self.fail('validation failed for valid data')
+
+        cases = [
+            ({}, 'This field cannot be blank.'),
+            ({1: 2}, 'Formato incorrecto para Año 1'),
+            ({1: [2, 1]}, 'No hay un valor para Año 2'),
+            ({2: [2, 1]}, 'No hay un valor para Año 1'),
+            ({1: 2, 2: [2, 1]}, 'Formato incorrecto para Año 1'),
+            ({1: [2, 1], 2: [2]}, 'Formato incorrecto para Año 2'),
+            ({1: [2], 2: [2, 1]}, 'Formato incorrecto para Año 1'),
+            ({1: [2, 1], 2: 2}, 'Formato incorrecto para Año 2'),
+            ({1: [1, 1], 2: [2, 1]}, 'El grupo 1 no es un grupo buscado'),
+            ({1: [3, 1], 2: [2, 1]}, 'El grupo 3 no es un grupo buscado'),
+            ({1: [2, 1], 2: [4, 1]}, 'El grupo 4 no es un grupo buscado'),
+            ({1: [2, 0], 2: [2, 1]}, 'El subgrupo 0 no existe en Año 1'),
+            ({1: [2, 3], 2: [2, 1]}, 'El subgrupo 3 no existe en Año 1'),
+            ({1: [2, 1], 2: [2, 4]}, 'El subgrupo 4 no existe en Año 2'),
+        ]
+
+        for case in cases:
+            with self.assertRaisesMessage(ValidationError, case[1]):
+                answer.set_groups(case[0])
+                answer.full_clean(['user'])

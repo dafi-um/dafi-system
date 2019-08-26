@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import TradePeriod, TradeOffer, TradeOfferLine
+from .models import TradePeriod, TradeOffer, TradeOfferLine, TradeOfferAnswer
 
 
 @admin.register(TradePeriod)
@@ -19,7 +19,7 @@ class TradeOfferLineAdmin(admin.ModelAdmin):
     list_display = ('offer', 'year', 'curr_group', 'wanted_groups')
     list_filter = ['offer', 'year', 'curr_group', 'wanted_groups']
 
-
-admin.site.register(TradePeriod, TradePeriodAdmin)
-admin.site.register(TradeOffer, TradeOfferAdmin)
-admin.site.register(TradeOfferLine, TradeOfferLineAdmin)
+@admin.register(TradeOfferAnswer)
+class TradeOfferAnswerAdmin(admin.ModelAdmin):
+    list_display = ('offer', 'user', 'creation_date', 'is_completed')
+    list_filter = ['offer', 'user', 'is_completed']

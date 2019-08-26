@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -38,6 +40,7 @@ class TradeOffer(models.Model):
     user = models.ForeignKey(get_user_model(), models.PROTECT, verbose_name='usuario')
     period = models.ForeignKey(TradePeriod, models.PROTECT, verbose_name='periodo')
     creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
+    answer = models.ForeignKey('TradeOfferAnswer', models.PROTECT, blank=True, null=True, verbose_name='respuesta')
     is_visible = models.BooleanField('es visible', default=True, help_text='La oferta es visible para otros usuarios y puede recibir respuestas')
     is_completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte')
 
@@ -137,3 +140,64 @@ class TradeOfferLine(models.Model):
     @cached_property
     def i(self):
         return self.year.i
+
+class TradeOfferAnswer(models.Model):
+    '''
+    Trade Offer Answer
+    '''
+
+    offer = models.ForeignKey(TradeOffer, models.PROTECT, 'answers', verbose_name='oferta')
+    user = models.ForeignKey(get_user_model(), models.PROTECT, verbose_name='usuario')
+    groups = models.CharField('grupos ofertados', max_length=64)
+    creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
+    is_completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._groups = {}
+
+    class Meta():
+        verbose_name = 'respuesta de oferta de permuta'
+        verbose_name_plural = 'respuestas de oferta de permuta'
+
+    def __str__(self):
+        return 'Respuesta de {} para Oferta #{}'.format(self.user, self.offer.id)
+
+    def clean(self):
+        if not self.groups:
+            return super().clean()
+
+        groups = self.get_groups()
+
+        if not groups:
+            raise ValidationError({'groups': 'Valor de grupos ofertados inválido'})
+
+        for line in self.offer.lines.all():
+            if line.year.id not in groups:
+                raise ValidationError({'groups': 'No hay un valor para {}'.format(line.year)})
+            elif not isinstance(groups[line.year.id], list):
+                raise ValidationError({'groups': 'Formato incorrecto para {}'.format(line.year)})
+
+            try:
+                group, subgroup = groups[line.year.id]
+            except ValueError:
+                raise ValidationError({'groups': 'Formato incorrecto para {}'.format(line.year)})
+
+            if group not in line.get_wanted_groups():
+                raise ValidationError({'groups': 'El grupo {} no es un grupo buscado'.format(group)})
+
+            if subgroup < 1 or subgroup > line.year.subgroups:
+                raise ValidationError({'groups': 'El subgrupo {} no existe en {}'.format(subgroup, line.year)})
+
+        return super().clean()
+
+    def set_groups(self, value):
+        self._groups = value
+        self.groups = json.dumps(value, separators=(',', ':')) if value else ''
+
+    def get_groups(self):
+        if self.groups and not self._groups:
+            self._groups = json.loads(self.groups)
+
+        return self._groups
