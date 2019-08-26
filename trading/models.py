@@ -37,10 +37,9 @@ class TradeOffer(models.Model):
 
     user = models.ForeignKey(get_user_model(), models.PROTECT, verbose_name='usuario')
     period = models.ForeignKey(TradePeriod, models.PROTECT, verbose_name='periodo')
-    pub_date = models.DateTimeField('fecha de creación', auto_now_add=True)
-    answer = models.ForeignKey('self', models.PROTECT, 'answers', blank=True, null=True, verbose_name='respuesta')
-    is_answer = models.BooleanField('es una respuesta', default=False, help_text='Esta oferta es una respuesta a otra oferta')
-    completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte')
+    creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
+    is_visible = models.BooleanField('es visible', default=True, help_text='La oferta es visible para otros usuarios y puede recibir respuestas')
+    is_completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte')
 
     class Meta:
         verbose_name = 'oferta de permuta'

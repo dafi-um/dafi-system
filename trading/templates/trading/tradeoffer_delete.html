@@ -9,7 +9,7 @@
             <a class="button alt" href="{% url 'trading:offer_detail' object.id %}" title="Volver a la oferta">Volver a la oferta</a>
         </div>
 
-        <p>Creada el {{ object.pub_date | date:'j M Y H:i' }}</p>
+        <p>Creada el {{ object.creation_date | date:'j M Y H:i' }}</p>
     </header>
 
     <p>Vas a eliminar esta oferta de permuta. Si hay respuestas pendientes se eliminarán.</p>
