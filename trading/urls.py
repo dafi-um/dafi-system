@@ -11,6 +11,6 @@ urlpatterns = [
     path('crear/', views.TradeOfferAddView.as_view(), name='offer_create'),
     path('ofertas/<int:pk>/editar/', views.TradeOfferEditView.as_view(), name='offer_edit'),
     path('ofertas/<int:pk>/eliminar/', views.TradeOfferDeleteView.as_view(), name='offer_delete'),
-    path('ofertas/<int:pk>/responder/', views.TradeOfferDetailView.as_view(), name='answer_create'),
+    path('ofertas/<int:pk>/responder/', views.TradeOfferAnswerCreate.as_view(), name='answer_create'),
     path('ofertas/<int:pk>', views.TradeOfferDetailView.as_view(), name='offer_detail'),
 ]

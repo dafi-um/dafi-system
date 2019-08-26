@@ -4030,3 +4030,11 @@
 			padding-top: 0.5em;
 			border-top: 2px solid #e5474b;
 		}
+
+		.year-block .row label {
+			margin-bottom: 0.25em;
+		}
+
+		.year-block .row select {
+			margin-bottom: 1.5em;
+		}

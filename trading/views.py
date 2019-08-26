@@ -192,3 +192,7 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
             return redirect(self.get_object())
 
         return super().get(request, *args, **kwargs)
+
+class TradeOfferAnswerCreate(TradingPeriodMixin, DetailView):
+    model = TradeOffer
+    template_name = 'trading/answer_form.html'
