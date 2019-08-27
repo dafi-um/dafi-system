@@ -172,7 +172,7 @@ class TradeOfferTestCase(TestCase):
 
         answer = TradeOfferAnswer(offer=offer)
 
-        for case in [{1: [2, 1], 2: [2, 1]}, {1: [2, 2], 2: [3, 3]}]:
+        for case in [{'1': [2, 1], '2': [2, 1]}, {'1': [2, 2], '2': [3, 3]}]:
             answer.set_groups(case)
 
             try:
@@ -182,19 +182,22 @@ class TradeOfferTestCase(TestCase):
 
         cases = [
             ({}, 'This field cannot be blank.'),
-            ({1: 2}, 'Formato incorrecto para Año 1'),
-            ({1: [2, 1]}, 'No hay un valor para Año 2'),
-            ({2: [2, 1]}, 'No hay un valor para Año 1'),
-            ({1: 2, 2: [2, 1]}, 'Formato incorrecto para Año 1'),
-            ({1: [2, 1], 2: [2]}, 'Formato incorrecto para Año 2'),
-            ({1: [2], 2: [2, 1]}, 'Formato incorrecto para Año 1'),
-            ({1: [2, 1], 2: 2}, 'Formato incorrecto para Año 2'),
-            ({1: [1, 1], 2: [2, 1]}, 'El grupo 1 no es un grupo buscado'),
-            ({1: [3, 1], 2: [2, 1]}, 'El grupo 3 no es un grupo buscado'),
-            ({1: [2, 1], 2: [4, 1]}, 'El grupo 4 no es un grupo buscado'),
-            ({1: [2, 0], 2: [2, 1]}, 'El subgrupo 0 no existe en Año 1'),
-            ({1: [2, 3], 2: [2, 1]}, 'El subgrupo 3 no existe en Año 1'),
-            ({1: [2, 1], 2: [2, 4]}, 'El subgrupo 4 no existe en Año 2'),
+            ({1: 2}, 'No hay un valor para Año 1'),
+            ({'1': 2}, 'Formato incorrecto para Año 1'),
+            ({'1': [2, 1]}, 'No hay un valor para Año 2'),
+            ({'1': [2, 1], 2: [2, 1]}, 'No hay un valor para Año 2'),
+            ({'2': [2, 1]}, 'No hay un valor para Año 1'),
+            ({'2': [2, 1], 2: [2, 1]}, 'No hay un valor para Año 1'),
+            ({'1': 2, '2': [2, 1]}, 'Formato incorrecto para Año 1'),
+            ({'1': [2, 1], '2': [2]}, 'Formato incorrecto para Año 2'),
+            ({'1': [2], '2': [2, 1]}, 'Formato incorrecto para Año 1'),
+            ({'1': [2, 1], '2': 2}, 'Formato incorrecto para Año 2'),
+            ({'1': [1, 1], '2': [2, 1]}, 'El grupo 1 no es un grupo buscado'),
+            ({'1': [3, 1], '2': [2, 1]}, 'El grupo 3 no es un grupo buscado'),
+            ({'1': [2, 1], '2': [4, 1]}, 'El grupo 4 no es un grupo buscado'),
+            ({'1': [2, 0], '2': [2, 1]}, 'El subgrupo 0 no existe en Año 1'),
+            ({'1': [2, 3], '2': [2, 1]}, 'El subgrupo 3 no existe en Año 1'),
+            ({'1': [2, 1], '2': [2, 4]}, 'El subgrupo 4 no existe en Año 2'),
         ]
 
         for case in cases:

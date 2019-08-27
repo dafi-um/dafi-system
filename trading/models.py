@@ -174,13 +174,15 @@ class TradeOfferAnswer(models.Model):
             raise ValidationError({'groups': 'Valor de grupos ofertados inválido'})
 
         for line in self.offer.lines.all():
-            if line.year.id not in groups:
+            year_key = str(line.year.id) # because JSON dictionary keys are always strings
+
+            if year_key not in groups:
                 raise ValidationError({'groups': 'No hay un valor para {}'.format(line.year)})
-            elif not isinstance(groups[line.year.id], list):
+            elif not isinstance(groups[year_key], list):
                 raise ValidationError({'groups': 'Formato incorrecto para {}'.format(line.year)})
 
             try:
-                group, subgroup = groups[line.year.id]
+                group, subgroup = groups[year_key]
             except ValueError:
                 raise ValidationError({'groups': 'Formato incorrecto para {}'.format(line.year)})
 
