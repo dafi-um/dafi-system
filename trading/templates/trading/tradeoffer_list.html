@@ -1,5 +1,6 @@
 {% extends 'generic.html' %}
 {% load users_tags %}
+{% load trading_tags %}
 
 {% block title %}Ofertas de Permutas{% endblock title %}
 
@@ -18,7 +19,13 @@
                 <h3><a href="{% url 'trading:offer_detail' object.id %}">Oferta #{{ object.id }} - {{ object.user | nice_name }}</a></h3>
                 <div>
                     {% if user != object.user %}
-                        <a class="button special small" href="{% url 'trading:answer_create' object.id %}" title="Responder a la oferta">¡Me interesa!</a>
+                        {% with object|get_answer:user as answer %}
+                            {% if answer %}
+                                <a class="button alt small" href="{% url 'trading:answer_detail' answer.id %}" title="Ver mi respuesta">Ver mi respuesta</a>
+                            {% else %}
+                                <a class="button special small" href="{% url 'trading:answer_create' object.id %}" title="Responder a la oferta">¡Me interesa!</a>
+                            {% endif %}
+                        {% endwith %}
                     {% else %}
                         <a class="button alt small" href="{% url 'trading:offer_edit' object.id %}" title="Editar la oferta">Editar Oferta</a>
                     {% endif %}
