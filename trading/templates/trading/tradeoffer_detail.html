@@ -8,7 +8,7 @@
         <div class="split">
             <h1>Oferta de Permuta Nº {{ object.id }}</h1>
 
-            <div>
+            <div class="actions">
                 {% if user == object.user %}
                     {% if object.answer %}
                         <a class="button special" href="{% url 'trading:tradeoffer_confirm' object.id %}" title="Ver respuesta">Ver respuestas</a>

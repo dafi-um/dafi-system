@@ -3123,6 +3123,19 @@
 
 		}
 
+		@media screen and (min-width: 481px) and (max-width: 980px) {
+
+			.split .actions {
+				display: flex;
+				flex-direction: column;
+			}
+
+				.split .actions a + a {
+					margin-top: 0.5em;
+				}
+
+		}
+
 /* Header */
 
 	body {
