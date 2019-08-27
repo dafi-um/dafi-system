@@ -8,13 +8,17 @@
         <p>Noticias frescas (a veces)</p>
     </header>
 
-    {% if post_list %}
-        <ul class="alt">
-        {% for post in post_list %}
-            <li><a href="{% url 'blog:detail' post.slug %}">{{ post.title }}</a></li>
-        {% endfor %}
-        </ul>
-    {% else %}
+    {% for post in post_list %}
+        {% if forloop.first %}
+            <ul class="alt">
+        {% endif %}
+
+        <li><a href="{% url 'blog:detail' post.slug %}">{{ post.title }}</a></li>
+
+        {% if forloop.last %}
+            </ul>
+        {% endif %}
+    {% empty %}
         <p>No hay posts disponibles.</p>
-    {% endif %}
+    {% endfor %}
 {% endblock content %}

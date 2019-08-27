@@ -7,13 +7,17 @@
         <h1>Nuestros Clubes</h1>
     </header>
 
-    {% if club_list %}
-        <ul class="alt">
-        {% for club in club_list %}
-            <li><a href="{% url 'clubs:detail' club.slug %}">{{ club.name }}</a></li>
-        {% endfor %}
-        </ul>
-    {% else %}
+    {% for club in club_list %}
+        {% if forloop.first %}
+            <ul class="alt">
+        {% endif %}
+
+        <li><a href="{% url 'clubs:detail' club.slug %}">{{ club.name }}</a></li>
+
+        {% if forloop.last %}
+            </ul>
+        {% endif %}
+    {% empty %}
         <p>No hay clubes disponibles.</p>
-    {% endif %}
+    {% endfor %}
 {% endblock content %}
