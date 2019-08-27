@@ -1,0 +1,73 @@
+{% extends 'generic.html' %}
+{% load users_tags %}
+
+{% block title %}Respuesta #{{ object.id }} a Oferta #{{ object.offer.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Respuesta Nº {{ object.id }} a la Oferta Nº {{ object.offer.id }}</h1>
+
+            <div class="actions">
+                {% if object.user == user %}
+                    <a class="button alt" href="{% url 'trading:answer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
+                {% endif %}
+
+                <a class="button alt" href="{% url 'trading:offer_detail' object.offer.id %}" title="Ver oferta">Ver oferta</a>
+            </div>
+        </div>
+
+        <p>Creada por {{ object.user | nice_name }} el {{ object.creation_date | date:'j M Y H:i' }}</p>
+    </header>
+
+    <div id="app" class="year-block" style="margin-bottom: 1.5em;">
+        <div class="split">
+            <h4>Oferta de {{ object.offer.user | nice_name }}</h4>
+            <a v-on:click="offer_block = !offer_block">Mostrar/ocultar</a>
+        </div>
+
+        <div class="subjects" v-show="offer_block">
+            <p>Creada el {{ object.offer.creation_date | date:'j M Y H:i' }}</p>
+
+            {% with object.offer as object %}
+                {% include 'trading/tradeoffer.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Curso</th>
+                <th>Grupo de la Oferta</th>
+                <th>Grupo de la Respuesta</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for line in object.get_lines %}
+                <tr>
+                    <td>
+                        <p>{{ line.year }}</p>
+                    </td>
+                    <td>
+                        <p>{{ line.curr_group }}.{{ line.curr_subgroup }}</p>
+                    </td>
+                    <td>
+                        <p>{{ line.new_group }}.{{ line.new_subgroup }}</p>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                offer_block: false,
+            },
+        });
+    </script>
+{% endblock content %}

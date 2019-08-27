@@ -249,3 +249,11 @@ class TradeOfferAnswerCreate(UserPassesTestMixin, TradingPeriodMixin, DetailView
 
         return super().get(request, **kwargs)
 
+
+class TradeOfferAnswerDetail(LoginRequiredMixin, TradingPeriodMixin, DetailView):
+    model = TradeOfferAnswer
+
+    template_name = 'trading/answer_detail.html'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(Q(user=self.request.user) | Q(offer__user=self.request.user))
