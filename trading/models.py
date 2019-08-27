@@ -203,3 +203,23 @@ class TradeOfferAnswer(models.Model):
             self._groups = json.loads(self.groups)
 
         return self._groups
+
+    def get_lines(self):
+        l = []
+
+        if not self.offer: return l
+
+        groups = self.get_groups()
+
+        for line in self.offer.lines.all():
+            group, subgroup = groups[str(line.year.id)]
+
+            l.append({
+                'year': line.year,
+                'curr_group': line.curr_group,
+                'curr_subgroup': line.curr_subgroup,
+                'new_group': group,
+                'new_subgroup': subgroup,
+            })
+
+        return l
