@@ -8,7 +8,7 @@ from django.views.generic.base import ContextMixin
 
 from heart.models import Year
 
-from .models import TradeOffer, TradeOfferLine, TradePeriod
+from .models import TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod
 
 
 class TradingPeriodMixin(ContextMixin):
@@ -207,6 +207,36 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
 
         return super().get(request, *args, **kwargs)
 
-class TradeOfferAnswerCreate(TradingPeriodMixin, DetailView):
+
+class TradeOfferAnswerCreate(UserPassesTestMixin, TradingPeriodMixin, DetailView):
     model = TradeOffer
     template_name = 'trading/answer_form.html'
+
+    def test_func(self):
+        return self.request.user != self.get_object().user
+
+    def post(self, request, **kwargs):
+        offer = self.get_object()
+        answer = TradeOfferAnswer(offer=offer, user=request.user)
+
+        data = {}
+
+        for line in offer.lines.all():
+            try:
+                data[line.year.id] = [
+                    int(request.POST.get('{}-group'.format(line.i))),
+                    int(request.POST.get('{}-subgroup'.format(line.i))),
+                ]
+            except ValueError:
+                return super().get(request, **kwargs)
+
+        answer.set_groups(data)
+
+        try:
+            answer.save()
+            return redirect(reverse_lazy('trading:answer_detail', args=[answer.id]))
+        except ValidationError:
+            pass
+
+        return super().get(request, **kwargs)
+
