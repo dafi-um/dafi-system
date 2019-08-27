@@ -12,37 +12,35 @@
         <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
     </header>
 
-    {% if tradeoffer_list %}
-        {% for object in tradeoffer_list %}
-            <div class="box wrapper style3">
-                <div class="split">
-                    <h3><a href="{% url 'trading:offer_detail' object.id %}">Oferta #{{ object.id }} - {{ object.user | nice_name }}</a></h3>
-                    <div>
-                        {% if user != object.user %}
-                            <a class="button special small" href="{% url 'trading:answer_create' object.id %}" title="Responder a la oferta">¡Me interesa!</a>
-                        {% else %}
-                            <a class="button alt small" href="{% url 'trading:offer_edit' object.id %}" title="Editar la oferta">Editar Oferta</a>
-                        {% endif %}
-                        <a class="button alt small" href="{% url 'trading:offer_detail' object.id %}">Ver Oferta</a>
-                    </div>
-                </div>
-
-                {% include 'trading/tradeoffer.html' %}
-            </div>
-        {% endfor %}
-
-        {% if is_paginated %}
-            <p class="center">
-                {% for page in paginator.page_range %}
-                    {% if page == page_obj.number %}
-                        <span><b>{{ page_obj.number }}</b></span>
+    {% for object in tradeoffer_list %}
+        <div class="box wrapper style3">
+            <div class="split">
+                <h3><a href="{% url 'trading:offer_detail' object.id %}">Oferta #{{ object.id }} - {{ object.user | nice_name }}</a></h3>
+                <div>
+                    {% if user != object.user %}
+                        <a class="button special small" href="{% url 'trading:answer_create' object.id %}" title="Responder a la oferta">¡Me interesa!</a>
                     {% else %}
-                        <a href="?page={{ page }}" title="Página {{ page }}">{{ page }}</a>
+                        <a class="button alt small" href="{% url 'trading:offer_edit' object.id %}" title="Editar la oferta">Editar Oferta</a>
                     {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
-    {% else %}
+                    <a class="button alt small" href="{% url 'trading:offer_detail' object.id %}">Ver Oferta</a>
+                </div>
+            </div>
+
+            {% include 'trading/tradeoffer.html' %}
+        </div>
+    {% empty %}
         <p>No hay ofertas disponibles.</p>
+    {% endfor %}
+
+    {% if is_paginated %}
+        <p class="center">
+            {% for page in paginator.page_range %}
+                {% if page == page_obj.number %}
+                    <span><b>{{ page_obj.number }}</b></span>
+                {% else %}
+                    <a href="?page={{ page }}" title="Página {{ page }}">{{ page }}</a>
+                {% endif %}
+            {% endfor %}
+        </p>
     {% endif %}
 {% endblock content %}
