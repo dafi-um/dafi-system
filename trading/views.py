@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView
@@ -32,17 +33,27 @@ class TradingPeriodMixin(ContextMixin):
 
         return super().get_template_names()
 
+    def filter_query(self):
+        query = Q(is_visible=True) & Q(answer=None)
+
+        if self.request.user.is_authenticated:
+            query = query | Q(user=self.request.user) | Q(answer__user=self.request.user)
+
+        return Q(period=self.get_current_period()) & query
+
 
 class IndexView(TradingPeriodMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return TradeOffer.objects.filter(answer=None, period=self.get_current_period())
+        return TradeOffer.objects.filter(self.filter_query())
 
 
 class TradeOfferDetailView(TradingPeriodMixin, DetailView):
     model = TradeOffer
 
+    def get_queryset(self):
+        return super().get_queryset().filter(self.filter_query())
 
 class TradeOfferEditMixin(TradingPeriodMixin):
     template_name = 'trading/tradeoffer_form.html'
@@ -129,7 +140,7 @@ class TradeOfferAddView(LoginRequiredMixin, TradeOfferEditMixin, TemplateView):
         return reverse_lazy('trading:offer_detail', args=[self.get_offer().id])
 
 
-class TradeOfferEditView(TradeOfferEditMixin, DetailView):
+class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
     model = TradeOffer
 
     title = 'Editar una Oferta de Permuta'
@@ -139,8 +150,11 @@ class TradeOfferEditView(TradeOfferEditMixin, DetailView):
         self._lines = None
         return super().__init__(*args, **kwargs)
 
+    def test_func(self):
+        return self.request.user == self.get_object().user
+
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset().filter(answer=None)
 
     def get_offer(self):
         return self.get_object()
@@ -172,7 +186,7 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
         return self.request.user == self.get_object().user
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset().filter(answer=None)
 
     def post(self, request, **kwargs):
         offer = self.get_object()
