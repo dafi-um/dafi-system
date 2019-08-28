@@ -104,7 +104,10 @@ class TradeOfferEditMixin(TradingPeriodMixin):
         offer = self.get_offer()
 
         if valid:
-            if not offer.id:
+            if offer.id:
+                # TODO: Notify users with answers that this offer was modified and remove their answers (not valid anymore)
+                pass
+            else:
                 offer.save()
 
             for line in valid:
@@ -200,8 +203,9 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
     def post(self, request, **kwargs):
         offer = self.get_object()
 
-        if offer.answer:
-            return redirect(offer)
+        for answer in offer.answers.all():
+            # TODO: notify users that this offer was deleted
+            answer.delete()
 
         for line in offer.lines.all():
             line.delete()
@@ -305,3 +309,13 @@ class TradeOfferAnswerDeleteView(TradeOfferAnswerAccessMixin, DeleteView):
     def get_success_url(self, **kwargs):
         return reverse_lazy('trading:list')
 
+
+class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
+    model = TradeOfferAnswer
+
+    template_name = 'trading/answer_accept.html'
+
+    def test_func(self):
+        answer = self.get_object()
+
+        return self.request.user == answer.offer.user and not answer.offer.answer
