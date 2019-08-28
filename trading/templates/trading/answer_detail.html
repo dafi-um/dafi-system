@@ -9,8 +9,13 @@
             <h1>Respuesta Nº {{ object.id }} a la Oferta Nº {{ object.offer.id }}</h1>
 
             <div class="actions">
-                {% if object.user == user %}
-                    <a class="button alt" href="{% url 'trading:answer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
+                {% if not object.offer.answer %}
+                    {% if object.user == user %}
+                        <a class="button alt" href="{% url 'trading:answer_delete' object.id %}" title="Eliminar respuesta">Eliminar</a>
+                        <a class="button alt" href="{% url 'trading:answer_edit' object.id %}" title="Editar respuesta">Editar</a>
+                    {% elif object.offer.user == user %}
+                        <a class="button special" href="{% url 'trading:answer_accept' object.id %}" title="Aceptar respuesta">¡Me Interesa!</a>
+                    {% endif %}
                 {% endif %}
 
                 <a class="button alt" href="{% url 'trading:offer_detail' object.offer.id %}" title="Ver oferta">Ver oferta</a>
@@ -19,6 +24,14 @@
 
         <p>Creada por {{ object.user | nice_name }} el {{ object.creation_date | date:'j M Y H:i' }}</p>
     </header>
+
+    {% if object.offer.answer == object %}
+        <div class="box wrapper style1 split">
+            <h4 style="margin: 0;padding-top: 0.5em;">Esta respuesta ha sido seleccionada</h4>
+
+            <a class="button alt" href="{% url 'trading:change_process' object.id %}" title="Comenzar proceso">Comenzar proceso</a>
+        </div>
+    {% endif %}
 
     <div id="app" class="year-block" style="margin-bottom: 1.5em;">
         <div class="split">
@@ -35,31 +48,7 @@
         </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Curso</th>
-                <th>Grupo de la Oferta</th>
-                <th>Grupo de la Respuesta</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for line in object.get_lines %}
-                <tr>
-                    <td>
-                        <p>{{ line.year }}</p>
-                    </td>
-                    <td>
-                        <p>{{ line.curr_group }}.{{ line.curr_subgroup }}</p>
-                    </td>
-                    <td>
-                        <p>{{ line.new_group }}.{{ line.new_subgroup }}</p>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% include 'trading/answer.html' %}
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
     <script type="text/javascript">
