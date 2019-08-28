@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView, DeleteView
 from django.views.generic.base import ContextMixin
 
 from heart.models import Year
@@ -217,16 +217,26 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class TradeOfferAnswerCreateView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
-    model = TradeOffer
-    template_name = 'trading/answer_form.html'
+class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
+    def test_func(self):
+        answer = self.get_object()
+
+        return self.request.user == answer.user and not answer.offer.answer
+
+
+class TradeOfferAnswerDetailView(LoginRequiredMixin, TradingPeriodMixin, DetailView):
+    model = TradeOfferAnswer
+
+    template_name = 'trading/answer_detail.html'
 
     def test_func(self):
-        return self.request.user != self.get_object().user
+        return self.request.user == self.get_object().offer.user or super().test_func()
 
+
+class TradeOfferAnswerEditMixin(TradingPeriodMixin):
     def post(self, request, **kwargs):
-        offer = self.get_object()
-        answer = TradeOfferAnswer(offer=offer, user=request.user)
+        offer = self.get_offer()
+        answer = self.get_answer()
 
         data = {}
 
@@ -243,17 +253,55 @@ class TradeOfferAnswerCreateView(UserPassesTestMixin, TradingPeriodMixin, Detail
 
         try:
             answer.save()
-            return redirect(reverse_lazy('trading:answer_detail', args=[answer.id]))
         except ValidationError:
-            pass
+            return super().get(request, **kwargs)
 
+        return self.on_success(request, **kwargs)
+
+
+class TradeOfferAnswerCreateView(UserPassesTestMixin, TradeOfferAnswerEditMixin, DetailView):
+    model = TradeOffer
+    template_name = 'trading/answer_form.html'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._answer = None
+
+    def test_func(self):
+        return self.request.user != self.get_object().user
+
+    def get_offer(self):
+        return self.get_object()
+
+    def get_answer(self):
+        if not self._answer:
+            self._answer = TradeOfferAnswer(offer=self.get_offer(), user=self.request.user)
+
+        return self._answer
+
+    def on_success(self, request, **kwargs):
+        return redirect(reverse_lazy('trading:answer_detail', args=[self.get_answer().id]))
+
+
+class TradeOfferAnswerEditView(TradeOfferAnswerAccessMixin, TradeOfferAnswerEditMixin, DetailView):
+    model = TradeOfferAnswer
+    template_name = 'trading/answer_edit.html'
+
+    def get_offer(self):
+        return self.get_object().offer
+
+    def get_answer(self):
+        return self.get_object()
+
+    def on_success(self, request, **kwargs):
         return super().get(request, **kwargs)
 
 
-class TradeOfferAnswerDetailView(LoginRequiredMixin, TradingPeriodMixin, DetailView):
+class TradeOfferAnswerDeleteView(TradeOfferAnswerAccessMixin, DeleteView):
     model = TradeOfferAnswer
+    template_name = 'trading/answer_delete.html'
 
-    template_name = 'trading/answer_detail.html'
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('trading:list')
 
-    def get_queryset(self):
-        return super().get_queryset().filter(Q(user=self.request.user) | Q(offer__user=self.request.user))

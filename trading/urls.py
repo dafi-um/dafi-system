@@ -14,7 +14,7 @@ urlpatterns = [
     path('ofertas/<int:pk>/responder/', views.TradeOfferAnswerCreateView.as_view(), name='answer_create'),
     path('ofertas/<int:pk>/', views.TradeOfferDetailView.as_view(), name='offer_detail'),
     path('respuestas/<int:pk>/', views.TradeOfferAnswerDetailView.as_view(), name='answer_detail'),
-    path('respuestas/<int:pk>/editar/', views.TradeOfferAnswerDetailView.as_view(), name='answer_edit'),
-    path('respuestas/<int:pk>/eliminar/', views.TradeOfferAnswerDetailView.as_view(), name='answer_delete'),
+    path('respuestas/<int:pk>/editar/', views.TradeOfferAnswerEditView.as_view(), name='answer_edit'),
+    path('respuestas/<int:pk>/eliminar/', views.TradeOfferAnswerDeleteView.as_view(), name='answer_delete'),
     path('intercambio/<int:pk>/', views.TradeOfferDetailView.as_view(), name='change_process'),
 ]

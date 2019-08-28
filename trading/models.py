@@ -215,6 +215,7 @@ class TradeOfferAnswer(models.Model):
             group, subgroup = groups[str(line.year.id)]
 
             l.append({
+                'line': line,
                 'year': line.year,
                 'curr_group': line.curr_group,
                 'curr_subgroup': line.curr_subgroup,
