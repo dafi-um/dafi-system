@@ -217,7 +217,7 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class TradeOfferAnswerCreate(UserPassesTestMixin, TradingPeriodMixin, DetailView):
+class TradeOfferAnswerCreateView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
     model = TradeOffer
     template_name = 'trading/answer_form.html'
 
@@ -250,7 +250,7 @@ class TradeOfferAnswerCreate(UserPassesTestMixin, TradingPeriodMixin, DetailView
         return super().get(request, **kwargs)
 
 
-class TradeOfferAnswerDetail(LoginRequiredMixin, TradingPeriodMixin, DetailView):
+class TradeOfferAnswerDetailView(LoginRequiredMixin, TradingPeriodMixin, DetailView):
     model = TradeOfferAnswer
 
     template_name = 'trading/answer_detail.html'
