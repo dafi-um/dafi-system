@@ -10,9 +10,7 @@
 
             <div class="actions">
                 {% if user == object.user %}
-                    {% if object.answer %}
-                        <a class="button special" href="{% url 'trading:process' object.id %}" title="Realizar intercambio">Realizar intercambios</a>
-                    {% else %}
+                    {% if not object.answer %}
                         <a class="button alt" href="{% url 'trading:offer_delete' object.id %}" title="Eliminar oferta">Eliminar oferta</a>
                         <a class="button alt" href="{% url 'trading:offer_edit' object.id %}" title="Editar oferta">Editar oferta</a>
                     {% endif %}
@@ -27,7 +25,19 @@
         <p>Creado por {{ object.user | nice_name }} el {{ object.creation_date | date:'j M Y H:i' }}</p>
     </header>
 
-    {% if object.user == user and not object.answer %}
+    {% if object.answer %}
+        <div class="wrapper box style1 split">
+            <h4 style="margin: 0;padding-top: 0.5em;">
+                {% if object.user == user %}
+                    Has seleccionado la respuesta de {{ object.answer.user | nice_name }}
+                {% else %}
+                    Tu respuesta ha sido seleccionada
+                {% endif %}
+            </h4>
+
+            <a class="button alt" href="{% url 'trading:change_process' object.id %}" title="Comenzar proceso">Comenzar proceso</a>
+        </div>
+    {% elif object.user == user %}
         {% for answer in object.answers.all %}
             {% if forloop.first %}
                 <div class="wrapper box style1" style="box-shadow: 0 0 10px #444;">
