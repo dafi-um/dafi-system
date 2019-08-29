@@ -215,7 +215,7 @@ class TradingViewsTests(TestCase):
         self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
         self.user3 = User.objects.create(username='tester_3', email='test3@test.com', password='1234')
 
-        year = Year.objects.create(id=1, groups=2, subgroups=2)
+        year = Year.objects.create(id=1, groups=3, subgroups=3)
 
         Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
 
@@ -227,12 +227,9 @@ class TradingViewsTests(TestCase):
 
         TradeOfferLine.objects.create(
             offer=self.offer, year=year, subjects='1',
-            curr_group=1, curr_subgroup=1, wanted_groups='2'
+            curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
-        self.create_answer()
-
-    def create_answer(self):
         self.answer = TradeOfferAnswer(user=self.user2, offer=self.offer)
         self.answer.set_groups({'1': [2, 1]})
         self.answer.save()
@@ -368,19 +365,31 @@ class TradingViewsTests(TestCase):
         '''TradeOfferAnswer views work properly with valid input in POST requests'''
 
         c = Client()
+        c.force_login(self.user2)
 
-        url_create = reverse('trading:answer_create', args=[self.offer.id])
-        url_update = reverse('trading:answer_edit', args=[self.answer.id])
-        url_delete = reverse('trading:answer_delete', args=[self.answer.id])
+        # delete existing answer
+        self.assertRedirects(c.post(reverse('trading:answer_delete', args=[self.answer.id])), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
 
-        self.assertEqual(c.post(url_update).status_code, 200, 'answer creator cannot update answer')
-        self.assertRedirects(c.post(url_delete), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
+        self.assertEqual(TradeOfferAnswer.objects.all().count(), 0, 'deleted answer still exists')
 
-        self.assertEqual(c.get(url_create).status_code, 200, 'answer creator cannot create answer after deleting the existing one')
+        # create another answer
+        res = c.post(reverse('trading:answer_create', args=[self.offer.id]), {'0-group': '2', '0-subgroup': '1'})
 
-        self.create_answer()
+        self.assertEqual(TradeOfferAnswer.objects.all().count(), 1, 'created answer does not exist')
 
-        self.assertEqual(c.get(self.answer.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after re-creating it')
+        self.answer = TradeOfferAnswer.objects.get()
+
+        self.assertRedirects(res, reverse('trading:answer_detail', args=[self.answer.id]), msg_prefix='answer creator cannot create answer after deleting the existing one')
+
+        self.assertEqual(c.get(self.answer.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after creating it')
+
+        # update new answer
+        res = c.post(reverse('trading:answer_edit', args=[self.answer.id]), {'0-group': '3', '0-subgroup': '2'})
+        self.assertEqual(res.status_code, 200, 'valid post data generates error')
+
+        self.answer = TradeOfferAnswer.objects.get()
+
+        self.assertDictEqual(self.answer.get_groups(), {'1': [3, 2]}, 'updated data does not change object data')
 
 
 class TradingAuxiliarToolsTests(TestCase):
