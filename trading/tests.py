@@ -2,7 +2,9 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import reverse
+from django.template import Context, Template
 from django.test import Client, TestCase
 from django.utils import timezone
 
@@ -301,7 +303,7 @@ class TradingViewsTests(TestCase):
         # create
         url_create = reverse('trading:answer_create', args=[self.offer.id])
 
-        self.assertEqual(c.get(url_create).status_code, 302, 'annonymous user can create answer')
+        self.assertEqual(c.get(url_create).status_code, 302, 'anonymous user can create answer')
 
         c.force_login(self.user1)
         self.assertEqual(c.get(url_create).status_code, 403, 'offer creator can create answer to its own offer')
@@ -321,7 +323,7 @@ class TradingViewsTests(TestCase):
         # read
         read_url = self.answer.get_absolute_url()
 
-        self.assertEqual(c.get(read_url).status_code, 302, 'annonymous user can read answers')
+        self.assertEqual(c.get(read_url).status_code, 302, 'anonymous user can read answers')
 
         c.force_login(self.user1)
         self.assertEqual(c.get(read_url).status_code, 200, 'offer creator cannot read answer')
@@ -342,36 +344,76 @@ class TradingViewsTests(TestCase):
         url_update = reverse('trading:answer_edit', args=[self.answer.id])
         url_delete = reverse('trading:answer_delete', args=[self.answer.id])
 
-        self.assertEqual(c.get(url_update).status_code, 302, 'annonymous user can update answer (get)')
-        self.assertEqual(c.get(url_delete).status_code, 302, 'annonymous user can delete answer (get)')
-        self.assertEqual(c.post(url_update).status_code, 302, 'annonymous user can update answer (post)')
-        self.assertEqual(c.post(url_delete).status_code, 302, 'annonymous user can delete answer (post)')
+        self.assertEqual(c.get(url_update).status_code, 302, 'anonymous user can update answer')
+        self.assertEqual(c.get(url_delete).status_code, 302, 'anonymous user can delete answer')
 
         c.force_login(self.user1)
 
-        self.assertEqual(c.get(url_update).status_code, 403, 'offer creator can update answer (get)')
-        self.assertEqual(c.get(url_delete).status_code, 403, 'offer creator can delete answer (get)')
-        self.assertEqual(c.post(url_update).status_code, 403, 'offer creator can update answer (post)')
-        self.assertEqual(c.post(url_delete).status_code, 403, 'offer creator can delete answer (post)')
+        self.assertEqual(c.get(url_update).status_code, 403, 'offer creator can update answer')
+        self.assertEqual(c.get(url_delete).status_code, 403, 'offer creator can delete answer')
 
         c.logout()
         c.force_login(self.user3)
 
-        self.assertEqual(c.get(url_update).status_code, 403, 'invalid user can update answer (get)')
-        self.assertEqual(c.get(url_delete).status_code, 403, 'invalid user can delete answer (get)')
-        self.assertEqual(c.post(url_update).status_code, 403, 'invalid user can update answer (post)')
-        self.assertEqual(c.post(url_delete).status_code, 403, 'invalid user can delete answer (post)')
+        self.assertEqual(c.get(url_update).status_code, 403, 'invalid user can update answer')
+        self.assertEqual(c.get(url_delete).status_code, 403, 'invalid user can delete answer')
 
         c.logout()
         c.force_login(self.user2)
 
-        self.assertEqual(c.get(url_update).status_code, 200, 'answer creator cannot update answer (get)')
-        self.assertEqual(c.get(url_delete).status_code, 200, 'answer creator cannot delete answer (get)')
-        self.assertEqual(c.post(url_update).status_code, 200, 'answer creator cannot update answer (post)')
-        self.assertRedirects(c.post(url_delete), reverse('trading:list'), msg_prefix='answer creator cannot delete answer (post)')
+        self.assertEqual(c.get(url_update).status_code, 200, 'answer creator cannot update answer')
+        self.assertEqual(c.get(url_delete).status_code, 200, 'answer creator cannot delete answer')
+
+    def test_tradeofferanswer_views_post(self):
+        '''TradeOfferAnswer views work properly with valid input in POST requests'''
+
+        c = Client()
+
+        url_create = reverse('trading:answer_create', args=[self.offer.id])
+        url_update = reverse('trading:answer_edit', args=[self.answer.id])
+        url_delete = reverse('trading:answer_delete', args=[self.answer.id])
+
+        self.assertEqual(c.post(url_update).status_code, 200, 'answer creator cannot update answer')
+        self.assertRedirects(c.post(url_delete), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
 
         self.assertEqual(c.get(url_create).status_code, 200, 'answer creator cannot create answer after deleting the existing one')
 
         self.create_answer()
 
         self.assertEqual(c.get(self.answer.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after re-creating it')
+
+
+class TradingAuxiliarToolsTests(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
+        self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
+
+        year = Year.objects.create(id=1, groups=2, subgroups=2)
+
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
+
+        now = timezone.now()
+        period = TradePeriod.objects.create(name='Period 1', start=now - timedelta(hours=2), end=now + timedelta(hours=1))
+
+        self.offer = TradeOffer.objects.create(user=self.user1, period=period)
+
+        TradeOfferLine.objects.create(
+            offer=self.offer, year=year, subjects='1',
+            curr_group=1, curr_subgroup=1, wanted_groups='2'
+        )
+
+        answer = TradeOfferAnswer(user=self.user2, offer=self.offer)
+        answer.set_groups({'1': [2, 1]})
+        answer.save()
+
+    def render_get_answer(self, offer, user):
+        template_str = '{% load trading_tags %}{{ offer|get_answer:user }}'
+        context = Context({'offer': offer, 'user': user})
+        return Template(template_str).render(context)
+
+    def test_templatetags_get_answer(self):
+        '''get_answer template tag works as expected'''
+
+        self.assertEquals(self.render_get_answer(self.offer, AnonymousUser()), 'None')
+        self.assertEquals(self.render_get_answer(self.offer, self.user1), 'None')
+        self.assertEquals(self.render_get_answer(self.offer, self.user2), 'Respuesta de tester_2 para Oferta #1')
