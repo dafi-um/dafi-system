@@ -164,6 +164,9 @@ class TradeOfferAnswer(models.Model):
     def __str__(self):
         return 'Respuesta de {} para Oferta #{}'.format(self.user, self.offer.id)
 
+    def get_absolute_url(self):
+        return reverse('trading:answer_detail', args=[self.pk])
+
     def clean(self):
         if not self.groups:
             return super().clean()

@@ -2,7 +2,8 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.shortcuts import reverse
+from django.test import Client, TestCase
 from django.utils import timezone
 
 from heart.models import Subject, Year
@@ -12,7 +13,7 @@ from .models import TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod
 User = get_user_model()
 
 
-class TradeOfferTestCase(TestCase):
+class TradingModelsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='tester', email='test@test.com', password='1234')
 
@@ -204,3 +205,173 @@ class TradeOfferTestCase(TestCase):
             with self.assertRaisesMessage(ValidationError, case[1]):
                 answer.set_groups(case[0])
                 answer.full_clean(['user'])
+
+
+class TradingViewsTests(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
+        self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
+        self.user3 = User.objects.create(username='tester_3', email='test3@test.com', password='1234')
+
+        year = Year.objects.create(id=1, groups=2, subgroups=2)
+
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
+
+        start = timezone.now() - timedelta(hours=2)
+        end = timezone.now() + timedelta(hours=1)
+        self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
+
+        self.offer = TradeOffer.objects.create(user=self.user1, period=self.period)
+
+        TradeOfferLine.objects.create(
+            offer=self.offer, year=year, subjects='1',
+            curr_group=1, curr_subgroup=1, wanted_groups='2'
+        )
+
+        self.create_answer()
+
+    def create_answer(self):
+        self.answer = TradeOfferAnswer(user=self.user2, offer=self.offer)
+        self.answer.set_groups({'1': [2, 1]})
+        self.answer.save()
+
+    def period_expired(self):
+        self.period.end = timezone.now() - timedelta(hours=1)
+        self.period.save()
+
+    def period_active(self):
+        self.period.end = timezone.now() + timedelta(hours=1)
+        self.period.save()
+
+    def test_tradeoffer_views_access(self):
+        '''TradeOffer list and CRUD views restrict access properly'''
+
+        c = Client()
+
+        # list
+        url_list = reverse('trading:list')
+
+        self.assertNotContains(c.get(url_list), 'Periodo de Permutas no activo')
+
+        self.period_expired()
+
+        self.assertContains(c.get(url_list), 'Periodo de Permutas no activo')
+
+        self.period_active()
+
+        # create
+        url_create = reverse('trading:offer_create')
+
+        res = c.get(url_create)
+        self.assertEqual(res.status_code, 302)
+
+        c.force_login(self.user1)
+
+        res = c.get(url_create)
+        self.assertEqual(res.status_code, 200)
+
+        c.logout()
+
+        # read
+        res = c.get(self.offer.get_absolute_url())
+        self.assertEqual(res.status_code, 200)
+
+        # update and delete
+        url_update = reverse('trading:offer_edit', args=[self.offer.id])
+        url_delete = reverse('trading:offer_delete', args=[self.offer.id])
+
+        self.assertEqual(c.get(url_update).status_code, 302)
+        self.assertEqual(c.get(url_delete).status_code, 302)
+
+        c.force_login(self.user2)
+
+        self.assertEqual(c.get(url_update).status_code, 403)
+        self.assertEqual(c.get(url_delete).status_code, 403)
+
+        c.force_login(self.user1)
+
+        self.assertEqual(c.get(url_update).status_code, 200)
+        self.assertEqual(c.get(url_delete).status_code, 200)
+
+    def test_tradeofferanswer_views_access(self):
+        '''TradeOfferAnswer CRUD views restrict access properly'''
+
+        c = Client()
+
+        # create
+        url_create = reverse('trading:answer_create', args=[self.offer.id])
+
+        self.assertEqual(c.get(url_create).status_code, 302, 'annonymous user can create answer')
+
+        c.force_login(self.user1)
+        self.assertEqual(c.get(url_create).status_code, 403, 'offer creator can create answer to its own offer')
+
+        c.logout()
+
+        c.force_login(self.user2)
+        self.assertEqual(c.get(url_create).status_code, 403, 'user with existing answer can create another answer')
+
+        c.logout()
+
+        c.force_login(self.user3)
+        self.assertEqual(c.get(url_create).status_code, 200, 'valid user cannot create answer')
+
+        c.logout()
+
+        # read
+        read_url = self.answer.get_absolute_url()
+
+        self.assertEqual(c.get(read_url).status_code, 302, 'annonymous user can read answers')
+
+        c.force_login(self.user1)
+        self.assertEqual(c.get(read_url).status_code, 200, 'offer creator cannot read answer')
+
+        c.logout()
+
+        c.force_login(self.user2)
+        self.assertEqual(c.get(read_url).status_code, 200, 'answer creator cannot read answer')
+
+        c.logout()
+
+        c.force_login(self.user3)
+        self.assertEqual(c.get(read_url).status_code, 403, 'invalid user can read answer')
+
+        c.logout()
+
+        # update and delete
+        url_update = reverse('trading:answer_edit', args=[self.answer.id])
+        url_delete = reverse('trading:answer_delete', args=[self.answer.id])
+
+        self.assertEqual(c.get(url_update).status_code, 302, 'annonymous user can update answer (get)')
+        self.assertEqual(c.get(url_delete).status_code, 302, 'annonymous user can delete answer (get)')
+        self.assertEqual(c.post(url_update).status_code, 302, 'annonymous user can update answer (post)')
+        self.assertEqual(c.post(url_delete).status_code, 302, 'annonymous user can delete answer (post)')
+
+        c.force_login(self.user1)
+
+        self.assertEqual(c.get(url_update).status_code, 403, 'offer creator can update answer (get)')
+        self.assertEqual(c.get(url_delete).status_code, 403, 'offer creator can delete answer (get)')
+        self.assertEqual(c.post(url_update).status_code, 403, 'offer creator can update answer (post)')
+        self.assertEqual(c.post(url_delete).status_code, 403, 'offer creator can delete answer (post)')
+
+        c.logout()
+        c.force_login(self.user3)
+
+        self.assertEqual(c.get(url_update).status_code, 403, 'invalid user can update answer (get)')
+        self.assertEqual(c.get(url_delete).status_code, 403, 'invalid user can delete answer (get)')
+        self.assertEqual(c.post(url_update).status_code, 403, 'invalid user can update answer (post)')
+        self.assertEqual(c.post(url_delete).status_code, 403, 'invalid user can delete answer (post)')
+
+        c.logout()
+        c.force_login(self.user2)
+
+        self.assertEqual(c.get(url_update).status_code, 200, 'answer creator cannot update answer (get)')
+        self.assertEqual(c.get(url_delete).status_code, 200, 'answer creator cannot delete answer (get)')
+        self.assertEqual(c.post(url_update).status_code, 200, 'answer creator cannot update answer (post)')
+        self.assertRedirects(c.post(url_delete), reverse('trading:list'), msg_prefix='answer creator cannot delete answer (post)')
+
+        self.assertEqual(c.get(url_create).status_code, 200, 'answer creator cannot create answer after deleting the existing one')
+
+        self.create_answer()
+
+        self.assertEqual(c.get(self.answer.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after re-creating it')

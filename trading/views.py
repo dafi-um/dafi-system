@@ -228,7 +228,7 @@ class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
         return self.request.user == answer.user and not answer.offer.answer
 
 
-class TradeOfferAnswerDetailView(LoginRequiredMixin, TradingPeriodMixin, DetailView):
+class TradeOfferAnswerDetailView(LoginRequiredMixin, TradeOfferAnswerAccessMixin, DetailView):
     model = TradeOfferAnswer
 
     template_name = 'trading/answer_detail.html'
@@ -250,7 +250,7 @@ class TradeOfferAnswerEditMixin(TradingPeriodMixin):
                     int(request.POST.get('{}-group'.format(line.i))),
                     int(request.POST.get('{}-subgroup'.format(line.i))),
                 ]
-            except ValueError:
+            except TypeError:
                 return super().get(request, **kwargs)
 
         answer.set_groups(data)
@@ -263,7 +263,7 @@ class TradeOfferAnswerEditMixin(TradingPeriodMixin):
         return self.on_success(request, **kwargs)
 
 
-class TradeOfferAnswerCreateView(UserPassesTestMixin, TradeOfferAnswerEditMixin, DetailView):
+class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeOfferAnswerEditMixin, DetailView):
     model = TradeOffer
     template_name = 'trading/answer_form.html'
 
@@ -273,7 +273,12 @@ class TradeOfferAnswerCreateView(UserPassesTestMixin, TradeOfferAnswerEditMixin,
         self._answer = None
 
     def test_func(self):
-        return self.request.user != self.get_object().user
+        offer = self.get_object()
+
+        if self.request.user == offer.user:
+            return False
+
+        return TradeOfferAnswer.objects.filter(user=self.request.user, offer=offer).count() == 0
 
     def get_offer(self):
         return self.get_object()
