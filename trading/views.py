@@ -1,8 +1,8 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView, DeleteView
 from django.views.generic.base import ContextMixin
 
@@ -13,11 +13,11 @@ from .models import TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod
 
 class TradingPeriodMixin(ContextMixin):
     def __init__(self, *args, **kwargs):
-        self._current_period = False
+        self._current_period = None
         return super().__init__(*args, **kwargs)
 
     def get_current_period(self):
-        if self._current_period is False:
+        if not self._current_period:
             self._current_period = TradePeriod.get_current()
 
         return self._current_period
@@ -324,3 +324,25 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, Detail
         answer = self.get_object()
 
         return self.request.user == answer.offer.user and not answer.offer.answer
+
+
+class ManagementListView(PermissionRequiredMixin, ListView):
+    model = TradeOffer
+    template_name = 'trading/management_list.html'
+
+    permission_required = 'trading.is_manager'
+
+    def __init__(self, *args, **kwargs):
+        self._current_period = None
+        return super().__init__(*args, **kwargs)
+
+    def get_current_period(self):
+        if not self._current_period:
+            self._current_period = TradePeriod.get_current()
+
+        return self._current_period
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['period'] = self.get_current_period()
+        return context

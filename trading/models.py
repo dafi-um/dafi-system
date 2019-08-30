@@ -50,6 +50,10 @@ class TradeOffer(models.Model):
 
         ordering = ['id']
 
+        permissions = [
+            ('is_manager', 'Puede ver cualquier oferta y acceder a las vistas de gestión de ofertas'),
+        ]
+
     def __str__(self):
         return 'Oferta {}: {} en {}'.format(self.id, self.user, self.period.name)
 
