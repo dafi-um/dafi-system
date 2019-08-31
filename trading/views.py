@@ -28,32 +28,33 @@ class TradingPeriodMixin(ContextMixin):
         return context
 
     def get_template_names(self):
-        if not self.get_current_period():
+        if not self.get_current_period() and not self.request.user.has_perm('trading.is_manager'):
             return ['trading/tradeperiod.html']
 
         return super().get_template_names()
-
-    def filter_query(self):
-        query = Q(is_visible=True) & Q(answer=None)
-
-        if self.request.user.is_authenticated:
-            query = query | Q(user=self.request.user) | Q(answer__user=self.request.user)
-
-        return Q(period=self.get_current_period()) & query
 
 
 class IndexView(TradingPeriodMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return TradeOffer.objects.filter(self.filter_query())
+        return TradeOffer.objects.filter(is_visible=True, answer=None)
 
 
-class TradeOfferDetailView(TradingPeriodMixin, DetailView):
+class TradeOfferDetailView(TradingPeriodMixin, UserPassesTestMixin, DetailView):
     model = TradeOffer
 
-    def get_queryset(self):
-        return super().get_queryset().filter(self.filter_query())
+    def test_func(self):
+        offer = self.get_object()
+        user = self.request.user
+
+        return (
+            not offer.answer
+            and offer.is_visible
+            or user.has_perm('trading.is_manager')
+            or offer.user == user
+            or offer.answer.user == user
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -163,10 +164,9 @@ class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
         return super().__init__(*args, **kwargs)
 
     def test_func(self):
-        return self.request.user == self.get_object().user
+        offer = self.get_object()
 
-    def get_queryset(self):
-        return super().get_queryset().filter(answer=None)
+        return not offer.answer and self.request.user == offer.user
 
     def get_offer(self):
         return self.get_object()
@@ -195,10 +195,9 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
     model = TradeOffer
 
     def test_func(self):
-        return self.request.user == self.get_object().user
+        offer = self.get_object()
 
-    def get_queryset(self):
-        return super().get_queryset().filter(answer=None)
+        return not offer.answer and self.request.user == offer.user
 
     def post(self, request, **kwargs):
         offer = self.get_object()
@@ -221,20 +220,16 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
-    def test_func(self):
-        answer = self.get_object()
-
-        return self.request.user == answer.user and not answer.offer.answer
-
-
-class TradeOfferAnswerDetailView(LoginRequiredMixin, TradeOfferAnswerAccessMixin, DetailView):
+class TradeOfferAnswerDetailView(UserPassesTestMixin, DetailView):
     model = TradeOfferAnswer
 
     template_name = 'trading/answer_detail.html'
 
     def test_func(self):
-        return self.request.user == self.get_object().offer.user or super().test_func()
+        answer = self.get_object()
+        user = self.request.user
+
+        return user.has_perm('trading.is_manager') or user == answer.offer.user or user == answer.user
 
 
 class TradeOfferAnswerEditMixin(TradingPeriodMixin):
@@ -293,6 +288,13 @@ class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeO
         return redirect(reverse_lazy('trading:answer_detail', args=[self.get_answer().id]))
 
 
+class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
+    def test_func(self):
+        answer = self.get_object()
+
+        return self.request.user == answer.user and not answer.offer.answer
+
+
 class TradeOfferAnswerEditView(TradeOfferAnswerAccessMixin, TradeOfferAnswerEditMixin, DetailView):
     model = TradeOfferAnswer
     template_name = 'trading/answer_edit.html'
@@ -324,6 +326,18 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, Detail
         answer = self.get_object()
 
         return self.request.user == answer.offer.user and not answer.offer.answer
+
+    def post(self, request, **kwargs):
+        answer = self.get_object()
+        answer.offer.answer = answer
+        answer.save()
+
+        return reverse_lazy('trading:change_process', args=[answer.offer.id])
+
+
+class ChangeProcessView(UserPassesTestMixin, DetailView):
+    model = TradeOffer
+    template_name = 'trading/process.html'
 
 
 class ManagementListView(PermissionRequiredMixin, ListView):

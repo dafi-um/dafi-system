@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, Permission
 from django.shortcuts import reverse
 from django.template import Context, Template
 from django.test import Client, TestCase
@@ -192,6 +192,10 @@ class TradingViewsTests(TestCase):
         self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
         self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
         self.user3 = User.objects.create(username='tester_3', email='test3@test.com', password='1234')
+        self.user_manager = User.objects.create(username='manager', email='manager@test.com', password='1234')
+        self.user_manager.user_permissions.add(Permission.objects.get(codename='is_manager'))
+
+        self.users = [self.user1, self.user2, self.user3, self.user_manager]
 
         year = Year.objects.create(id=1, groups=3, subgroups=3)
 
@@ -220,55 +224,78 @@ class TradingViewsTests(TestCase):
         self.period.end = timezone.now() + timedelta(hours=1)
         self.period.save()
 
-    def test_tradeoffer_views_access(self):
-        '''TradeOffer list and CRUD views restrict access properly'''
+    def test_list_view_access(self):
+        '''TradeOffer list view restrict access properly'''
 
         c = Client()
 
-        # list
         url_list = reverse('trading:list')
 
-        self.assertNotContains(c.get(url_list), 'Periodo de Permutas no activo')
+        self.assertNotContains(c.get(url_list), 'Periodo de Permutas no activo', msg_prefix='anonymous user cannot access list inside period')
+
+        for user in self.users:
+            c.force_login(user)
+            self.assertNotContains(c.get(url_list), 'Periodo de Permutas no activo', msg_prefix='user {} cannot access list inside period'.format(user.username))
+            c.logout()
 
         self.period_expired()
 
-        self.assertContains(c.get(url_list), 'Periodo de Permutas no activo')
+        self.assertContains(c.get(url_list), 'Periodo de Permutas no activo', msg_prefix='anonymous user can access list outside period')
+
+        for user in [self.user1, self.user2, self.user3]:
+            c.force_login(user)
+            self.assertContains(c.get(url_list), 'Periodo de Permutas no activo', msg_prefix='user {} can access list outside period'.format(user.username))
+            c.logout()
+
+        c.force_login(self.user_manager)
+        self.assertNotContains(c.get(url_list), 'Periodo de Permutas no activo', msg_prefix='manager user cannot access list outside period')
+        c.logout()
 
         self.period_active()
+
+    def test_tradeoffer_views_access(self):
+        '''TradeOffer CRUD views restrict access properly'''
+
+        c = Client()
 
         # create
         url_create = reverse('trading:offer_create')
 
         res = c.get(url_create)
-        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.status_code, 302, 'anonymous user can access create offer view')
 
-        c.force_login(self.user1)
-
-        res = c.get(url_create)
-        self.assertEqual(res.status_code, 200)
-
-        c.logout()
+        for user in self.users:
+            c.force_login(user)
+            res = c.get(url_create)
+            self.assertEqual(res.status_code, 200, 'user {} cannot access create offer view'.format(user.username))
+            c.logout()
 
         # read
-        res = c.get(self.offer.get_absolute_url())
-        self.assertEqual(res.status_code, 200)
+        detail_url = self.offer.get_absolute_url()
+        self.assertEqual(c.get(detail_url).status_code, 200, 'anonymous user cannot access offer detail view')
+
+        for user in self.users:
+            c.force_login(user)
+            self.assertEqual(c.get(detail_url).status_code, 200, 'user {} cannot access offer detail view'.format(user.username))
+            c.logout()
 
         # update and delete
         url_update = reverse('trading:offer_edit', args=[self.offer.id])
         url_delete = reverse('trading:offer_delete', args=[self.offer.id])
 
-        self.assertEqual(c.get(url_update).status_code, 302)
-        self.assertEqual(c.get(url_delete).status_code, 302)
-
-        c.force_login(self.user2)
-
-        self.assertEqual(c.get(url_update).status_code, 403)
-        self.assertEqual(c.get(url_delete).status_code, 403)
+        self.assertEqual(c.get(url_update).status_code, 302, 'anonymous user is not redirected to login view')
+        self.assertEqual(c.get(url_delete).status_code, 302, 'anonymous user is not redirected to login view')
 
         c.force_login(self.user1)
+        self.assertEqual(c.get(url_update).status_code, 200, 'offer creator cannot access their offer editor')
+        self.assertEqual(c.get(url_delete).status_code, 200, 'offer creator cannot access their offer editor')
+        c.logout()
 
-        self.assertEqual(c.get(url_update).status_code, 200)
-        self.assertEqual(c.get(url_delete).status_code, 200)
+        for user in [self.user2, self.user3, self.user_manager]:
+            c.force_login(user)
+            self.assertEqual(c.get(url_update).status_code, 403, 'user {} can access another user offer editor'. format(user.username))
+            self.assertEqual(c.get(url_delete).status_code, 403, 'user {} can access another user offer editor'. format(user.username))
+            c.logout()
 
     def test_tradeofferanswer_views_access(self):
         '''TradeOfferAnswer CRUD views restrict access properly'''
@@ -278,42 +305,39 @@ class TradingViewsTests(TestCase):
         # create
         url_create = reverse('trading:answer_create', args=[self.offer.id])
 
-        self.assertEqual(c.get(url_create).status_code, 302, 'anonymous user can create answer')
+        self.assertEqual(c.get(url_create).status_code, 302, 'anonymous user can create answers')
 
         c.force_login(self.user1)
         self.assertEqual(c.get(url_create).status_code, 403, 'offer creator can create answer to its own offer')
-
         c.logout()
 
         c.force_login(self.user2)
         self.assertEqual(c.get(url_create).status_code, 403, 'user with existing answer can create another answer')
-
         c.logout()
 
         c.force_login(self.user3)
-        self.assertEqual(c.get(url_create).status_code, 200, 'valid user cannot create answer')
-
+        self.assertEqual(c.get(url_create).status_code, 200, 'random user cannot create answer')
         c.logout()
 
         # read
         read_url = self.answer.get_absolute_url()
 
-        self.assertEqual(c.get(read_url).status_code, 302, 'anonymous user can read answers')
-
-        c.force_login(self.user1)
-        self.assertEqual(c.get(read_url).status_code, 200, 'offer creator cannot read answer')
-
-        c.logout()
-
-        c.force_login(self.user2)
-        self.assertEqual(c.get(read_url).status_code, 200, 'answer creator cannot read answer')
-
-        c.logout()
+        self.assertEqual(c.get(read_url).status_code, 302, 'anonymous user can read answer')
 
         c.force_login(self.user3)
-        self.assertEqual(c.get(read_url).status_code, 403, 'invalid user can read answer')
-
+        self.assertEqual(c.get(read_url).status_code, 403, 'random user can read answer')
         c.logout()
+
+        users = [
+            (self.user1, 'offer creator'),
+            (self.user2, 'answer creator'),
+            (self.user_manager, 'manager user'),
+        ]
+
+        for user in users:
+            c.force_login(user[0])
+            self.assertEqual(c.get(read_url).status_code, 200, '{} cannot read answer'.format(user[1]))
+            c.logout()
 
         # update and delete
         url_update = reverse('trading:answer_edit', args=[self.answer.id])
@@ -323,21 +347,19 @@ class TradingViewsTests(TestCase):
         self.assertEqual(c.get(url_delete).status_code, 302, 'anonymous user can delete answer')
 
         c.force_login(self.user1)
-
         self.assertEqual(c.get(url_update).status_code, 403, 'offer creator can update answer')
         self.assertEqual(c.get(url_delete).status_code, 403, 'offer creator can delete answer')
-
         c.logout()
-        c.force_login(self.user3)
 
-        self.assertEqual(c.get(url_update).status_code, 403, 'invalid user can update answer')
-        self.assertEqual(c.get(url_delete).status_code, 403, 'invalid user can delete answer')
-
-        c.logout()
         c.force_login(self.user2)
-
         self.assertEqual(c.get(url_update).status_code, 200, 'answer creator cannot update answer')
         self.assertEqual(c.get(url_delete).status_code, 200, 'answer creator cannot delete answer')
+        c.logout()
+
+        c.force_login(self.user3)
+        self.assertEqual(c.get(url_update).status_code, 403, 'random user can update answer')
+        self.assertEqual(c.get(url_delete).status_code, 403, 'random user can delete answer')
+        c.logout()
 
     def test_tradeofferanswer_views_post(self):
         '''TradeOfferAnswer views work properly with valid input in POST requests'''
