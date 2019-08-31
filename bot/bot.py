@@ -1,3 +1,5 @@
+import logging
+
 from os import environ, getenv
 from importlib import import_module
 
@@ -12,6 +14,11 @@ handlers = [
 ]
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
+
     environ.setdefault('DJANGO_SETTINGS_MODULE', 'website.settings')
 
     django_setup()
