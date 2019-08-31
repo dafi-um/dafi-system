@@ -391,6 +391,51 @@ class TradingViewsTests(TestCase):
 
         self.assertDictEqual(self.answer.get_groups(), {'1': [3, 2]}, 'updated data does not change object data')
 
+    def test_answered_offer_views_access(self):
+        '''Answered TradeOffer related views restrict access properly'''
+
+        c = Client()
+
+        self.offer.answer = self.answer
+        self.offer.save()
+
+        # read
+        urls = [
+            (self.offer.get_absolute_url(), 'answered offer detail view'),
+            (self.offer.get_absolute_url(), 'accepted answer detail view'),
+        ]
+
+        for url in urls:
+            self.assertEqual(c.get(url[0]).status_code, 302, 'anonymous user can access {}'.format(url[1]))
+
+        for url, user in zip(urls, [self.user1, self.user2, self.user_manager]):
+            c.force_login(user)
+            self.assertEqual(c.get(url[0]).status_code, 200, 'user {} cannot access {}'.format(user.username, url[1]))
+            c.logout()
+
+        for url in urls:
+            c.force_login(self.user3)
+            self.assertEqual(c.get(url[0]).status_code, 403, 'random user can access {}'.format(url[1]))
+            c.logout()
+
+        # edit, delete
+        urls = [
+            (reverse('trading:offer_edit', args=[self.offer.id]), 'answered offer edit view'),
+            (reverse('trading:offer_delete', args=[self.offer.id]), 'answered offer delete view'),
+            (reverse('trading:answer_edit', args=[self.answer.id]), 'accepted answer edit view'),
+            (reverse('trading:answer_delete', args=[self.answer.id]), 'accepted answer delete view'),
+        ]
+
+        for url in urls:
+            self.assertEqual(c.get(url[0]).status_code, 302, 'anonymous user can access {}'.format(url[1]))
+
+        for url, user in zip(urls, self.users):
+            c.force_login(user)
+            self.assertEqual(c.get(url[0]).status_code, 403, 'user {} can access {}'.format(user.username, url[1]))
+            c.logout()
+
+        self.offer.answer = None
+        self.offer.save()
 
 class TradingAuxiliarToolsTests(TestCase):
     def setUp(self):
