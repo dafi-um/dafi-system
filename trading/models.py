@@ -138,9 +138,6 @@ class TradeOfferLine(models.Model):
         except ValueError as e:
             return []
 
-    def get_wanted_groups_str(self):
-        return ' ó '.join(str(x) for x in self.get_wanted_groups())
-
     @cached_property
     def i(self):
         return self.year.i

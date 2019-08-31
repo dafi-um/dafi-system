@@ -35,28 +35,6 @@ class TradingModelsTests(TestCase):
 
         line = TradeOfferLine()
 
-        # wanted groups
-        line.wanted_groups = ''
-        self.assertEquals(line.get_wanted_groups(), [])
-        self.assertEquals(line.get_wanted_groups_str(), '')
-
-        line.wanted_groups = '1'
-        self.assertEquals(line.get_wanted_groups(), [1])
-        self.assertEquals(line.get_wanted_groups_str(), '1')
-
-        line.wanted_groups = '1,2'
-        self.assertEquals(line.get_wanted_groups(), [1,2])
-        self.assertEquals(line.get_wanted_groups_str(), '1 ó 2')
-
-        line.wanted_groups = '1,a'
-        self.assertEquals(line.get_wanted_groups(), [])
-        self.assertEquals(line.get_wanted_groups_str(), '')
-
-        line.wanted_groups = 'not_valid'
-        self.assertEquals(line.get_wanted_groups(), [])
-        self.assertEquals(line.get_wanted_groups_str(), '')
-
-        # subjects
         line.subjects = ''
         self.assertEquals(line.get_subjects_list(), [])
         self.assertEquals(line.get_subjects().count(), 0)

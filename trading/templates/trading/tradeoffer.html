@@ -27,7 +27,7 @@
                         <p>{{ line.curr_group }}.{{ line.curr_subgroup }}</p>
                     </td>
                     <td>
-                        {{ line.get_wanted_groups_str }}
+                        {{ line.get_wanted_groups | join:' ó ' }}
                     </td>
                 {% endwith %}
             </tr>
