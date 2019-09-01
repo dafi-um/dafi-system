@@ -29,7 +29,7 @@
         <div class="box wrapper style1 split">
             <h4 style="margin: 0;padding-top: 0.5em;">Esta respuesta ha sido seleccionada</h4>
 
-            <a class="button alt" href="{% url 'trading:change_process' object.id %}" title="Comenzar proceso">Comenzar proceso</a>
+            <a class="button alt" href="{% url 'trading:change_process' object.offer.id %}" title="Comenzar proceso">Comenzar proceso</a>
         </div>
     {% endif %}
 
