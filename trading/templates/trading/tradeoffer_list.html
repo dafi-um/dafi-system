@@ -9,7 +9,9 @@
         <div class="split">
             <h1>Ofertas disponibles de Permutas</h1>
             <div>
-                <a class="button alt" href="{% url 'trading:offer_create' %}" title="Crear oferta">Crear oferta</a>
+                {% if not my_offer and not my_answer %}
+                    <a class="button alt" href="{% url 'trading:offer_create' %}" title="Crear oferta">Crear oferta</a>
+                {% endif %}
                 {% if perms.trading.is_manager %}
                     <a class="button alt" href="{% url 'trading:management_list' %}" title="Gestión de Permutas">Gestión</a>
                 {% endif %}
@@ -18,11 +20,23 @@
         <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. {% if period %}El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}{% endif %}</p>
     </header>
 
-    {% if my_offer %}
-        <div class="box wrapper style3 split">
-            <p style="margin-bottom: 0;padding-top: 0.4em;">Has creado una oferta con el ID #{{ my_offer.id }}</p>
-            <a class="button special" href="{% url 'trading:offer_detail' my_offer.id %}" title="Mi oferta">Ver mi oferta</a>
+    {% if my_answer %}
+        <div class="box wrapper style1 split">
+            <h4 style="margin: 0;padding-top: 0.5em;">Tu respuesta a la oferta #{{ my_answer.id }} ha sido aceptada</h4>
+            <a class="button alt" href="{% url 'trading:change_process' my_answer.id %}" title="Comenzar proceso">Comenzar proceso</a>
         </div>
+    {% elif my_offer %}
+        {% if my_offer.answer %}
+            <div class="box wrapper style1 split">
+                <h4 style="margin: 0;padding-top: 0.5em;">Has aceptado la respuesta #{{ my_offer.answer.id }} a tu oferta</h4>
+                <a class="button alt" href="{% url 'trading:change_process' my_offer.id %}" title="Comenzar proceso">Comenzar proceso</a>
+            </div>
+        {% else %}
+            <div class="box wrapper style3 split">
+                <p style="margin-bottom: 0;padding-top: 0.4em;">Has creado una oferta con el ID #{{ my_offer.id }}</p>
+                <a class="button special" href="{% url 'trading:offer_detail' my_offer.id %}" title="Mi oferta">Ver mi oferta</a>
+            </div>
+        {% endif %}
     {% endif %}
 
     {% for object in tradeoffer_list %}
@@ -34,11 +48,11 @@
                         {% with object|get_answer:user as answer %}
                             {% if answer %}
                                 <a class="button alt small" href="{% url 'trading:answer_detail' answer.id %}" title="Ver mi respuesta">Ver mi respuesta</a>
-                            {% else %}
+                            {% elif not my_offer and not my_answer %}
                                 <a class="button special small" href="{% url 'trading:answer_create' object.id %}" title="Responder a la oferta">¡Me interesa!</a>
                             {% endif %}
                         {% endwith %}
-                    {% else %}
+                    {% elif not object.answer %}
                         <a class="button alt small" href="{% url 'trading:offer_edit' object.id %}" title="Editar la oferta">Editar Oferta</a>
                     {% endif %}
                     <a class="button alt small" href="{% url 'trading:offer_detail' object.id %}">Ver Oferta</a>

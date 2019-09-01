@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView
@@ -18,6 +19,10 @@ class IndexView(TradingPeriodMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.is_authenticated:
+            context['my_answer'] = TradeOffer.objects.filter(
+                period=self.get_current_period(), answer__user=self.request.user
+            ).exclude(answer=None).first()
+
             context['my_offer'] = TradeOffer.objects.filter(
                 user=self.request.user, period=self.get_current_period()
             ).first()
@@ -25,9 +30,13 @@ class IndexView(TradingPeriodMixin, ListView):
         return context
 
     def get_queryset(self):
-        return TradeOffer.objects.prefetch_related('lines').filter(
-            period=self.get_current_period(), is_visible=True, answer=None
-        )
+        user = self.request.user
+        query = Q(is_visible=True, answer=None)
+
+        if user.is_authenticated:
+            query = query | Q(user=user) | (~Q(answer=None) & Q(answer__user=user))
+
+        return TradeOffer.objects.prefetch_related('lines').filter(Q(period=self.get_current_period()) & query)
 
 
 class TradeOfferDetailView(TradingPeriodMixin, UserPassesTestMixin, DetailView):
