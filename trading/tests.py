@@ -192,6 +192,7 @@ class TradingViewsTests(TestCase):
         self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
         self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
         self.user3 = User.objects.create(username='tester_3', email='test3@test.com', password='1234')
+        self.user4 = User.objects.create(username='tester_4', email='test4@test.com', password='1234')
         self.user_manager = User.objects.create(username='manager', email='manager@test.com', password='1234')
         self.user_manager.user_permissions.add(Permission.objects.get(codename='is_manager'))
 
@@ -206,6 +207,7 @@ class TradingViewsTests(TestCase):
         self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
 
         self.offer = TradeOffer.objects.create(user=self.user1, period=self.period)
+        TradeOffer.objects.create(user=self.user4, period=self.period)
 
         TradeOfferLine.objects.create(
             offer=self.offer, year=year, subjects='1',
@@ -224,8 +226,16 @@ class TradingViewsTests(TestCase):
         self.period.end = timezone.now() + timedelta(hours=1)
         self.period.save()
 
-    def test_list_view_access(self):
-        '''TradeOffer list view restrict access properly'''
+    def offer_accept_answer(self):
+        self.offer.answer = self.answer
+        self.offer.save()
+
+    def offer_remove_answer(self):
+        self.offer.answer = None
+        self.offer.save()
+
+    def test_list_view_period_access(self):
+        '''TradeOffer list view restricts access properly depending on the current trading period'''
 
         c = Client()
 
@@ -252,6 +262,41 @@ class TradingViewsTests(TestCase):
         c.logout()
 
         self.period_active()
+
+    def test_list_view_answered_offers_access(self):
+        '''TradeOffer list view restricts access properly for offers with accepted answers'''
+
+        c = Client()
+
+        url_list = reverse('trading:list')
+
+        offers = ['Oferta #1', 'Oferta #2']
+
+        for offer in offers:
+            self.assertContains(c.get(url_list), offer, msg_prefix='anonymous user cannot see {} in list'.format(offer))
+
+        for user in self.users:
+            for offer in offers:
+                self.assertContains(c.get(url_list), offer, msg_prefix='user {} cannot see {} in list'.format(user, offer))
+
+        self.offer_accept_answer()
+
+        self.assertNotContains(c.get(url_list), 'Oferta #1', msg_prefix='anonymous user can see answered offer in list')
+        self.assertContains(c.get(url_list), 'Oferta #2', msg_prefix='anonymous user cannot see not answered offer in list')
+
+        for user in [self.user1, self.user2]:
+            c.force_login(user)
+            self.assertContains(c.get(url_list), 'Oferta #1', msg_prefix='{} cannot see its answered offer in list'.format(user.username))
+            self.assertContains(c.get(url_list), 'Oferta #2', msg_prefix='{} cannot see not answered offer in list'.format(user.username))
+            c.logout()
+
+        for user in [self.user3, self.user4]:
+            c.force_login(user)
+            self.assertNotContains(c.get(url_list), 'Oferta #1', msg_prefix='{} can see others answered offer in list'.format(user.username))
+            self.assertContains(c.get(url_list), 'Oferta #2', msg_prefix='{} cannot see not answered offer in list'.format(user.username))
+            c.logout()
+
+        self.offer_remove_answer()
 
     def test_tradeoffer_views_access(self):
         '''TradeOffer CRUD views restrict access properly'''
@@ -396,8 +441,7 @@ class TradingViewsTests(TestCase):
 
         c = Client()
 
-        self.offer.answer = self.answer
-        self.offer.save()
+        self.offer_accept_answer()
 
         # read
         urls = [
@@ -434,8 +478,8 @@ class TradingViewsTests(TestCase):
             self.assertEqual(c.get(url[0]).status_code, 403, 'user {} can access {}'.format(user.username, url[1]))
             c.logout()
 
-        self.offer.answer = None
-        self.offer.save()
+        self.offer_remove_answer()
+
 
 class TradingAuxiliarToolsTests(TestCase):
     def setUp(self):
