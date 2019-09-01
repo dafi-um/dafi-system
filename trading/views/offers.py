@@ -25,7 +25,9 @@ class IndexView(TradingPeriodMixin, ListView):
         return context
 
     def get_queryset(self):
-        return TradeOffer.objects.filter(period=self.get_current_period(), is_visible=True, answer=None)
+        return TradeOffer.objects.prefetch_related('lines').filter(
+            period=self.get_current_period(), is_visible=True, answer=None
+        )
 
 
 class TradeOfferDetailView(TradingPeriodMixin, UserPassesTestMixin, DetailView):
@@ -50,6 +52,9 @@ class TradeOfferDetailView(TradingPeriodMixin, UserPassesTestMixin, DetailView):
             context['answer'] = self.get_object().answers.filter(user=self.request.user).first()
 
         return context
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('lines')
 
 
 class TradeOfferEditMixin(TradingPeriodMixin):
@@ -155,6 +160,9 @@ class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
 
         return not offer.answer and self.request.user == offer.user
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('lines')
+
     def get_offer(self):
         return self.get_object()
 
@@ -210,3 +218,6 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
 class ChangeProcessView(UserPassesTestMixin, DetailView):
     model = TradeOffer
     template_name = 'trading/process.html'
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('answer').prefetch_related('lines')

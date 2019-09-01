@@ -14,3 +14,6 @@ class ManagementListView(PermissionRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['period'] = TradePeriod.get_current()
         return context
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('lines')

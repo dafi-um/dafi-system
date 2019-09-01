@@ -20,6 +20,9 @@ class TradeOfferAnswerDetailView(UserPassesTestMixin, DetailView):
 
         return user.has_perm('trading.is_manager') or user == answer.offer.user or user == answer.user
 
+    def get_queryset(self):
+        return super().get_queryset().select_related('offer')
+
 
 class TradeOfferAnswerEditMixin(TradingPeriodMixin):
     def post(self, request, **kwargs):
@@ -64,6 +67,9 @@ class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeO
 
         return TradeOfferAnswer.objects.filter(user=self.request.user, offer=offer).count() == 0
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('lines')
+
     def get_offer(self):
         return self.get_object()
 
@@ -87,6 +93,9 @@ class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
 class TradeOfferAnswerEditView(TradeOfferAnswerAccessMixin, TradeOfferAnswerEditMixin, DetailView):
     model = TradeOfferAnswer
     template_name = 'trading/answer_edit.html'
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('offer__lines')
 
     def get_offer(self):
         return self.get_object().offer
@@ -115,6 +124,9 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, Detail
         answer = self.get_object()
 
         return self.request.user == answer.offer.user and not answer.offer.answer
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('offer__lines')
 
     def post(self, request, **kwargs):
         answer = self.get_object()
