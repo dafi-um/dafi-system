@@ -2,6 +2,7 @@ import json
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.validators import int_list_validator
 from django.db import models
 from django.shortcuts import reverse
 from django.utils import timezone
@@ -69,9 +70,12 @@ class TradeOfferLine(models.Model):
     offer = models.ForeignKey(TradeOffer, on_delete=models.PROTECT, related_name='lines', verbose_name='oferta')
     year = models.ForeignKey(Year, on_delete=models.PROTECT, related_name='year', verbose_name='año')
     subjects = models.CharField('asignaturas', max_length=64)
+    started = models.CharField('intercambios iniciados', max_length=64, blank=True, default='', validators=[int_list_validator()])
+    completed = models.CharField('intercambios completados', max_length=64, blank=True, default='', validators=[int_list_validator()])
     curr_group = models.IntegerField('grupo actual', default=1)
     curr_subgroup = models.IntegerField('subgrupo actual', default=1)
     wanted_groups = models.CharField('grupos buscados', max_length=10, default='')
+    is_completed = models.BooleanField('proceso completado', default=False, help_text='Todas las asignaturas de la línea se han intercambiado.')
 
     class Meta:
         ordering = ['year']
@@ -103,34 +107,63 @@ class TradeOfferLine(models.Model):
                     if g < 1 or g > self.year.groups:
                         errors['curr_group'] = 'El grupo {} no existe en {}'.format(g, self.year)
 
-        if self.subjects:
-            l = len(self.get_subjects_list())
+        subjects_list = self.get_subjects_list()
 
-            if l:
-                q = self.get_subjects()
+        if subjects_list:
+            subjects = self.get_subjects()
 
-                if q.count() != l:
-                    errors['subjects'] = 'Código de asignatura incorrecto'
-
-                for s in q:
+            if len(subjects) != len(subjects_list):
+                errors['subjects'] = 'Código de asignatura incorrecto'
+            else:
+                for s in subjects:
                     if s.year != self.year:
                         errors['subjects'] = 'La asignatura {} es de un año distinto'.format(s.code)
-            else:
-                errors['subjects'] = 'Valor de asignaturas inválido'
+        elif self.subjects:
+            errors['subjects'] = 'Valor de asignaturas inválido'
+
+        started_list = self.get_started_list()
+
+        for subject in started_list:
+            if subject not in subjects_list:
+                errors['started'] = 'La asignatura {} no aparece en esta línea'.format(s.code)
+
+        if self.started and not started_list:
+            errors['started'] = 'Valor de intercambios iniciados inválido'
+
+        completed_list = self.get_completed_list()
+
+        for subject in completed_list:
+            if subject not in started_list:
+                errors['completed'] = 'La asignatura {} no se está intercambiando'.format(s.code)
+
+        if self.completed and not completed_list:
+            errors['completed'] = 'Valor de intercambios completados inválido'
 
         if errors:
             raise ValidationError(errors)
 
         return super().clean()
 
-    def get_subjects_list(self):
+    def _get_list_from_str(self, field):
         try:
-            return [int(x) for x in self.subjects.split(',')]
+            return [int(x) for x in getattr(self, field).split(',')]
         except ValueError as e:
             return []
 
+    def get_subjects_list(self):
+        return self._get_list_from_str('subjects')
+
     def get_subjects(self):
         return Subject.objects.filter(pk__in=self.get_subjects_list())
+
+    def get_started_list(self):
+        return self._get_list_from_str('started')
+
+    def get_started(self):
+        return Subject.objects.filter(pk__in=self.get_started_list())
+
+    def get_completed_list(self):
+        return self._get_list_from_str('completed')
 
     def get_wanted_groups(self):
         try:
