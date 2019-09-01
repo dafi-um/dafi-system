@@ -8,9 +8,14 @@
     <header class="major special">
         <div class="split">
             <h1>Ofertas disponibles de Permutas</h1>
+            <div>
             <a class="button alt" href="{% url 'trading:offer_create' %}" title="Crear oferta">Crear oferta</a>
+                {% if perms.trading.is_manager %}
+                    <a class="button alt" href="{% url 'trading:management_list' %}" title="Gestión de Permutas">Gestión</a>
+                {% endif %}
         </div>
-        <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
+        </div>
+        <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. {% if period %}El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}{% endif %}</p>
     </header>
 
     {% for object in tradeoffer_list %}
