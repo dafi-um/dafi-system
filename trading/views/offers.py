@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
 from heart.models import Year
@@ -151,7 +151,7 @@ class TradeOfferAddView(LoginRequiredMixin, TradeOfferEditMixin, TemplateView):
         return self._lines
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:offer_detail', args=[self.get_offer().id])
+        return reverse('trading:offer_detail', args=[self.get_offer().id])
 
 
 class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
@@ -190,7 +190,7 @@ class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
         return self._lines
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('trading:offer_edit', args=[self.get_offer().id])
+        return reverse('trading:offer_edit', args=[self.get_offer().id])
 
 
 class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
