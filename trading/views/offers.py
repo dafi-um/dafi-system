@@ -14,6 +14,16 @@ from .common import TradingPeriodMixin
 class IndexView(TradingPeriodMixin, ListView):
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.request.user.is_authenticated:
+            context['my_offer'] = TradeOffer.objects.filter(
+                user=self.request.user, period=self.get_current_period()
+            ).first()
+
+        return context
+
     def get_queryset(self):
         return TradeOffer.objects.filter(period=self.get_current_period(), is_visible=True, answer=None)
 
