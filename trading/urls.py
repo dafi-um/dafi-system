@@ -20,7 +20,7 @@ urlpatterns = [
     path('respuestas/<int:pk>/editar/', views.TradeOfferAnswerEditView.as_view(), name='answer_edit'),
     path('respuestas/<int:pk>/eliminar/', views.TradeOfferAnswerDeleteView.as_view(), name='answer_delete'),
 
-    path('intercambio/<int:pk>/', views.TradeOfferDetailView.as_view(), name='change_process'),
+    path('intercambio/<int:pk>/', views.ChangeProcessView.as_view(), name='change_process'),
 
     path('gestion/', views.ManagementListView.as_view(), name='management_list'),
 ]
