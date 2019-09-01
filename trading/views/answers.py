@@ -130,7 +130,9 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, Detail
 
     def post(self, request, **kwargs):
         answer = self.get_object()
-        answer.offer.answer = answer
-        answer.save()
+        offer = answer.offer
 
-        return reverse_lazy('trading:change_process', args=[answer.offer.id])
+        offer.answer = answer
+        offer.save()
+
+        return redirect(reverse_lazy('trading:change_process', args=[offer.id]))

@@ -219,5 +219,15 @@ class ChangeProcessView(UserPassesTestMixin, DetailView):
     model = TradeOffer
     template_name = 'trading/process.html'
 
+    def test_func(self):
+        offer = self.get_object()
+        user = self.request.user
+
+        return (
+            not offer.is_completed
+            and offer.answer
+            and (user == offer.user or user == offer.answer.user)
+        )
+
     def get_queryset(self):
         return super().get_queryset().select_related('answer').prefetch_related('lines')
