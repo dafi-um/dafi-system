@@ -1,0 +1,13 @@
+{% extends 'generic.html' %}
+
+{% block title %}Intercambio de Oferta #{{ object.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Intercambio de la Oferta Nº {{ object.id }}: Completado</h1>
+    </header>
+
+    <p>Ambas partes han indicado que el proceso se ha completado correctamente.</p>
+
+    <p>Si crees que ha ocurrido algún error, ponte en contacto con nosotros en <a href="mailto:dafi@um.es" title="dafi@um.es">dafi@um.es</a>.</p>
+{% endblock content %}

@@ -1,0 +1,108 @@
+{% extends 'generic.html' %}
+{% load users_tags %}
+
+{% block title %}Intercambio de Oferta #{{ object.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Intercambio de la Oferta Nº {{ object.id }}</h1>
+
+            <div class="actions">
+                <a class="button alt" href="{% url 'trading:answer_detail' object.answer.id %}" title="Ver respuesta">Ver respuesta</a>
+                <a class="button alt" href="{% url 'trading:offer_detail' object.id %}" title="Ver oferta">Ver oferta</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="box wrapper style3">
+        <h4>Instrucciones</h4>
+
+        <ol>
+            <li>El creador de la oferta{% if object.user == user %} (tú){% endif %} tiene que iniciar la permuta en Praxis para cada asignatura.</li>
+            <li>Cada asignatura intercambiada con éxito debe ser marcada por cada usuario una vez complete su parte.</li>
+            <li>Cuando todas las asignaturas estén marcadas, el proceso se cerrará.</li>
+        </ol>
+
+        <h4>Información útil</h4>
+
+        <ul>
+            {% if object.user == user %}
+                <li>E-mail: {{ object.answer.user.email }}</li>
+                {% if object.answer.user.telegram_user %}
+                    <li>Telegram: {{ object.answer.user.telegram_user }}</li>
+                {% endif %}
+            {% else %}
+                <li>E-mail: {{ object.user.email }}</li>
+                {% if object.user.telegram_user %}
+                    <li>Telegram: {{ object.user.telegram_user }}</li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </div>
+
+    {# TODO: Add progress bar depending on subjects #}
+
+    {% if completed %}
+        <div class="box wrapper style1">
+            <p style="margin: 0;">Has completado tu parte del proceso, cuando {{ object.answer.user | nice_name }} confirme su parte, habréis completado el intercambio.</p>
+        </div>
+    {% else %}
+        <form method="post">
+            {% for line, subjects, marked in lines %}
+                {% ifchanged line.i %}
+                    <div class="split">
+                        <label>{{ line.year }}:</label>
+                        <a style="cursor: pointer;" class="subject-markall" data-line="{{ line.i }}">Marcar/desmarcar todos</a>
+                    </div>
+                {% endifchanged %}
+
+                {% for subject in subjects %}
+                    <div>
+                        <input
+                            type="checkbox"
+                            name="{{ line.i }}-subjects"
+                            value="{{ subject.code }}"
+                            id="subject_{{ subject.code }}"
+                            {% if subject.code in marked %}checked disabled{% endif %} />
+
+                        <label for="subject_{{ subject.code }}">
+                            <span>[{{ subject.code }}] {{ subject.name }}</span>
+
+                            {% if subject.code in marked_other %}<span> - <b>Completado</b></span>{% endif %}
+                        </label>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% if not completed %}
+                {% csrf_token %}
+
+                <input class="button special" type="submit" value="Guardar progreso" />
+            {% endif %}
+        </form>
+    {% endif %}
+
+    <script type="text/javascript">
+        (function() {
+            var buttons = document.getElementsByClassName('subject-markall');
+
+            var toggles = [
+                {% for line in lines %}true,{% endfor %}
+            ];
+
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener('click', function() {
+                    var id = this.getAttribute('data-line');
+                    var checks = document.querySelectorAll('input[name="' + id + '-subjects"]:not([disabled])');
+
+                    for (var i = 0; i < checks.length; i++) {
+                        checks[i].checked = toggles[id];
+                    }
+
+                    toggles[id] = !toggles[id];
+                });
+            }
+        })();
+    </script>
+{% endblock content %}

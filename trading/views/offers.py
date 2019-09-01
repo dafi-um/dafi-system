@@ -224,19 +224,119 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
         return super().get(request, *args, **kwargs)
 
 
-class ChangeProcessView(UserPassesTestMixin, DetailView):
-    model = TradeOffer
-    template_name = 'trading/process.html'
-
+class ChangeAccessMixin(UserPassesTestMixin):
     def test_func(self):
         offer = self.get_object()
         user = self.request.user
 
-        return (
-            not offer.is_completed
-            and offer.answer
-            and (user == offer.user or user == offer.answer.user)
-        )
+        return offer.answer and (user == offer.user or user == offer.answer.user)
+
+
+class ChangeProcessView(ChangeAccessMixin, DetailView):
+    model = TradeOffer
+    template_name = 'trading/change_process.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.get_object().is_completed:
+            return self.redirect_success()
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().select_related('answer').prefetch_related('lines')
+
+    def get_lines_data(self):
+        data = []
+        offer = self.get_object()
+
+        for line in offer.lines.all():
+            if offer.user == self.request.user:
+                marked = line.get_started_list()
+                subjects = line.get_subjects()
+            else:
+                marked = line.get_completed_list()
+                subjects = line.get_started()
+
+            if subjects:
+                data.append((line, subjects, marked))
+
+        return data
+
+    def get_context_data(self, **kwargs):
+        lines_data = self.get_lines_data()
+        completed = True
+
+        if self.request.user == self.get_object().user:
+            for line, subjects, _ in self.get_lines_data():
+                if line.is_completed:
+                    continue
+                elif len(line.get_started_list()) != len(subjects):
+                    completed = False
+                    break
+        else:
+            completed = False
+
+        context = super().get_context_data(**kwargs)
+        context['lines'] = lines_data
+        context['completed'] = completed
+        return context
+
+    def redirect_success(self):
+        return redirect(reverse('trading:change_completed', args=[self.get_object().id]))
+
+    def post(self, request, **kwargs):
+        total_completed = 0
+
+        lines_data = self.get_lines_data()
+
+        for line, _, marked in lines_data:
+            if line.is_completed:
+                total_completed += 1
+                continue
+
+            subjects = line.get_subjects_list()
+
+            add = []
+
+            for subject in request.POST.getlist('{}-subjects'.format(line.i)):
+                try:
+                    subject = int(subject)
+                except ValueError:
+                    continue
+
+                if subject not in subjects:
+                    continue
+                elif subject not in marked:
+                    add.append(subject)
+
+            if add:
+                marked += add
+                marked = ','.join(str(x) for x in marked)
+
+                if self.get_object().user == self.request.user:
+                    line.started = marked
+                else:
+                    line.completed = marked
+
+                if len(subjects) == len(line.get_completed_list()):
+                    line.is_completed = True
+                    total_completed += 1
+
+                line.save()
+
+        if total_completed == len(lines_data):
+            offer = self.get_object()
+            offer.is_completed = True
+            offer.save()
+
+            return self.redirect_success()
+
+        return super().get(request, **kwargs)
+
+
+class ChangeCompletedView(ChangeAccessMixin, DetailView):
+    model = TradeOffer
+    template_name = 'trading/change_completed.html'
+
+    def test_func(self):
+        return super().test_func() and self.get_object().is_completed
