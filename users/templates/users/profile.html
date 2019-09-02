@@ -48,6 +48,10 @@
                 {% csrf_token %}
 
                 <input class="button alt" type="submit" name="telegram_form" value="Actualizar datos" />
+
+                {% if user.telegram_id %}
+                    <input class="button alt" type="submit" name="telegram_unlink" value="Desvincular" />
+                {% endif %}
             </form>
         </div>
     </div>

@@ -27,19 +27,22 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, **kwargs):
         if 'profile_form' in request.POST:
-            form = ProfileForm(request.POST, instance=self.request.user)
+            form = ProfileForm(request.POST, instance=request.user)
 
-            if form.is_valid():
+            if form.has_changed() and form.is_valid():
                 user = form.save()
                 self.success = True
         elif 'telegram_form' in request.POST:
-            form = TelegramForm(request.POST, instance=self.request.user)
+            form = TelegramForm(request.POST, instance=request.user)
 
-            if form.is_valid():
+            if form.has_changed() and form.is_valid():
                 user = form.save(commit=False)
                 user.telegram_id = None
                 user.save()
 
                 self.success = True
+        elif 'telegram_unlink' in request.POST and request.user.telegram_id:
+            request.user.telegram_id = None
+            request.user.save()
 
         return super().get(request, **kwargs)
