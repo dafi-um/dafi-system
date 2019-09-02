@@ -8,7 +8,7 @@
     </thead>
 
     <tbody>
-        {% for line in object.get_lines %}
+        {% for line, groups in lines %}
             <tr>
                 <td>
                     <p>{{ line.year }}</p>
@@ -17,7 +17,7 @@
                     <p>{{ line.curr_group }}.{{ line.curr_subgroup }}</p>
                 </td>
                 <td>
-                    <p>{{ line.new_group }}.{{ line.new_subgroup }}</p>
+                    <p>{{ groups.group }}.{{ groups.subgroup }}</p>
                 </td>
             </tr>
         {% endfor %}

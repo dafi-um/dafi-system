@@ -18,30 +18,30 @@
     </header>
 
     <form id="app" method="post">
-        {% for line in object.get_lines %}
+        {% for line, groups in lines %}
             <div class="box wrapper style3">
                 <h4>Año {{ line.year.id }}</h4>
                 <div class="field half first">
-                    <label for="{{ line.line.i }}-group">Grupo:</label>
+                    <label for="{{ line.i }}-group">Grupo:</label>
                     <div class="select-wrapper">
-                        <select name="{{ line.line.i }}-group" id="{{ line.line.i }}-group">
-                            {% for i in line.line.get_wanted_groups %}
+                        <select name="{{ line.i }}-group" id="{{ line.i }}-group">
+                            {% for i in line.get_wanted_groups %}
                                 <option
                                     value="{{ i }}"
-                                    {% if line.new_group == i %}selected{% endif %}>Grupo {{ i }}</option>
+                                    {% if groups.group == i %}selected{% endif %}>Grupo {{ i }}</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
 
                 <div class="field half">
-                    <label for="{{ line.line.i }}-subgroup">Subgrupo:</label>
+                    <label for="{{ line.i }}-subgroup">Subgrupo:</label>
                     <div class="select-wrapper">
-                        <select name="{{ line.line.i }}-subgroup" id="{{ line.line.i }}-subgroup">
+                        <select name="{{ line.i }}-subgroup" id="{{ line.i }}-subgroup">
                             {% for i in line.year.subgroups_range %}
                                 <option
                                     value="{{ i }}"
-                                    {% if line.new_subgroup == i %}selected{% endif %}>Subgrupo {{ i }}</option>
+                                    {% if groups.subgroup == i %}selected{% endif %}>Subgrupo {{ i }}</option>
                             {% endfor %}
                         </select>
                     </div>

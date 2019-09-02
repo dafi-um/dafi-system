@@ -3,13 +3,31 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, DeleteView
+from django.views.generic.base import ContextMixin
 
 from ..models import TradeOffer, TradeOfferAnswer
 
 from .common import TradingPeriodMixin
 
 
-class TradeOfferAnswerDetailView(UserPassesTestMixin, DetailView):
+class TradeOfferAnswerLinesMixin(ContextMixin):
+    def get_context_data(self, **kwargs):
+        lines = []
+
+        answer = self.get_object()
+        groups = answer.get_groups()
+
+        for line in answer.offer.lines.all():
+            group, subgroup = groups[str(line.year.id)]
+
+            lines.append((line, {'group': group, 'subgroup': subgroup}))
+
+        context = super().get_context_data(**kwargs)
+        context['lines'] = lines
+        return context
+
+
+class TradeOfferAnswerDetailView(UserPassesTestMixin, TradeOfferAnswerLinesMixin, DetailView):
     model = TradeOfferAnswer
 
     template_name = 'trading/answer_detail.html'
@@ -90,7 +108,7 @@ class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
         return self.request.user == answer.user and not answer.offer.answer
 
 
-class TradeOfferAnswerEditView(TradeOfferAnswerAccessMixin, TradeOfferAnswerEditMixin, DetailView):
+class TradeOfferAnswerEditView(TradeOfferAnswerAccessMixin, TradeOfferAnswerLinesMixin, TradeOfferAnswerEditMixin, DetailView):
     model = TradeOfferAnswer
     template_name = 'trading/answer_edit.html'
 
@@ -115,7 +133,7 @@ class TradeOfferAnswerDeleteView(TradeOfferAnswerAccessMixin, DeleteView):
         return reverse_lazy('trading:list')
 
 
-class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
+class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeOfferAnswerLinesMixin, DetailView):
     model = TradeOfferAnswer
 
     template_name = 'trading/answer_accept.html'
