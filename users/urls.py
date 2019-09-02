@@ -1,8 +1,11 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from .views import profile
+from . import views
 
+urlpatterns = [
+    path('', views.ProfileView.as_view(), name='profile'),
+]
 
 urls = [
     ('acceder/', 'login', auth_views.LoginView),
@@ -15,9 +18,6 @@ urls = [
     ('reiniciar-clave/exito/', 'password_reset_complete', auth_views.PasswordResetCompleteView),
 ]
 
-urlpatterns = [
-    path('', profile, name='profile'),
-]
-
-for u in urls:
-    urlpatterns.append(path(u[0], u[2].as_view(template_name='users/' + u[1] + '.html'), name=u[1]))
+for url, name, view_class in urls:
+    view = view_class.as_view(template_name='users/{}.html'.format(name))
+    urlpatterns.append(path(url, view, name=name))

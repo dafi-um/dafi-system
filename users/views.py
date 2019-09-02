@@ -1,7 +1,45 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
+
+from .forms import ProfileForm, TelegramForm
 
 
-@login_required()
-def profile(request):
-    return render(request, 'users/profile.html')
+class ProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'users/profile.html'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.success = False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if 'profile_form' not in context:
+            context['profile_form'] = ProfileForm(instance=self.request.user)
+
+        if 'telegram_form' not in context:
+            context['telegram_form'] = TelegramForm(instance=self.request.user)
+
+        context['success'] = self.success
+
+        return context
+
+    def post(self, request, **kwargs):
+        if 'profile_form' in request.POST:
+            form = ProfileForm(request.POST, instance=self.request.user)
+
+            if form.is_valid():
+                user = form.save()
+                self.success = True
+        elif 'telegram_form' in request.POST:
+            form = TelegramForm(request.POST, instance=self.request.user)
+
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.telegram_id = None
+                user.save()
+
+                self.success = True
+
+        return super().get(request, **kwargs)

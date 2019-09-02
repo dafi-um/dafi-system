@@ -15,6 +15,40 @@
             </div>
         </div>
 
-        <p>Has iniciado sesión como {{ user | nice_name }}.</p>
+        <p>Has iniciado sesión como {{ user.email }}</p>
     </header>
+
+    {% if success %}
+        <div class="box wrapper style3">
+            <h5 style="margin-bottom: 0;">¡Todos los cambios se han guardado!</h5>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="6u 12u(small)">
+            <form method="post">
+                {{ profile_form.as_p }}
+
+                {% csrf_token %}
+
+                <input class="button alt" type="submit" name="profile_form" value="Guardar perfil" />
+            </form>
+        </div>
+
+        <div class="6u 12u(small)">
+            <form method="post">
+                {{ telegram_form.as_p }}
+
+                {% if user.telegram_id %}
+                    <p><b>Cuenta vinculada.</b> Si cambias tu usuario de telegram, se desvinculará tu cuenta de DAFI con tu cuenta de Telegram actual.</p>
+                {% elif user.telegram_user %}
+                    <p><b>Cuenta <u>no</u> vinculada.</b></p>
+                {% endif %}
+
+                {% csrf_token %}
+
+                <input class="button alt" type="submit" name="telegram_form" value="Actualizar datos" />
+            </form>
+        </div>
+    </div>
 {% endblock content %}
