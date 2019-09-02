@@ -16,13 +16,6 @@ def start(update, context):
 def error_callback(bot, update, error):
     print(error)
 
-    try:
-        raise error
-    except (KeyboardInterrupt, SystemExit):
-        raise
-    except Exception as e:
-        print(e)
-
 def basic_callback(update, context):
     update.callback_query.answer()
 
