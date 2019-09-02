@@ -73,3 +73,13 @@ To run the daemon execute:
 ```bash
 venv/bin/uwsgi --ini app_socket.ini --uid www-data --gid www-data --daemonize uwsgi_webdafi.log --pidfile uwsgi_webdafi.pid
 ```
+
+### PostgreSQL
+
+Libraries needed:
+
+* `libpq-dev`
+
+Add this environment variable:
+
+`DB_URL='postgresql://USER_HERE:PASS_HERE@127.0.0.1/DB_NAME'`
