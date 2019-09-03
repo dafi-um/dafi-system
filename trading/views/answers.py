@@ -189,6 +189,6 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeO
             answer.is_visible = False
             answer.save()
 
-        telegram_notify(answer.user, 'Tu respuesta a la oferta #{} ha sido aceptada y ha comenzado el proceso de intercambio.'.format(offer.id), url=reverse('trading:offer_detail', args=[offer.id]), url_button='Ver intercambio')
+        telegram_notify(answer.user, 'Tu respuesta a la oferta #{} ha sido aceptada y ha comenzado el proceso de intercambio.'.format(offer.id), url=reverse('trading:change_process', args=[offer.id]), url_button='Ver intercambio')
 
         return redirect(reverse_lazy('trading:change_process', args=[offer.id]))
