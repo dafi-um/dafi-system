@@ -85,11 +85,14 @@ class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeO
 
     def test_func(self):
         offer = self.get_object()
+        user = self.request.user
 
-        if self.request.user == offer.user:
+        if user == offer.user:
             return False
 
-        return TradeOfferAnswer.objects.filter(user=self.request.user, offer=offer).count() == 0
+        query = ~Q(offer__answer=None, is_completed=False) | Q(user=user, offer=offer)
+
+        return TradeOfferAnswer.objects.filter(query).count() == 0
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('lines')
@@ -149,7 +152,8 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeO
         answer = self.get_object()
 
         return (
-            answer.is_visible
+            self.request.user.is_authenticated
+            and answer.is_visible
             and self.request.user == answer.offer.user
             and not answer.offer.answer
         )
@@ -177,5 +181,7 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeO
         for answer in answers:
             answer.is_visible = False
             answer.save()
+
+        # TODO: Notify both users that this change process started
 
         return redirect(reverse_lazy('trading:change_process', args=[offer.id]))

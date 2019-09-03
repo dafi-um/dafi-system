@@ -110,8 +110,11 @@ class TradeOfferEditMixin(TradingPeriodMixin):
 
         if valid:
             if offer.id:
-                # TODO: Notify users with answers that this offer was modified and remove their answers (not valid anymore)
-                pass
+                answers = TradeOfferAnswer.objects.filter(offer=offer)
+
+                for answer in answers:
+                    # telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido modificada, deberías revisar la oferta por si todavía te interesa.', url=reverse('trading:offer_detail', args=[offer.id]))
+                    answer.delete()
             else:
                 offer.save()
 
