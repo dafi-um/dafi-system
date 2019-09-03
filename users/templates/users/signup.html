@@ -1,0 +1,62 @@
+{% extends 'generic.html' %}
+
+{% block title %}Crear Cuenta - DAFI{% endblock title %}
+
+{% block content %}
+    <h2>Crear una cuenta</h2>
+
+    <form method="post">
+        <p>
+            {{ form.email.label_tag }}
+            {{ form.email }}
+        </p>
+
+        {{ form.email.errors }}
+
+        <div class="row">
+            <div class="6u 12u(small)">
+                <p>
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                </p>
+
+                {{ form.first_name.errors }}
+            </div>
+
+            <div class="6u$ 12u$(small)">
+                <p>
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                </p>
+
+                {{ form.last_name.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="6u 12u(small)">
+                <p>
+                    {{ form.password1.label_tag }}
+                    {{ form.password1 }}
+                </p>
+
+                {{ form.password1.errors }}
+            </div>
+
+            <div class="6u$ 12u$(small)">
+                <p>
+                    {{ form.password2.label_tag }}
+                    {{ form.password2 }}
+                </p>
+
+                {{ form.password2.errors }}
+            </div>
+        </div>
+
+        {% csrf_token %}
+
+        <button class="button special" type="submit">Crear cuenta</button>
+    </form>
+
+    <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}" title="Acceder a mi cuenta">Iniciar Sesión</a></p>
+{% endblock content %}

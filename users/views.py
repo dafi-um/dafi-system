@@ -1,5 +1,7 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView
+from django.views.generic.edit import FormView
 
 from .forms import ProfileUserForm, ProfileTelegramForm, SignUpForm
 
@@ -46,3 +48,22 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             request.user.save()
 
         return super().get(request, **kwargs)
+
+
+class SignUpView(UserPassesTestMixin, FormView):
+    template_name = 'users/signup.html'
+    form_class = SignUpForm
+    success_url = reverse_lazy('profile')
+
+    def test_func(self):
+        return not self.request.user.is_authenticated
+
+    def form_valid(self, form: SignUpForm):
+        user = form.save(commit=False)
+
+        user.username = user.email
+        # TODO: Create an email confirmation system
+        # user.is_active = False
+        user.save()
+
+        return super().form_valid(form)

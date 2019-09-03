@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path('', views.ProfileView.as_view(), name='profile'),
+    path('crear/', views.SignUpView.as_view(), name='signup'),
 ]
 
 urls = [
