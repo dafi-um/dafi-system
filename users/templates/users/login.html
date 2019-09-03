@@ -1,5 +1,7 @@
 {% extends 'generic.html' %}
 
+{% block title %}Iniciar Sesión - DAFI{% endblock title %}
+
 {% block content %}
     <h2>Acceder a mi cuenta</h2>
 
@@ -8,20 +10,23 @@
     {% endif %}
 
     <form method="post">
-        {% csrf_token %}
-
         <div class="field half first">
-            {{ form.username.label_tag }}
+            <label for="{{ form.username.id_for_label }}">Correo Electrónico:</label>
             {{ form.username }}
         </div>
 
         <div class="field half">
-            {{ form.password.label_tag }}
+            <label for="{{ form.password.id_for_label }}">Contraseña:</label>
             {{ form.password }}
         </div>
 
-        <button type="submit">Entrar</button>
+        {% csrf_token %}
+
+        <div style="clear: both;" class="split">
+            <button class="button alt" type="submit">Entrar</button>
+
+            <a style="padding-top: 0.7em;" href="{% url 'password_reset' %}">He olvidado mi contraseña</a>
+        </div>
     </form>
 
-    <p><a href="{% url 'password_reset' %}">He olvidado mi contraseña</a></p>
 {% endblock content %}

@@ -39,20 +39,48 @@
             <form method="post">
                 {{ telegram_form.as_p }}
 
-                {% if user.telegram_id %}
-                    <p><b>Cuenta vinculada.</b> Si cambias tu usuario de telegram, se desvinculará tu cuenta de DAFI con tu cuenta de Telegram actual.</p>
-                {% elif user.telegram_user %}
-                    <p><b>Cuenta <u>no</u> vinculada.</b></p>
-                {% endif %}
-
                 {% csrf_token %}
 
-                <input class="button alt" type="submit" name="telegram_form" value="Actualizar datos" />
+                <input
+                    class="button alt"
+                    type="submit"
+                    name="telegram_form"
+                    value="{% if user.telegram_user %}Actualizar cuenta de Telegram{% else %}Agregar cuenta de Telegram{% endif %}" />
 
                 {% if user.telegram_id %}
                     <input class="button alt" type="submit" name="telegram_unlink" value="Desvincular" />
                 {% endif %}
             </form>
+
+            {% if user.telegram_id %}
+                <p><b>Cuenta vinculada.</b> Si cambias tu usuario de telegram, se desvinculará tu cuenta de DAFI con tu cuenta de Telegram actual.</p>
+            {% elif user.telegram_user %}
+                <p><b>Cuenta de Telegram <u>no</u> vinculada.</b></p>
+            {% endif %}
+
+            {% if not user.telegram_id %}
+                <div class="box wrapper style3">
+                    {% if user.telegram_user %}
+                        <h4>Cómo vincular tu cuenta</h4>
+
+                        <ol>
+                            <li>Habla con @DafiUMBot en Telegram.</li>
+                            <li>Escribe /vincular y envíalo.</li>
+                            <li>Haz click en <i>Vincular Cuenta</i>.</li>
+                            <li>¡Listo!</li>
+                        </ol>
+                    {% else %}
+                        <h4>Ventajas de vincular tu cuenta de Telegram</h4>
+
+                        <ul>
+                            <li>Recibirás notificaciones de las cosas importantes en tu cuenta.</li>
+                            <li>Si te unes a un club podrás interactuar con sus miembros más cómodamente.</li>
+                            <li>Te informaremos de las noticias importantes de la facultad.</li>
+                            <li>Es muy fácil, cómodo, seguro... ¡y gratis!</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock content %}

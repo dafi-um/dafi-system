@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
-from .forms import ProfileForm, TelegramForm
+from .forms import ProfileUserForm, ProfileTelegramForm, SignUpForm
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
@@ -16,10 +16,10 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         if 'profile_form' not in context:
-            context['profile_form'] = ProfileForm(instance=self.request.user)
+            context['profile_form'] = ProfileUserForm(instance=self.request.user)
 
         if 'telegram_form' not in context:
-            context['telegram_form'] = TelegramForm(instance=self.request.user)
+            context['telegram_form'] = ProfileTelegramForm(instance=self.request.user)
 
         context['success'] = self.success
 
@@ -27,13 +27,13 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, **kwargs):
         if 'profile_form' in request.POST:
-            form = ProfileForm(request.POST, instance=request.user)
+            form = ProfileUserForm(request.POST, instance=request.user)
 
             if form.has_changed() and form.is_valid():
                 user = form.save()
                 self.success = True
         elif 'telegram_form' in request.POST:
-            form = TelegramForm(request.POST, instance=request.user)
+            form = ProfileTelegramForm(request.POST, instance=request.user)
 
             if form.has_changed() and form.is_valid():
                 user = form.save(commit=False)
