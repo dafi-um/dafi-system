@@ -43,6 +43,10 @@
 
     {# TODO: Add progress bar depending on subjects #}
 
+    {% if user == object.answer.user %}
+        <p>Las asignaturas aparecerán a medida que el creador de la oferta vaya iniciando sus intercambios en Praxis.</p>
+    {% endif %}
+
     {% if completed %}
         <div class="box wrapper style1">
             <p style="margin: 0;">Has completado tu parte del proceso, cuando {{ object.answer.user | nice_name }} confirme su parte, habréis completado el intercambio.</p>
