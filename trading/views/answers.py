@@ -3,9 +3,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, DeleteView
 from django.views.generic.base import ContextMixin
+
+from bot.notifications import telegram_notify
 
 from ..models import TradeOffer, TradeOfferAnswer
 
@@ -107,7 +109,12 @@ class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeO
         return self._answer
 
     def on_success(self, request, **kwargs):
-        return redirect(reverse_lazy('trading:answer_detail', args=[self.get_answer().id]))
+        answer = self.get_answer()
+        url = reverse_lazy('trading:answer_detail', args=[answer.id])
+
+        telegram_notify(answer.offer.user, '¡Tu oferta #{} ha recibido una respuesta!'.format(answer.offer.id), url=url, url_button='Ver oferta')
+
+        return redirect(url)
 
 
 class TradeOfferAnswerAccessMixin(UserPassesTestMixin, TradingPeriodMixin):
@@ -182,6 +189,6 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeO
             answer.is_visible = False
             answer.save()
 
-        # TODO: Notify both users that this change process started
+        telegram_notify(answer.user, 'Tu respuesta a la oferta #{} ha sido aceptada y ha comenzado el proceso de intercambio.'.format(offer.id), url=reverse('trading:offer_detail', args=[offer.id]), url_button='Ver intercambio')
 
         return redirect(reverse_lazy('trading:change_process', args=[offer.id]))

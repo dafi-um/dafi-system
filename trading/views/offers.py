@@ -5,6 +5,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
+from bot.notifications import telegram_notify
+
 from heart.models import Year
 
 from ..models import TradeOffer, TradeOfferAnswer, TradeOfferLine
@@ -113,7 +115,7 @@ class TradeOfferEditMixin(TradingPeriodMixin):
                 answers = TradeOfferAnswer.objects.filter(offer=offer)
 
                 for answer in answers:
-                    # telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido modificada, deberías revisar la oferta por si todavía te interesa.', url=reverse('trading:offer_detail', args=[offer.id]))
+                    telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido modificada, deberías revisar la oferta por si todavía te interesa.', url=reverse('trading:offer_detail', args=[offer.id]), url_button='Ver oferta')
                     answer.delete()
             else:
                 offer.save()
@@ -213,7 +215,7 @@ class TradeOfferDeleteView(UserPassesTestMixin, TradingPeriodMixin, DetailView):
         offer = self.get_object()
 
         for answer in offer.answers.all():
-            # TODO: notify users that this offer was deleted
+            telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido eliminada.'.format(offer.id))
             answer.delete()
 
         for line in offer.lines.all():
