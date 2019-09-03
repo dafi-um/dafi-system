@@ -332,10 +332,13 @@ class ChangeProcessView(ChangeAccessMixin, DetailView):
 
                 line.save()
 
-        if total_completed == len(lines_data):
+        if total_completed > 0 and total_completed == len(lines_data):
             offer = self.get_object()
             offer.is_completed = True
             offer.save()
+
+            offer.answer.is_completed = True
+            offer.answer.save()
 
             return self.redirect_success()
 
