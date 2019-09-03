@@ -184,7 +184,8 @@ class TradeOfferAnswer(models.Model):
     user = models.ForeignKey(get_user_model(), models.PROTECT, verbose_name='usuario')
     groups = models.CharField('grupos ofertados', max_length=64)
     creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
-    is_completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte')
+    is_visible = models.BooleanField('es visible', default=True, help_text='La respuesta aparece en la oferta para la que fue creada.')
+    is_completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte.')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
