@@ -11,6 +11,7 @@ handlers = [
     'basic',
     'blog',
     'users',
+    'rooms'
 ]
 
 if __name__ == '__main__':
