@@ -1,7 +1,7 @@
 from django.template import Context, Template
 from django.test import TestCase
 
-class TradeOfferTestCase(TestCase):
+class UsersTemplateTagsTests(TestCase):
     def render_nice_name(self, user):
         template_str = '{% load users_tags %}{{ user|nice_name }}'
         context = Context({'user': user})
