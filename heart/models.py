@@ -49,6 +49,12 @@ class Subject(models.Model):
     quarter = models.IntegerField('cuatrimestre', choices=QUARTERS, default=1)
     year = models.ForeignKey(Year, models.PROTECT, related_name='subjects', verbose_name='año')
 
+    class Meta:
+        verbose_name = 'asignatura'
+
+    def __str__(self):
+        return '{} {} ({})'.format(self.code, self.name, self.acronym)
+
     @classmethod
     def get_grouped(cls):
         d = cache.get('grouped_subjects')
@@ -66,23 +72,23 @@ class Subject(models.Model):
 
         return d
 
-    def __str__(self):
-        return '{} {} ({})'.format(self.code, self.name, self.acronym)
-
-    class Meta:
-        verbose_name = 'asignatura'
-
 
 class Room(models.Model):
     name = models.CharField('nombre de la sala', max_length=64)
     code = models.CharField('código de la sala', max_length=64, unique=True)
     members = models.CharField('miembros en la sala', max_length=128, blank=True, default='')
 
-    def _get_members_list(self):
-        if not self.members:
-            return []
+    class Meta:
+        verbose_name = 'sala'
 
-        return [int(x) for x in self.members.split(',')]
+    def __str__(self):
+        return self.name
+
+    def _get_members_list(self):
+        try:
+            return [int(x) for x in self.members.split(',')]
+        except Exception:
+            return []
 
     def _set_members_list(self, l):
         self.members = ','.join(str(x) for x in l)
@@ -117,9 +123,3 @@ class Room(models.Model):
 
         self._set_members_list(l)
         self.save()
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'sala'
