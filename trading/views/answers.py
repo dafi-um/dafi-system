@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
@@ -126,6 +127,7 @@ class TradeOfferAnswerEditView(TradeOfferAnswerAccessMixin, TradeOfferAnswerLine
         return self.get_object()
 
     def on_success(self, request, **kwargs):
+        messages.success(request, 'Respuesta actualizada correctamente.')
         return super().get(request, **kwargs)
 
 
