@@ -58,7 +58,10 @@ class TradeOfferDetailView(TradingPeriodMixin, UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.is_authenticated:
-            context['answer'] = self.get_object().answers.filter(user=self.request.user).first()
+            context['my_answer'] = self.get_object().answers.filter(user=self.request.user).first()
+
+        if 'answers' not in context:
+            context['answers'] = self.get_object().answers.filter(is_visible=True)
 
         return context
 

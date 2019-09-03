@@ -36,7 +36,11 @@ class TradeOfferAnswerDetailView(UserPassesTestMixin, TradeOfferAnswerLinesMixin
         answer = self.get_object()
         user = self.request.user
 
-        return user.has_perm('trading.is_manager') or user == answer.offer.user or user == answer.user
+        return (
+            user.has_perm('trading.is_manager')
+            or user == answer.user
+            or (answer.is_visible and user == answer.offer.user)
+        )
 
     def get_queryset(self):
         return super().get_queryset().select_related('offer')
@@ -141,7 +145,11 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeO
     def test_func(self):
         answer = self.get_object()
 
-        return self.request.user == answer.offer.user and not answer.offer.answer
+        return (
+            answer.is_visible
+            and self.request.user == answer.offer.user
+            and not answer.offer.answer
+        )
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('offer__lines')
