@@ -406,36 +406,6 @@ class TradingViewsTests(TestCase):
         self.assertEqual(c.get(url_delete).status_code, 403, 'random user can delete answer')
         c.logout()
 
-    def test_tradeofferanswer_views_post(self):
-        '''TradeOfferAnswer views work properly with valid input in POST requests'''
-
-        c = Client()
-        c.force_login(self.user2)
-
-        # delete existing answer
-        self.assertRedirects(c.post(reverse('trading:answer_delete', args=[self.answer.id])), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
-
-        self.assertEqual(TradeOfferAnswer.objects.all().count(), 0, 'deleted answer still exists')
-
-        # create another answer
-        res = c.post(reverse('trading:answer_create', args=[self.offer.id]), {'0-group': '2', '0-subgroup': '1'})
-
-        self.assertEqual(TradeOfferAnswer.objects.all().count(), 1, 'created answer does not exist')
-
-        self.answer = TradeOfferAnswer.objects.get()
-
-        self.assertRedirects(res, reverse('trading:answer_detail', args=[self.answer.id]), msg_prefix='answer creator cannot create answer after deleting the existing one')
-
-        self.assertEqual(c.get(self.answer.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after creating it')
-
-        # update new answer
-        res = c.post(reverse('trading:answer_edit', args=[self.answer.id]), {'0-group': '3', '0-subgroup': '2'})
-        self.assertEqual(res.status_code, 200, 'valid post data generates error')
-
-        self.answer = TradeOfferAnswer.objects.get()
-
-        self.assertDictEqual(self.answer.get_groups(), {'1': [3, 2]}, 'updated data does not change object data')
-
     def test_answered_offer_views_access(self):
         '''Answered TradeOffer related views restrict access properly'''
 
@@ -479,6 +449,100 @@ class TradingViewsTests(TestCase):
             c.logout()
 
         self.offer_remove_answer()
+
+
+class TradingProcessTests(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
+        self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
+        self.user3 = User.objects.create(username='tester_3', email='test3@test.com', password='1234')
+        self.user4 = User.objects.create(username='tester_4', email='test4@test.com', password='1234')
+
+        year = Year.objects.create(id=1, groups=3, subgroups=3)
+
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
+
+        start = timezone.now() - timedelta(hours=2)
+        end = timezone.now() + timedelta(hours=1)
+        self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
+
+        self.offer1 = TradeOffer.objects.create(user=self.user1, period=self.period)
+
+        TradeOfferLine.objects.create(
+            offer=self.offer1, year=year, subjects='1',
+            curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
+        )
+
+        self.offer2 = TradeOffer.objects.create(user=self.user4, period=self.period)
+
+        TradeOfferLine.objects.create(
+            offer=self.offer2, year=year, subjects='1',
+            curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
+        )
+
+        self.answer1 = TradeOfferAnswer(user=self.user2, offer=self.offer1)
+        self.answer1.set_groups({'1': [2, 1]})
+        self.answer1.save()
+
+        self.answer2 = TradeOfferAnswer(user=self.user1, offer=self.offer2)
+        self.answer2.set_groups({'1': [2, 1]})
+        self.answer2.save()
+
+    def test_answer_posts(self):
+        '''TradeOfferAnswer views work properly with valid input in POST requests'''
+
+        c = Client()
+        c.force_login(self.user2)
+
+        # delete existing answer
+        self.assertRedirects(c.post(reverse('trading:answer_delete', args=[self.answer1.id])), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
+
+        self.assertEqual(TradeOfferAnswer.objects.filter(pk=self.answer1.id).count(), 0, 'deleted answer still exists')
+
+        # create another answer
+        res = c.post(reverse('trading:answer_create', args=[self.offer1.id]), {'0-group': '2', '0-subgroup': '1'})
+
+        self.assertEqual(TradeOfferAnswer.objects.filter(offer=self.offer1).count(), 1, 'created answer does not exist')
+
+        self.answer1 = TradeOfferAnswer.objects.filter(offer=self.offer1).first()
+
+        self.assertRedirects(res, reverse('trading:answer_detail', args=[self.answer1.id]), msg_prefix='answer creator cannot create answer after deleting the existing one')
+
+        self.assertEqual(c.get(self.answer1.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after creating it')
+
+        # update new answer
+        res = c.post(reverse('trading:answer_edit', args=[self.answer1.id]), {'0-group': '3', '0-subgroup': '2'})
+        self.assertEqual(res.status_code, 200, 'valid post data generates error')
+        self.assertContains(res, 'Respuesta actualizada correctamente.', msg_prefix='successful update does not show notification')
+
+        self.answer1.refresh_from_db()
+
+        self.assertDictEqual(self.answer1.get_groups(), {'1': [3, 2]}, 'updated data does not change object data')
+
+        # accept answer
+        c.logout()
+        c.force_login(self.user1)
+
+        res = c.post(reverse('trading:answer_accept', args=[self.answer1.id]), {})
+
+        self.offer1.refresh_from_db()
+        self.offer2.refresh_from_db()
+        self.answer1.refresh_from_db()
+        self.answer2.refresh_from_db()
+
+        self.assertRedirects(res, reverse('trading:change_process', args=[self.offer1.id]), msg_prefix='valid answer cannot be accepted by offer creator')
+        self.assertEqual(self.offer1.answer, self.answer1, 'accepted answer is not saved in the offer')
+        self.assertFalse(self.offer1.is_visible, 'answered offer is still visible')
+        self.assertTrue(self.offer2.is_visible, 'random offer is affected by another offer process')
+        self.assertTrue(self.answer1.is_visible, 'accepted answer is hidden after it is accepted')
+        self.assertFalse(self.answer2.is_visible, 'answer from answered offer creator is not hidden')
+
+        # restore modified data
+        self.offer1.answer = None
+        self.offer1.save()
+
+        self.answer2.is_visible = True
+        self.answer2.save()
 
 
 class TradingAuxiliarToolsTests(TestCase):

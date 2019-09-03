@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, DeleteView
@@ -161,6 +162,20 @@ class TradeOfferAnswerAcceptView(UserPassesTestMixin, TradingPeriodMixin, TradeO
         offer = answer.offer
 
         offer.answer = answer
+        offer.is_visible = False
         offer.save()
+
+        query = Q(user=offer.user) | Q(user=answer.user)
+
+        offers = TradeOffer.objects.filter(query & ~Q(pk=offer.id))
+        answers = TradeOfferAnswer.objects.filter(query & ~Q(pk=answer.id))
+
+        for offer in offers:
+            offer.is_visible = False
+            offer.save()
+
+        for answer in answers:
+            answer.is_visible = False
+            answer.save()
 
         return redirect(reverse_lazy('trading:change_process', args=[offer.id]))
