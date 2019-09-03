@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from heart.models import Room
 
 
+DAFI_MAIN_GROUP = -1001247574203
 User = get_user_model()
 
 
@@ -27,7 +28,7 @@ def dafi_callback(update, context):
         if members:
             text = '{} está de camino a DAFI! 🦔'.format(telegramUser.name)
             editText = 'Hecho, les he avisado 😉'
-            try: bot.sendMessage(-1001247574203, text=text)
+            try: bot.sendMessage(DAFI_MAIN_GROUP, text=text)
             except: pass
         else:
             editText = 'Ahora mismo no hay nadie en DAFI 😓'
@@ -90,8 +91,8 @@ def dafi_room(update, context):
     elif members:
         text = 'Hay alguien en DAFI, ¿quieres que avise de que vas? ✅'
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Estoy de camino 🏃🏻‍♂️", callback_data='dafi-omw-{}'.format(user.id))],
-            [InlineKeyboardButton("Iré luego ☕️", callback_data='dafi-later-{}'.format(user.id))]
+            [InlineKeyboardButton("Estoy de camino 🏃🏻‍♂️", callback_data='dafi-omw-{}'.format(telegramUser.id))],
+            [InlineKeyboardButton("Iré luego ☕️", callback_data='dafi-later-{}'.format(telegramUser.id))]
         ])
         bot.sendMessage(chatID, text, reply_markup=keyboard)
 
