@@ -451,6 +451,112 @@ class TradingViewsTests(TestCase):
         self.offer_remove_answer()
 
 
+class TradingUpdateViewsTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='tester_1', email='test@test.com', password='1234')
+
+        year1 = Year.objects.create(id=1, groups=3, subgroups=3)
+        year2 = Year.objects.create(id=2, groups=3, subgroups=3)
+
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year1)
+        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=year1)
+        Subject.objects.create(code=3, name='Subject 3', acronym='S3', quarter=1, year=year2)
+        Subject.objects.create(code=4, name='Subject 4', acronym='S4', quarter=1, year=year2)
+
+        start = timezone.now() - timedelta(hours=1)
+        end = timezone.now() + timedelta(hours=1)
+        self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
+
+        self.offer = TradeOffer.objects.create(user=self.user, period=self.period, description='initial')
+
+        self.line = TradeOfferLine.objects.create(
+            offer=self.offer, year=year1, subjects='1',
+            curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
+        )
+
+    def test_tradeoffer_edit_valid(self):
+        '''TradeOffer update form works properly with valid input data'''
+
+        c = Client()
+        c.force_login(self.user)
+
+        update_url = reverse('trading:offer_edit', args=[self.offer.id])
+
+        # initial state
+        data = {
+            'description': 'initial',
+            '0-curr_group': 1,
+            '0-curr_subgroup': 1,
+            '0-wanted_groups': [2],
+            '0-subjects': [1],
+        }
+
+        res = c.post(update_url, data)
+
+        self.assertEqual(TradeOffer.objects.count(), 1)
+        self.assertEqual(self.offer.description, 'initial')
+        self.assertEqual(TradeOfferLine.objects.count(), 1)
+        self.assertListEqual(self.line.get_subjects_list(), [1])
+
+        # description
+        data['description'] = 'Hello World'
+        res = c.post(update_url, data)
+
+        self.offer.refresh_from_db()
+        self.assertEqual(self.offer.description, 'Hello World', 'updated description does not change in object')
+
+        # subjects
+        data['0-subjects'] = [1, 2]
+        res = c.post(update_url, data)
+
+        self.line.refresh_from_db()
+        self.assertListEqual(self.line.get_subjects_list(), [1, 2], 'updated subjects does not change in offer line')
+
+        data['0-subjects'] = [2]
+        res = c.post(update_url, data)
+
+        self.line.refresh_from_db()
+        self.assertListEqual(self.line.get_subjects_list(), [2], 'deleted subject still appears in offer line')
+
+        # wanted groups
+        data['0-wanted_groups'] = [2, 3]
+        res = c.post(update_url, data)
+
+        self.line.refresh_from_db()
+        self.assertListEqual(self.line.get_wanted_groups(), [2, 3], 'updated wanted_groups does not change in offer line')
+
+        data['0-wanted_groups'] = [3]
+        res = c.post(update_url, data)
+
+        self.line.refresh_from_db()
+        self.assertListEqual(self.line.get_wanted_groups(), [3], 'deleted wanted group still appears in offer line')
+
+        # current group and subgroup
+        data['0-curr_group'] = 2
+        data['0-curr_subgroup'] = 3
+        res = c.post(update_url, data)
+
+        self.line.refresh_from_db()
+        self.assertEqual(self.line.curr_group, 2, 'updated current group does not change in offer line')
+        self.assertEqual(self.line.curr_subgroup, 3, 'updated current subgroup does not change in offer line')
+
+        # add line
+        data['1-curr_group'] = 1
+        data['1-curr_subgroup'] = 1
+        data['1-wanted_groups'] = [2, 3]
+        data['1-subjects'] = [3]
+
+        res = c.post(update_url, data)
+
+        self.assertEqual(TradeOfferLine.objects.count(), 2, 'new line is not created')
+
+        # delete initial line
+        data['0-subjects'] = []
+        res = c.post(update_url, data)
+
+        self.assertEqual(TradeOfferLine.objects.count(), 1, 'initial line is not deleted')
+
+
 class TradingProcessTests(TestCase):
     def setUp(self):
         self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
