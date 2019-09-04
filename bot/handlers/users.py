@@ -20,7 +20,7 @@ def users_link(update, context):
         msg = 'He encontrado una cuenta con el email {}, ¿quieres vincular esta cuenta con tu usuario de Telegram?'.format(user.email)
         reply_markup = InlineKeyboardMarkup(buttons)
     elif not user:
-        msg = 'No he podido continuar porque no existe ninguna cuenta con este usuario de Telegram'
+        msg = 'No he encontrado ninguna cuenta para vincular, recuerda introducir tu usuario de telegram en el apartado Mi Perfil de la web.'
         reply_markup = None
     else:
         msg = 'Esta cuenta ya está vinculada a {} usuario.'.format('tu' if user.telegram_id == id else 'otro')

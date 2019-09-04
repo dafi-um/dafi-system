@@ -39,6 +39,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
             if form.has_changed() and form.is_valid():
                 user = form.save(commit=False)
+                user.telegram_user = user.telegram_user.replace('@', '')
                 user.telegram_id = None
                 user.save()
 
