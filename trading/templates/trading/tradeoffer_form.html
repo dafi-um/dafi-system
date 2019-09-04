@@ -72,6 +72,11 @@
     {% endif %}
 
     <form id="app" method="post">
+        <p>
+            <label for="offer_description">Descripción (opcional):</label>
+            <input type="text" name="description" id="offer_description" value="{{ offer.description }}" />
+        </p>
+
         {% for line in lines %}
             <div class="year-block">
                 <div class="split">

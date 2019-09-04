@@ -110,15 +110,21 @@ class TradeOfferEditMixin(TradingPeriodMixin):
 
         offer = self.get_offer()
 
-        if valid:
+        if 'description' in request.POST:
+            offer.description = request.POST['description']
+
             if offer.id:
+                offer.save()
+
+        if valid:
+            if self.is_creation:
+                offer.save()
+            else:
                 answers = TradeOfferAnswer.objects.filter(offer=offer)
 
                 for answer in answers:
                     telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido modificada, deberías revisar la oferta por si todavía te interesa.', url=reverse('trading:offer_detail', args=[offer.id]), url_button='Ver oferta')
                     answer.delete()
-            else:
-                offer.save()
 
             for line in valid:
                 line.offer = offer
@@ -167,6 +173,7 @@ class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
 
     title = 'Editar una Oferta de Permuta'
     submit_btn = 'Guardar'
+    is_creation = False
 
     def __init__(self, *args, **kwargs):
         self._lines = None
