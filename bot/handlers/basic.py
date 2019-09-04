@@ -1,3 +1,4 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError
 from telegram.ext import CallbackQueryHandler, CommandHandler
 
@@ -11,7 +12,14 @@ def start(update, context):
     update.message.reply_text('Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?'.format(update.message.from_user.first_name))
 
     if user and not user.telegram_id:
-        update.message.reply_text('He encontrado una cuenta con tu usuario de Telegram, quizás deberías ejecutar /vincular para vincularla.')
+        msg = 'He encontrado una cuenta de DAFI ({}) con tu usuario de Telegram, ¿quieres vincularla ahora a tu cuenta de Telegram?'.format(user.email)
+
+        reply_markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton('Sí, vincular cuenta', callback_data='users:link'),
+            InlineKeyboardButton('No, cancelar', callback_data='main:abort')
+        ]])
+
+        update.message.reply_text(msg, reply_markup=reply_markup)
 
 def error_callback(bot, update, error):
     print(error)

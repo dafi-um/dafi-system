@@ -3,27 +3,35 @@ from telegram.ext import CommandHandler, CallbackQueryHandler
 
 from django.contrib.auth import get_user_model
 
+from main.utils import get_url
+
 User = get_user_model()
 
 def users_link(update, context):
     username = update.message.from_user.username
-    id = update.message.from_user.id
 
     user = User.objects.filter(telegram_user=update.message.from_user.username).first()
 
     if user and not user.telegram_id:
-        buttons = [[
+        msg = 'He encontrado una cuenta con el email {}, ¿quieres vincular esta cuenta con tu usuario de Telegram?'.format(user.email)
+
+        reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Vincular cuenta', callback_data='users:link'),
             InlineKeyboardButton('Cancelar', callback_data='main:abort')
-        ]]
+        ]])
 
-        msg = 'He encontrado una cuenta con el email {}, ¿quieres vincular esta cuenta con tu usuario de Telegram?'.format(user.email)
-        reply_markup = InlineKeyboardMarkup(buttons)
     elif not user:
         msg = 'No he encontrado ninguna cuenta para vincular, recuerda introducir tu usuario de telegram en el apartado Mi Perfil de la web.'
-        reply_markup = None
+
+        reply_markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton('Mi Perfil', url=get_url('profile')),
+        ]])
+
     else:
-        msg = 'Esta cuenta ya está vinculada a {} usuario.'.format('tu' if user.telegram_id == id else 'otro')
+        msg = 'Esta cuenta ya está vinculada a {} usuario.'.format(
+            'tu' if user.telegram_id == update.message.from_user.id else 'otro'
+        )
+
         reply_markup = None
 
     update.message.reply_text(msg, reply_markup=reply_markup)
@@ -46,18 +54,20 @@ def users_unlink(update, context):
     update.message.reply_text(msg, reply_markup=reply_markup)
 
 def users_callback_query(update, context):
-    if update.callback_query.data == 'users:link':
-        user = User.objects.filter(telegram_user=update.callback_query.from_user.username).first()
+    query = update.callback_query
+
+    if query.data == 'users:link':
+        user = User.objects.filter(telegram_user=query.from_user.username).first()
 
         if user:
-            user.telegram_id = update.callback_query.from_user.id
+            user.telegram_id = query.from_user.id
             user.save()
 
-            msg = '¡He vinculado tu cuenta correctamente! Ahora te informaré de las cosas importantes también por aquí.'
+            msg = '¡He vinculado tu cuenta correctamente! Ahora te informaré de las cosas importantes por aquí.'
         else:
             msg = 'Parece que ha ocurrido un error...'
-    elif update.callback_query.data == 'users:unlink':
-        user = User.objects.filter(telegram_id=update.callback_query.from_user.id).first()
+    elif query.data == 'users:unlink':
+        user = User.objects.filter(telegram_id=query.from_user.id).first()
 
         if user:
             user.telegram_id = None
@@ -69,8 +79,8 @@ def users_callback_query(update, context):
     else:
         msg = 'No hay ninguna acción disponible'
 
-    update.callback_query.answer()
-    update.callback_query.edit_message_text(msg, reply_markup=None)
+    query.answer()
+    query.edit_message_text(msg, reply_markup=None)
 
 def add_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('vincular', users_link))
