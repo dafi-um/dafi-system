@@ -123,7 +123,7 @@ class TradeOfferEditMixin(TradingPeriodMixin):
                 answers = TradeOfferAnswer.objects.filter(offer=offer)
 
                 for answer in answers:
-                    telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido modificada, deberías revisar la oferta por si todavía te interesa.', url=reverse('trading:offer_detail', args=[offer.id]), url_button='Ver oferta')
+                    telegram_notify(answer.user, 'Se ha eliminado tu respuesta a la oferta #{} porque ha sido modificada, deberías revisar la oferta por si todavía te interesa.'.format(offer.id), url=reverse('trading:offer_detail', args=[offer.id]), url_button='Ver oferta')
                     answer.delete()
 
             for line in valid:
