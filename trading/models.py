@@ -38,10 +38,11 @@ class TradeOffer(models.Model):
     Trading Offer
     '''
 
-    user = models.ForeignKey(get_user_model(), models.PROTECT, verbose_name='usuario')
-    period = models.ForeignKey(TradePeriod, models.PROTECT, verbose_name='periodo')
-    creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
+    user = models.ForeignKey(get_user_model(), models.CASCADE, verbose_name='usuario')
+    period = models.ForeignKey(TradePeriod, models.CASCADE, verbose_name='periodo')
     answer = models.ForeignKey('TradeOfferAnswer', models.PROTECT, blank=True, null=True, verbose_name='respuesta')
+    creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
+    description = models.CharField('descripción', max_length=240, blank=True, default='')
     is_visible = models.BooleanField('es visible', default=True, help_text='La oferta es visible para otros usuarios y puede recibir respuestas')
     is_completed = models.BooleanField('proceso completado', default=False, help_text='El usuario ha completado su parte')
 
@@ -67,8 +68,8 @@ class TradeOfferLine(models.Model):
     Trading Offer Line representing all the subjects in a year
     '''
 
-    offer = models.ForeignKey(TradeOffer, on_delete=models.PROTECT, related_name='lines', verbose_name='oferta')
-    year = models.ForeignKey(Year, on_delete=models.PROTECT, related_name='year', verbose_name='año')
+    offer = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, related_name='lines', verbose_name='oferta')
+    year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='year', verbose_name='año')
     subjects = models.CharField('asignaturas', max_length=64)
     started = models.CharField('intercambios iniciados', max_length=64, blank=True, default='', validators=[int_list_validator()])
     completed = models.CharField('intercambios completados', max_length=64, blank=True, default='', validators=[int_list_validator()])
@@ -180,8 +181,8 @@ class TradeOfferAnswer(models.Model):
     Trade Offer Answer
     '''
 
-    offer = models.ForeignKey(TradeOffer, models.PROTECT, 'answers', verbose_name='oferta')
-    user = models.ForeignKey(get_user_model(), models.PROTECT, verbose_name='usuario')
+    offer = models.ForeignKey(TradeOffer, models.CASCADE, 'answers', verbose_name='oferta')
+    user = models.ForeignKey(get_user_model(), models.CASCADE, verbose_name='usuario')
     groups = models.CharField('grupos ofertados', max_length=64)
     creation_date = models.DateTimeField('fecha de creación', auto_now_add=True)
     is_visible = models.BooleanField('es visible', default=True, help_text='La respuesta aparece en la oferta para la que fue creada.')
