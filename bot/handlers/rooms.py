@@ -54,11 +54,8 @@ def dafi_room(update, context):
     chatID = update.effective_message.chat_id
     priv = chatID > 0
 
-    try:
-        user = User.objects.get(telegram_id=telegramUser.id)
-        allowed = user.has_perm('users.change_room_state')
-    except:
-        user = allowed = None
+    user = User.objects.filter(telegram_id=telegramUser.id).first()
+    allowed = user.has_perm('users.change_room_state') if user else None
 
 
     r = Room.objects.get()
