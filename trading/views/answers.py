@@ -92,9 +92,9 @@ class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeO
         if user == offer.user:
             return False
 
-        query = ~Q(offer__answer=None, is_completed=False) | Q(user=user, offer=offer)
+        query = ~Q(offer__answer=None, is_completed=False) | Q(offer=offer)
 
-        return TradeOfferAnswer.objects.filter(query).count() == 0
+        return TradeOfferAnswer.objects.filter(query, user=user).count() == 0
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('lines')

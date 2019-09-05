@@ -364,6 +364,15 @@ class TradingViewsTests(TestCase):
         self.assertEqual(c.get(url_create).status_code, 200, 'random user cannot create answer')
         c.logout()
 
+        # ensure access when other offers are in process
+        self.offer_accept_answer()
+
+        c.force_login(self.user3)
+        self.assertEqual(c.get(url_create).status_code, 200, 'random user cannot create answer if other offers are in process')
+        c.logout()
+
+        self.offer_remove_answer()
+
         # read
         read_url = self.answer.get_absolute_url()
 
