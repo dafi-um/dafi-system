@@ -207,16 +207,25 @@ class TradingViewsTests(TestCase):
         self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
 
         self.offer = TradeOffer.objects.create(user=self.user1, period=self.period)
-        TradeOffer.objects.create(user=self.user4, period=self.period)
+        self.offer2 = TradeOffer.objects.create(user=self.user4, period=self.period)
 
         TradeOfferLine.objects.create(
             offer=self.offer, year=year, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
+        TradeOfferLine.objects.create(
+            offer=self.offer2, year=year, subjects='1',
+            curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
+        )
+
         self.answer = TradeOfferAnswer(user=self.user2, offer=self.offer)
         self.answer.set_groups({'1': [2, 1]})
         self.answer.save()
+
+        self.answer2 = TradeOfferAnswer(user=self.user1, offer=self.offer2)
+        self.answer2.set_groups({'1': [2, 1]})
+        self.answer2.save()
 
     def period_expired(self):
         self.period.end = timezone.now() - timedelta(hours=1)
@@ -353,11 +362,11 @@ class TradingViewsTests(TestCase):
         self.assertEqual(c.get(url_create).status_code, 302, 'anonymous user can create answers')
 
         c.force_login(self.user1)
-        self.assertEqual(c.get(url_create).status_code, 403, 'offer creator can create answer to its own offer')
+        self.assertContains(c.get(url_create), 'No puedes responder a tu propia oferta', status_code=403, msg_prefix='offer creator can create answer to its own offer')
         c.logout()
 
         c.force_login(self.user2)
-        self.assertEqual(c.get(url_create).status_code, 403, 'user with existing answer can create another answer')
+        self.assertContains(c.get(url_create), 'Ya has respondido a esta oferta', status_code=403, msg_prefix='user with existing answer can create another answer')
         c.logout()
 
         c.force_login(self.user3)
@@ -365,7 +374,8 @@ class TradingViewsTests(TestCase):
         c.logout()
 
         # ensure access when other offers are in process
-        self.offer_accept_answer()
+        self.offer2.answer = self.answer2
+        self.offer2.save()
 
         c.force_login(self.user3)
         self.assertEqual(c.get(url_create).status_code, 200, 'random user cannot create answer if other offers are in process')
