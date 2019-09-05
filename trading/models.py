@@ -20,17 +20,17 @@ class TradePeriod(models.Model):
     start = models.DateTimeField('fecha de inicio')
     end = models.DateTimeField('fecha de fin')
 
+    class Meta:
+        verbose_name = 'periodo de intercambio'
+        verbose_name_plural = 'periodos de intercambio'
+
+    def __str__(self):
+        return self.name
+
     @classmethod
     def get_current(cls):
         now = timezone.now()
         return cls.objects.filter(start__lt=now, end__gt=now).first()
-
-    def __str__(self):
-        return 'Periodo ' + self.name
-
-    class Meta:
-        verbose_name = 'periodo de intercambio'
-        verbose_name_plural = 'periodos de intercambio'
 
 
 class TradeOffer(models.Model):
