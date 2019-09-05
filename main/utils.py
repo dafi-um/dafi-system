@@ -1,10 +1,15 @@
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.cache import cache
 from django.urls import reverse
 
-_site_url = 'https://' + get_current_site(None).domain
-
 def get_domain():
-    return _site_url
+    site_url = cache.get('main_domain')
+
+    if not site_url:
+        site_url = 'https://' + get_current_site(None).domain
+        cache.set('main_domain', site_url)
+
+    return site_url
 
 def get_url(*args, **kwargs):
-    return _site_url + reverse(*args, **kwargs)
+    return get_domain() + reverse(*args, **kwargs)
