@@ -90,11 +90,17 @@ class TradeOfferAnswerCreateView(LoginRequiredMixin, UserPassesTestMixin, TradeO
         user = self.request.user
 
         if user == offer.user:
+            messages.error(self.request, 'No puedes responder a tu propia oferta')
+            return False
+        elif offer.answer:
+            messages.error(self.request, 'No puedes responder a esta oferta porque ya está en proceso de intercambio')
             return False
 
-        query = ~Q(offer__answer=None, is_completed=False) | Q(offer=offer)
+        if TradeOfferAnswer.objects.filter(offer=offer, user=user).count() != 0:
+            messages.error(self.request, 'Ya has respondido a esta oferta')
+            return False
 
-        return TradeOfferAnswer.objects.filter(query, user=user).count() == 0
+        return True
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('lines')

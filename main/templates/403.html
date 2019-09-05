@@ -8,5 +8,15 @@
         </div>
     </header>
 
-    <p>Parece que intentas acceder a un recurso para el que no tienes permisos. Si crees que esto es un error, contacta con un administrador del sitio.</p>
+    {% if messages %}
+        <div class="box wrapper style3">
+            <ul class="alt">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p>Parece que intentas acceder a un recurso para el que no tienes permisos. Si crees que esto es un error, contacta con un administrador del sitio.</p>
+    {% endif %}
 {% endblock %}
