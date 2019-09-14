@@ -1,3 +1,4 @@
+from telegram.error import BadRequest
 from telegram.ext import CommandHandler
 
 from django.core.exceptions import ValidationError
@@ -35,13 +36,14 @@ def groups_link(update, context):
         msg = 'No puedes vincular este grupo'
     else:
         group.telegram_group = group_id
-        group.telegram_group_link = context.bot.export_chat_invite_link(group_id)
 
         try:
+            group.telegram_group_link = context.bot.export_chat_invite_link(group_id)
+        except BadRequest:
+            msg = 'Ha ocurrido un error inesperado durante la vinculación'
+        else:
             group.save()
             msg = '¡Grupo vinculado correctamente!'
-        except ValidationError:
-            msg = 'Ha ocurrido un error durante la vinculación'
 
     message.reply_text(msg)
 
