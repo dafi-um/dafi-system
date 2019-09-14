@@ -6,6 +6,62 @@ from django.utils.functional import cached_property
 
 User = get_user_model()
 
+NUM_YEARS = 4
+YEARS_VALIDATORS = [MinValueValidator(1), MaxValueValidator(NUM_YEARS)]
+
+
+class Group(models.Model):
+    '''Group of Students'''
+
+    name = models.CharField(
+        'nombre', max_length=64
+    )
+
+    number = models.IntegerField(
+        'número de grupo', blank=True, null=True
+    )
+
+    year = models.IntegerField(
+        'año', validators=YEARS_VALIDATORS
+    )
+
+    subgroups = models.IntegerField(
+        'número de subgrupos', validators=[
+            MinValueValidator(1), MaxValueValidator(4)
+        ]
+    )
+
+    delegate = models.ForeignKey(
+        User, models.PROTECT, blank=True, null=True, related_name='delegate_group',
+        verbose_name='delegado'
+    )
+
+    subdelegate = models.ForeignKey(
+        User, models.PROTECT, blank=True, null=True, related_name='subdelegate_group',
+        verbose_name='subdelegado'
+    )
+
+    telegram_group = models.CharField(
+        'grupo de telegram', max_length=64, blank=True, default=''
+    )
+
+    telegram_group_link = models.CharField(
+        'enlace al grupo de telegram', max_length=64, blank=True, default=''
+    )
+
+    class Meta():
+        verbose_name = 'grupo'
+
+        permissions = [
+            ('can_link_group', 'Puede vincular un grupo de Telegram con un grupo de alumnos')
+        ]
+
+    def __str__(self):
+        return 'Año {} {}'.format(self.year, self.name)
+
+    def subgroups_range(self):
+        return range(1, self.subgroups + 1)
+
 
 class Year(models.Model):
     '''
