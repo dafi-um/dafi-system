@@ -1,5 +1,4 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError
 from telegram.ext import CallbackQueryHandler, CommandHandler
 
 from django.contrib.auth import get_user_model
@@ -7,12 +6,17 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 def start(update, context):
-    user = User.objects.filter(telegram_user=update.message.from_user.username).first()
+    telegram_user = update.message.from_user
+    user = User.objects.filter(telegram_user=telegram_user.username).first()
 
-    update.message.reply_text('Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?'.format(update.message.from_user.first_name))
+    update.message.reply_text(
+        f'Hola {telegram_user.first_name}, soy el DAFI Bot. ¿En qué puedo ayudarte?'
+    )
 
     if user and not user.telegram_id:
-        msg = 'He encontrado una cuenta de DAFI ({}) con tu usuario de Telegram, ¿quieres vincularla ahora a tu cuenta de Telegram?'.format(user.email)
+        msg = f'He encontrado una cuenta de DAFI ({user.email}) ' \
+               'con tu usuario de Telegram, ¿quieres vincularla ' \
+               'ahora a tu cuenta de Telegram?'
 
         reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Sí, vincular cuenta', callback_data='users:link'),
@@ -20,9 +24,6 @@ def start(update, context):
         ]])
 
         update.message.reply_text(msg, reply_markup=reply_markup)
-
-def error_callback(bot, update, error):
-    print(error)
 
 def basic_callback(update, context):
     update.callback_query.answer()
@@ -37,4 +38,3 @@ def basic_callback(update, context):
 def add_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CallbackQueryHandler(basic_callback, pattern='main'))
-    dispatcher.add_error_handler(error_callback)

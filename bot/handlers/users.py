@@ -8,28 +8,32 @@ from main.utils import get_url
 User = get_user_model()
 
 def users_link(update, context):
-    username = update.message.from_user.username
+    if update.message.chat.type != 'private':
+        update.message.reply_text('Este comando solamente puede utilizarse en chats privados')
+        return
 
-    user = User.objects.filter(telegram_user=update.message.from_user.username).first()
+    telegram_user = update.message.from_user
+    user = User.objects.filter(telegram_user=telegram_user.username).first()
 
     if user and not user.telegram_id:
-        msg = 'He encontrado una cuenta con el email {}, ¿quieres vincular esta cuenta con tu usuario de Telegram?'.format(user.email)
+        msg = f'He encontrado una cuenta con el email {user.email}, ' \
+               '¿quieres vincular esta cuenta con tu usuario de Telegram?'
 
         reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Vincular cuenta', callback_data='users:link'),
             InlineKeyboardButton('Cancelar', callback_data='main:abort')
         ]])
-
     elif not user:
-        msg = 'No he encontrado ninguna cuenta para vincular, recuerda introducir tu usuario de telegram en el apartado Mi Perfil de la web.'
+        msg = 'No he encontrado ninguna cuenta para vincular, ' \
+              'recuerda introducir tu usuario de telegram en el ' \
+              'apartado Mi Perfil de la web.'
 
         reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Mi Perfil', url=get_url('profile')),
         ]])
-
     else:
         msg = 'Esta cuenta ya está vinculada a {} usuario.'.format(
-            'tu' if user.telegram_id == update.message.from_user.id else 'otro'
+            'tu' if user.telegram_id == telegram_user.id else 'otro'
         )
 
         reply_markup = None
@@ -37,16 +41,21 @@ def users_link(update, context):
     update.message.reply_text(msg, reply_markup=reply_markup)
 
 def users_unlink(update, context):
+    if update.message.chat.type != 'private':
+        update.message.reply_text('Este comando solamente puede utilizarse en chats privados')
+        return
+
     user = User.objects.filter(telegram_id=update.message.from_user.id).first()
 
     if user:
-        buttons = [[
+        msg = 'Vas a desvincular tu cuenta. Dejarás de recibir ' \
+              'información importante en este chat y podrás vincular ' \
+              'este usuario a otra cuenta. ¿Estás seguro de que deseas continuar?'
+
+        reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Sí, desvincular cuenta', callback_data='users:unlink'),
             InlineKeyboardButton('No, cancelar', callback_data='main:abort')
-        ]]
-
-        msg = 'Vas a desvincular tu cuenta. Dejarás de recibir información importante en este chat y podrás vincular este usuario a otra cuenta. ¿Estás seguro de que deseas continuar?'
-        reply_markup = InlineKeyboardMarkup(buttons)
+        ]])
     else:
         msg = 'Este usuario no está vinculado a ninguna cuenta.'
         reply_markup = None
@@ -63,7 +72,8 @@ def users_callback_query(update, context):
             user.telegram_id = query.from_user.id
             user.save()
 
-            msg = '¡He vinculado tu cuenta correctamente! Ahora te informaré de las cosas importantes por aquí.'
+            msg = '¡He vinculado tu cuenta correctamente! ' \
+                  'Ahora te informaré de las cosas importantes por aquí.'
         else:
             msg = 'Parece que ha ocurrido un error...'
     elif query.data == 'users:unlink':
