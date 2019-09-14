@@ -16,8 +16,10 @@ def users_link(update, context):
     user = User.objects.filter(telegram_user=telegram_user.username).first()
 
     if user and not user.telegram_id:
-        msg = f'He encontrado una cuenta con el email {user.email}, ' \
-               '¿quieres vincular esta cuenta con tu usuario de Telegram?'
+        msg = (
+            'He encontrado una cuenta con el email {}, '
+            '¿quieres vincular esta cuenta con tu usuario de Telegram?'
+        ).format(user.email)
 
         reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Vincular cuenta', callback_data='users:link'),

@@ -10,13 +10,15 @@ def start(update, context):
     user = User.objects.filter(telegram_user=telegram_user.username).first()
 
     update.message.reply_text(
-        f'Hola {telegram_user.first_name}, soy el DAFI Bot. ¿En qué puedo ayudarte?'
+        'Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?'.format(telegram_user.first_name)
     )
 
     if user and not user.telegram_id:
-        msg = f'He encontrado una cuenta de DAFI ({user.email}) ' \
-               'con tu usuario de Telegram, ¿quieres vincularla ' \
-               'ahora a tu cuenta de Telegram?'
+        msg = (
+            'He encontrado una cuenta de DAFI ({}) '
+            'con tu usuario de Telegram, ¿quieres vincularla '
+            'ahora a tu cuenta de Telegram?'
+        ).format(user.email)
 
         reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Sí, vincular cuenta', callback_data='users:link'),
