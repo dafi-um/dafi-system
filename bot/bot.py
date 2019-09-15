@@ -7,14 +7,6 @@ from django import setup as django_setup
 
 from telegram.ext import Updater, CommandHandler
 
-handlers = [
-    'basic',
-    'blog',
-    'users',
-    'rooms',
-    'groups',
-]
-
 if __name__ == '__main__':
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -34,15 +26,14 @@ if __name__ == '__main__':
 
     updater = Updater(token=token, use_context=True)
 
-    # Fixes bug in python <= 3.5: parent module not initiated
-    import_module('bot.handlers')
-
     print('Loading handlers...')
 
-    for name in handlers:
-        mod = import_module('.' + name, 'bot.handlers')
+    from . import handlers
 
-        mod.add_handlers(updater.dispatcher)
+    for handler in handlers.get_handlers():
+        updater.dispatcher.add_handler(handler)
+
+    print('Starting polling...')
 
     updater.start_polling()
 

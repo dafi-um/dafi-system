@@ -1,16 +1,17 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, CallbackQueryHandler
 
 from django.contrib.auth import get_user_model
 
 from main.utils import get_url
 
+from .handlers import add_handler, add_query_handler
+
 User = get_user_model()
 
+@add_handler('vincular')
 def users_link(update, context):
     if update.message.chat.type != 'private':
-        update.message.reply_text('Este comando solamente puede utilizarse en chats privados')
-        return
+        return 'Este comando solamente puede utilizarse en chats privados'
 
     telegram_user = update.message.from_user
     user = User.objects.filter(telegram_user=telegram_user.username).first()
@@ -40,61 +41,57 @@ def users_link(update, context):
 
         reply_markup = None
 
-    update.message.reply_text(msg, reply_markup=reply_markup)
+    return msg, reply_markup
 
+@add_handler('desvincular')
 def users_unlink(update, context):
     if update.message.chat.type != 'private':
-        update.message.reply_text('Este comando solamente puede utilizarse en chats privados')
-        return
+        return 'Este comando solamente puede utilizarse en chats privados'
 
     user = User.objects.filter(telegram_id=update.message.from_user.id).first()
 
-    if user:
-        msg = 'Vas a desvincular tu cuenta. Dejarás de recibir ' \
-              'información importante en este chat y podrás vincular ' \
-              'este usuario a otra cuenta. ¿Estás seguro de que deseas continuar?'
+    if not user:
+        return 'Este usuario no está vinculado a ninguna cuenta.'
 
-        reply_markup = InlineKeyboardMarkup([[
-            InlineKeyboardButton('Sí, desvincular cuenta', callback_data='users:unlink'),
-            InlineKeyboardButton('No, cancelar', callback_data='main:abort')
-        ]])
-    else:
-        msg = 'Este usuario no está vinculado a ninguna cuenta.'
-        reply_markup = None
+    msg = (
+        'Vas a desvincular tu cuenta. Dejarás de recibir '
+        'información importante en este chat y podrás vincular '
+        'este usuario a otra cuenta. ¿Estás seguro de que deseas continuar?'
+    )
 
-    update.message.reply_text(msg, reply_markup=reply_markup)
+    reply_markup = InlineKeyboardMarkup([[
+        InlineKeyboardButton('Sí, desvincular cuenta', callback_data='users:unlink'),
+        InlineKeyboardButton('No, cancelar', callback_data='main:abort')
+    ]])
 
+    return msg, reply_markup
+
+@add_query_handler('users')
 def users_callback_query(update, context):
     query = update.callback_query
 
     if query.data == 'users:link':
         user = User.objects.filter(telegram_user=query.from_user.username).first()
 
-        if user:
-            user.telegram_id = query.from_user.id
-            user.save()
+        if not user:
+            return 'Parece que ha ocurrido un error...'
 
-            msg = '¡He vinculado tu cuenta correctamente! ' \
-                  'Ahora te informaré de las cosas importantes por aquí.'
-        else:
-            msg = 'Parece que ha ocurrido un error...'
+        user.telegram_id = query.from_user.id
+        user.save()
+
+        return (
+            '¡He vinculado tu cuenta correctamente! '
+            'Ahora te informaré de las cosas importantes por aquí.'
+        )
     elif query.data == 'users:unlink':
         user = User.objects.filter(telegram_id=query.from_user.id).first()
 
-        if user:
-            user.telegram_id = None
-            user.save()
+        if not user:
+            return 'Este usuario no está vinculado a ninguna cuenta.'
 
-            msg = 'He desvinculado tu cuenta correctamente.'
-        else:
-            msg = 'Este usuario no está vinculado a ninguna cuenta.'
-    else:
-        msg = 'No hay ninguna acción disponible'
+        user.telegram_id = None
+        user.save()
 
-    query.answer()
-    query.edit_message_text(msg, reply_markup=None)
+        return 'He desvinculado tu cuenta correctamente.'
 
-def add_handlers(dispatcher):
-    dispatcher.add_handler(CommandHandler('vincular', users_link))
-    dispatcher.add_handler(CommandHandler('desvincular', users_unlink))
-    dispatcher.add_handler(CallbackQueryHandler(users_callback_query, pattern='users'))
+    return 'No hay ninguna acción disponible'

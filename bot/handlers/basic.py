@@ -1,10 +1,12 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackQueryHandler, CommandHandler
 
 from django.contrib.auth import get_user_model
 
+from .handlers import add_handler, add_query_handler
+
 User = get_user_model()
 
+@add_handler('start')
 def start(update, context):
     telegram_user = update.message.from_user
     user = User.objects.filter(telegram_user=telegram_user.username).first()
@@ -25,18 +27,9 @@ def start(update, context):
             InlineKeyboardButton('No, cancelar', callback_data='main:abort')
         ]])
 
-        update.message.reply_text(msg, reply_markup=reply_markup)
+        return msg, reply_markup
 
+@add_query_handler('main')
 def basic_callback(update, context):
-    update.callback_query.answer()
-
     if update.callback_query.data == 'main:abort':
-        msg = 'Operación cancelada.'
-    else:
-        msg = 'Parece que ha ocurrido un error...'
-
-    update.callback_query.edit_message_text(msg, reply_markup=None)
-
-def add_handlers(dispatcher):
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CallbackQueryHandler(basic_callback, pattern='main'))
+        return 'Operación cancelada.'
