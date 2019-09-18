@@ -1,3 +1,5 @@
+from os import getenv
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 
 from django.contrib.auth import get_user_model
@@ -8,8 +10,8 @@ from .handlers import add_handler, add_query_handler
 
 User = get_user_model()
 
-DAFI_ROOM_CODE = 'dafi'
-DAFI_MAIN_GROUP = -375391840
+DAFI_ROOM_CODE = getenv('DAFI_ROOM_CODE', 'dafi')
+DAFI_MAIN_GROUP = getenv('DAFI_MAIN_GROUP', None)
 
 
 @add_query_handler('dafi')
@@ -31,8 +33,9 @@ def dafi_callback(update, context):
         if not members:
             return 'Ahora mismo no hay nadie en DAFI 😓'
 
-        text = '¡{} está de camino a DAFI!'.format(query.from_user.name)
-        context.bot.sendMessage(DAFI_MAIN_GROUP, text=text)
+        if DAFI_MAIN_GROUP:
+            text = '¡{} está de camino a DAFI!'.format(query.from_user.name)
+            context.bot.sendMessage(DAFI_MAIN_GROUP, text=text)
 
         return 'Hecho, les he avisado 😉'
     elif action == 'off':
