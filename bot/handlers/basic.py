@@ -33,3 +33,12 @@ def start(update, context):
 def basic_callback(update, context):
     if update.callback_query.data == 'main:abort':
         return 'Operación cancelada.'
+
+@add_handler('getid')
+def get_group_id(update, context):
+    user = User.objects.filter(telegram_id=update.message.from_user.id).first()
+
+    if not user or not user.is_staff:
+        return 'No tienes los permisos adecuados para realizar esta acción'
+
+    return 'ID: {}'.format(update.message.chat.id)
