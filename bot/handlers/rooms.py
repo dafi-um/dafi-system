@@ -1,102 +1,104 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import CommandHandler, CallbackQueryHandler, run_async
 
 from django.contrib.auth import get_user_model
+
 from heart.models import Room
 
+from .handlers import add_handler, add_query_handler
 
-DAFI_MAIN_GROUP = -1001247574203
 User = get_user_model()
 
+DAFI_ROOM_CODE = 'dafi'
+DAFI_MAIN_GROUP = -375391840
 
-@run_async
+
+@add_query_handler('dafi')
 def dafi_callback(update, context):
-    bot = context.bot
     query = update.callback_query
-    telegramUser = query.from_user
-    chatID = query.message.chat_id
-    message = query.message.text
-    query.answer()
+    action = query.data.replace('dafi:', '')
 
-    user = User.objects.get(telegram_id=telegramUser.id)
-    r = Room.objects.get()
-    members = r.get_members()
+    if action == 'later':
+        return '¡De acuerdo!'
 
-    data = query.data.split('-')
+    room = Room.objects.filter(code=DAFI_ROOM_CODE).first()
 
-    if data[1] == 'omw':
-        if members:
-            text = '{} está de camino a DAFI! 🦔'.format(telegramUser.name)
-            editText = 'Hecho, les he avisado 😉'
-            try: bot.sendMessage(DAFI_MAIN_GROUP, text=text)
-            except: pass
-        else:
-            editText = 'Ahora mismo no hay nadie en DAFI 😓'
-        query.edit_message_text(editText)
+    if not room:
+        return '⚠️⚠️\n¡¡La sala no existe en la base de datos!!'
 
-    elif data[1] == 'later':
-        query.edit_message_text('¡De acuerdo! ☕️')
+    members = room.get_members()
 
-    elif data[1] == 'off':
-        if user not in members:
-            query.edit_message_text('No sabía que estabas en DAFI ⚠️')
-        else:
-            query.edit_message_text('He anotado que has salido de DAFI 💤')
-            r.remove_member(user)
+    if action == 'omw':
+        if not members:
+            return 'Ahora mismo no hay nadie en DAFI 😓'
 
+        text = '¡{} está de camino a DAFI!'.format(query.from_user.name)
+        context.bot.sendMessage(DAFI_MAIN_GROUP, text=text)
 
+        return 'Hecho, les he avisado 😉'
+    elif action == 'off':
+        user = User.objects.filter(telegram_id=query.from_user.id).first()
 
-@run_async
+        if not user:
+            return 'No he encontrado una cuenta para tu usuario ⚠️'
+
+        if user in members:
+            room.remove_member(user)
+
+        return 'He anotado que has salido de DAFI.'
+
+@add_handler('dafi')
 def dafi_room(update, context):
-    bot = context.bot
-    args = context.args[0].lower() if context.args else None
-    telegramUser = update.effective_message.from_user
-    chatID = update.effective_message.chat_id
-    priv = chatID > 0
+    room = Room.objects.filter(code=DAFI_ROOM_CODE).first()
 
-    user = User.objects.filter(telegram_id=telegramUser.id).first()
-    allowed = user.has_perm('users.change_room_state') if user else None
+    if not room:
+        return '⚠️⚠️\n¡¡La sala no existe en la base de datos!!'
 
+    members = room.get_members()
 
-    r = Room.objects.get()
-    members = r.get_members()
+    if not context.args:
+        if update.message.chat.type != 'private':
+            return 'Este comando solamente puede utilizarse en chats privados'
 
-    if allowed and args:
-        if args == 'on':
-            if user in members:
-                bot.sendMessage(chatID,
-                                'Ya tenía constancia de que estás en DAFI ⚠️')
-                return
-            r.add_member(user)
-            keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton("Me voy 💤", callback_data='dafi-off')]
-            ])
-            bot.sendMessage(chatID, 'He anotado que estás DAFI ✅',
-                            reply_markup=keyboard)
-            # TODO: Si es el primer usuario que ha entrado, notificar
-            # TODO: Cambiar estado en el canal
+        if not members:
+            return 'Ahora mismo no hay nadie en DAFI 😓'
 
-        elif args == 'off':
-            if user not in members:
-                bot.sendMessage(chatID, 'No sabía que estabas en DAFI ⚠️')
-                return
-            r.remove_member(user)
-            update.effective_message.reply_text(
-                'He anotado que has salido de DAFI ✅')
-            # TODO: Cambiar estado en el canal
-
-    elif members:
-        text = 'Hay alguien en DAFI, ¿quieres que avise de que vas? ✅'
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Estoy de camino 🏃🏻‍♂️", callback_data='dafi-omw-{}'.format(telegramUser.id))],
-            [InlineKeyboardButton("Iré luego ☕️", callback_data='dafi-later-{}'.format(telegramUser.id))]
+        msg = 'Hay alguien en DAFI, ¿quieres que avise de que vas?'
+        reply_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton('Sí, estoy de camino 🏃🏻‍♂️', callback_data='dafi:omw')],
+            [InlineKeyboardButton('No, iré luego ☕️', callback_data='dafi:later')]
         ])
-        bot.sendMessage(chatID, text, reply_markup=keyboard)
+
+        return msg, reply_markup
+
+    action = context.args[0].lower()
+
+    if action != 'on' and action != 'off':
+        return 'La opción indicada no existe'
+
+    message = update.effective_message
+    user = User.objects.filter(telegram_id=message.from_user.id).first()
+
+    if not user or not user.has_perm('users.change_room_state'):
+        return 'No puedes llevar a cabo esta acción'
+
+    room = Room.objects.get()
+    members = room.get_members()
+
+    if action == 'on':
+        if user in members:
+            return 'Ya tenía constancia de que estás en DAFI ⚠️'
+
+        room.add_member(user)
+
+        reply_markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton('Me voy 💤', callback_data='dafi:off')
+        ]])
+
+        return 'He anotado que estás DAFI ✅', reply_markup
 
     else:
-        bot.sendMessage(chatID, 'Ahora mismo no hay nadie en DAFI 😓')
+        if user not in members:
+            return 'No sabía que estabas en DAFI ⚠️'
 
-
-def add_handlers(dispatcher):
-    dispatcher.add_handler(CommandHandler('dafi', dafi_room))
-    dispatcher.add_handler(CallbackQueryHandler(dafi_callback, pattern='dafi'))
+        room.remove_member(user)
+        return 'He anotado que has salido de DAFI ✅'
