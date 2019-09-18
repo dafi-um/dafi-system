@@ -1,11 +1,17 @@
 import telegram
 
-from telegram.ext import CallbackQueryHandler, CommandHandler
+from telegram.ext import CallbackQueryHandler, CommandHandler, run_async
 
 _handlers = []
 
 def add_handler(cmd):
+    '''
+    Adds a command handler to the bot handlers list.
+    Uses the given command without slashes.
+    '''
+
     def decorator(function):
+        @run_async
         def wrapper(update, context):
             answer = function(update, context)
 
@@ -31,7 +37,12 @@ def add_handler(cmd):
     return decorator
 
 def add_query_handler(pattern):
+    '''
+    Adds a callback query handler to the bot handlers list.
+    '''
+
     def decorator(function):
+        @run_async
         def wrapper(update, context):
             update.callback_query.answer()
 
