@@ -10,7 +10,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'members')
+    list_display = ('name', 'code')
 
 
 @admin.register(models.Subject)

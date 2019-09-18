@@ -132,50 +132,10 @@ class Subject(models.Model):
 class Room(models.Model):
     name = models.CharField('nombre de la sala', max_length=64)
     code = models.CharField('código de la sala', max_length=64, unique=True)
-    members = models.CharField('miembros en la sala', max_length=128, blank=True, default='')
+    members = models.ManyToManyField(User, verbose_name='miembros en la sala')
 
     class Meta:
         verbose_name = 'sala'
 
     def __str__(self):
         return self.name
-
-    def _get_members_list(self):
-        try:
-            return [int(x) for x in self.members.split(',')]
-        except Exception:
-            return []
-
-    def _set_members_list(self, l):
-        self.members = ','.join(str(x) for x in l)
-
-    def get_members(self):
-        return User.objects.filter(pk__in=self._get_members_list())
-
-    def add_member(self, user):
-        if not isinstance(user, User):
-            raise TypeError('Must provide a valid user instance')
-
-        l = self._get_members_list()
-
-        if user.id in l:
-            return
-
-        l.append(user.id)
-
-        self._set_members_list(l)
-        self.save()
-
-    def remove_member(self, user):
-        if not isinstance(user, User):
-            raise TypeError('Must provide a valid user instance')
-
-        l = self._get_members_list()
-
-        if user.id not in l:
-            return
-
-        l.remove(user.id)
-
-        self._set_members_list(l)
-        self.save()
