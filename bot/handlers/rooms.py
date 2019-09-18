@@ -27,10 +27,8 @@ def dafi_callback(update, context):
     if not room:
         return '⚠️⚠️\n¡¡La sala no existe en la base de datos!!'
 
-    members = room.get_members()
-
     if action == 'omw':
-        if not members:
+        if not room.members.all():
             return 'Ahora mismo no hay nadie en DAFI 😓'
 
         if DAFI_MAIN_GROUP:
@@ -44,10 +42,12 @@ def dafi_callback(update, context):
         if not user:
             return 'No he encontrado una cuenta para tu usuario ⚠️'
 
-        if user in members:
-            room.remove_member(user)
+        if user not in room.members.all():
+            return 'No sabía que estabas en DAFI ⚠️'
 
-        return 'He anotado que has salido de DAFI.'
+        room.members.remove(user)
+
+        return 'He anotado que has salido de DAFI  ✅'
 
 @add_handler('dafi')
 def dafi_room(update, context):
@@ -56,13 +56,11 @@ def dafi_room(update, context):
     if not room:
         return '⚠️⚠️\n¡¡La sala no existe en la base de datos!!'
 
-    members = room.get_members()
-
     if not context.args:
         if update.message.chat.type != 'private':
             return 'Este comando solamente puede utilizarse en chats privados'
 
-        if not members:
+        if not room.members.all():
             return 'Ahora mismo no hay nadie en DAFI 😓'
 
         msg = 'Hay alguien en DAFI, ¿quieres que avise de que vas?'
@@ -85,13 +83,12 @@ def dafi_room(update, context):
         return 'No puedes llevar a cabo esta acción'
 
     room = Room.objects.get()
-    members = room.get_members()
 
     if action == 'on':
-        if user in members:
+        if user in room.members.all():
             return 'Ya tenía constancia de que estás en DAFI ⚠️'
 
-        room.add_member(user)
+        room.members.add(user)
 
         reply_markup = InlineKeyboardMarkup([[
             InlineKeyboardButton('Me voy 💤', callback_data='dafi:off')
@@ -100,8 +97,8 @@ def dafi_room(update, context):
         return 'He anotado que estás DAFI ✅', reply_markup
 
     else:
-        if user not in members:
+        if user not in room.members.all():
             return 'No sabía que estabas en DAFI ⚠️'
 
-        room.remove_member(user)
+        room.members.remove(user)
         return 'He anotado que has salido de DAFI ✅'
