@@ -69,8 +69,9 @@ def users_unlink(update, context):
 @add_query_handler('users')
 def users_callback_query(update, context):
     query = update.callback_query
+    action = query.data.replace('users:', '')
 
-    if query.data == 'users:link':
+    if action == 'link':
         user = User.objects.filter(telegram_user=query.from_user.username).first()
 
         if not user:
@@ -83,7 +84,7 @@ def users_callback_query(update, context):
             '¡He vinculado tu cuenta correctamente! '
             'Ahora te informaré de las cosas importantes por aquí.'
         )
-    elif query.data == 'users:unlink':
+    elif action == 'unlink':
         user = User.objects.filter(telegram_id=query.from_user.id).first()
 
         if not user:
