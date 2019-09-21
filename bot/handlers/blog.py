@@ -4,22 +4,26 @@ from blog.models import Post
 
 from main.utils import get_url
 
-from .handlers import add_handler
+from .handlers import CommandHandler, add_handler
+
 
 @add_handler('blog')
-def blog_list(update, context):
-    posts = Post.objects.order_by('-pub_date')[:10]
+class BlogListHandler(CommandHandler):
+    '''Prints a list of blog posts as buttons'''
 
-    if not posts:
-        return '*El Blog de DAFI*\n\n_No hay entradas disponibles_'
+    def handle(self, update, context):
+        posts = Post.objects.order_by('-pub_date')[:10]
 
-    msg = '*El Blog de DAFI*\n\nMostrando los últimos {} posts.'.format(len(posts))
+        if not posts:
+            return '*El Blog de DAFI*\n\n_No hay entradas disponibles_'
 
-    buttons = []
+        msg = '*El Blog de DAFI*\n\nMostrando los últimos {} posts.'.format(len(posts))
 
-    for p in posts:
-        buttons.append([
-            InlineKeyboardButton(p.title, url=get_url('blog:detail', args=[p.slug]))
-        ])
+        buttons = []
 
-    return msg, InlineKeyboardMarkup(buttons)
+        for p in posts:
+            buttons.append([
+                InlineKeyboardButton(p.title, url=get_url('blog:detail', args=[p.slug]))
+            ])
+
+        return msg, InlineKeyboardMarkup(buttons)

@@ -5,65 +5,58 @@ from django.db.models import Q
 
 from heart.models import Group
 
-from .handlers import add_handler
+from .handlers import add_handler, CommandHandler
 
 User = get_user_model()
 
+
 @add_handler('vinculargrupo')
-def groups_link(update, context):
-    message = update.message
+class GroupsLink(CommandHandler):
+    '''Links a telegram group to a students group (only staff and delegates)'''
 
-    if message.chat.type != 'group':
-        return 'Este comando solamente puede utilizarse en grupos'
+    chat_type = 'group'
 
-    try:
-        group_year, group_num = [int(x) for x in context.args[0].split('.')]
-    except (ValueError, IndexError):
-        return (
-            '**Uso**: _/vinculargrupo <curso>.<grupo>_\n\n'
-            '**Ej**: para el grupo 1 de tercero usa `/vinculargrupo 3.1`'
-        )
+    bot_admin_required = True
+    user_required = True
 
-    bot_id = context.bot.get_me().id
+    def handle(self, update, context):
+        message = update.message
 
-    if message.chat.get_member(bot_id).status != 'administrator':
-        return 'El bot debe ser administrador para vincular el grupo'
+        try:
+            group_year, group_num = [int(x) for x in context.args[0].split('.')]
+        except (ValueError, IndexError):
+            return (
+                '**Uso**: _/vinculargrupo <curso>.<grupo>_\n\n'
+                '**Ej**: para el grupo 1 de tercero usa `/vinculargrupo 3.1`'
+            )
 
-    group_id = str(message.chat.id)
+        chat_id = str(update.effective_chat.id)
+        group = Group.objects.filter(telegram_group=chat_id).first()
 
-    group = Group.objects.filter(telegram_group=group_id).first()
+        if group:
+            return (
+                'Este chat de Telegram ya está vinculado al grupo {}.{}'
+            ).format(group.year, group.number)
 
-    if group:
-        if group.year == group_year and group.number == group_num:
-            return 'Este chat de Telegram ya se ha vinculado a este grupo'
-        else:
-            return 'Este chat de Telegram ya está vinculado al grupo {}.{}'.format(group.year, group.number)
+        user = self.get_user()
 
-    user = User.objects.filter(telegram_id=message.from_user.id).first()
+        query = Q(year=group_year, number=group_num)
 
-    if not user:
-        return (
-            'Debes vincular tu cuenta de usuario primero: '
-            'ejecuta /vincular en un chat privado conmigo'
-        )
+        if not user.has_perm('can_link_group'):
+            query &= Q(delegate=user) | Q(subdelegate=user)
 
-    query = Q(year=group_year, number=group_num)
+        group = Group.objects.filter(query).first()
 
-    if not user.has_perm('can_link_group'):
-        query &= Q(delegate=user) | Q(subdelegate=user)
+        if not group:
+            return 'No se ha encontrado el grupo indicado o el usuario no es un delegado'
 
-    group = Group.objects.filter(query).first()
+        group.telegram_group = chat_id
 
-    if not group:
-        return 'No se ha encontrado el grupo indicado o el usuario no es un delegado'
+        try:
+            group.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
+        except BadRequest:
+            return 'Ha ocurrido un error inesperado durante la vinculación'
 
-    group.telegram_group = group_id
+        group.save()
 
-    try:
-        group.telegram_group_link = context.bot.export_chat_invite_link(group_id)
-    except BadRequest:
-        return 'Ha ocurrido un error inesperado durante la vinculación'
-
-    group.save()
-
-    return '¡Grupo vinculado correctamente!'
+        return '¡Grupo vinculado correctamente!'
