@@ -7,7 +7,7 @@ from django import setup as django_setup
 
 from telegram.ext import Updater, CommandHandler
 
-if __name__ == '__main__':
+def main():
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO
@@ -38,3 +38,6 @@ if __name__ == '__main__':
     updater.start_polling()
 
     print('Bot started!')
+
+if __name__ == '__main__':
+    main()

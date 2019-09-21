@@ -12,6 +12,9 @@ class StartHandler(CommandHandler):
     '''Start command'''
 
     def handle(self, update, context):
+        if update.effective_chat.type != 'private':
+            return
+
         telegram_user = update.message.from_user
         user = User.objects.filter(telegram_user=telegram_user.username).first()
 
