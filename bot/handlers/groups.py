@@ -60,3 +60,32 @@ class GroupsLink(CommandHandler):
         group.save()
 
         return '¡Grupo vinculado correctamente!'
+
+
+@add_handler('desvinculargrupo')
+class GroupsUnlink(CommandHandler):
+    '''Unlinks a telegram group from a students group (only staff and delegates)'''
+
+    chat_type = 'group'
+
+    user_required = True
+
+    def handle(self, update, context):
+        group = Group.objects.filter(telegram_group=update.message.chat.id).first()
+
+        if not group:
+            return '⚠️ Este chat de Telegram no está vinculado a ningún grupo ⚠️'
+
+        user = self.get_user()
+
+        if (not user.has_perm('can_link_group')
+                and not user == group.delegate
+                and not user == group.subdelegate):
+            return 'No tienes los permisos necesarios para ejecutar este comando'
+
+        group.telegram_group = ''
+        group.telegram_group_link = ''
+
+        group.save()
+
+        return 'Grupo desvinculado correctamente'
