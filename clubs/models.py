@@ -23,6 +23,10 @@ class Club(models.Model):
         verbose_name = 'club'
         verbose_name_plural = 'clubes'
 
+        permissions = [
+            ('can_link_club', 'Puede vincular un grupo de Telegram con un club')
+        ]
+
 
 class ClubMeeting(models.Model):
     '''

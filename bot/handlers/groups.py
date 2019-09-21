@@ -42,7 +42,7 @@ class GroupsLink(CommandHandler):
 
         query = Q(year=group_year, number=group_num)
 
-        if not user.has_perm('can_link_group'):
+        if not user.has_perm('heart.can_link_group'):
             query &= Q(delegate=user) | Q(subdelegate=user)
 
         group = Group.objects.filter(query).first()
@@ -78,7 +78,7 @@ class GroupsUnlink(CommandHandler):
 
         user = self.get_user()
 
-        if (not user.has_perm('can_link_group')
+        if (not user.has_perm('heart.can_link_group')
                 and not user == group.delegate
                 and not user == group.subdelegate):
             return 'No tienes los permisos necesarios para ejecutar este comando'

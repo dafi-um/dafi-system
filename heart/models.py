@@ -137,5 +137,9 @@ class Room(models.Model):
     class Meta:
         verbose_name = 'sala'
 
+        permissions = [
+            ('can_change_room_state', 'Puede cambiar el estado de una sala')
+        ]
+
     def __str__(self):
         return self.name
