@@ -8,13 +8,27 @@ class Club(models.Model):
     '''
 
     name = models.CharField('nombre', max_length=64)
+
     slug = models.SlugField('slug', max_length=64)
+
     description = models.TextField('descripción', max_length=300)
-    telegram_group = models.CharField('grupo telegram', max_length=64, blank=True)
-    telegram_channel = models.CharField('canal telegram', max_length=64, blank=True)
-    manager = models.ForeignKey(get_user_model(),
-                               on_delete=models.CASCADE,
-                               verbose_name='gestor')
+
+    telegram_group = models.CharField(
+        'grupo de telegram', max_length=64, blank=True, default=''
+    )
+
+    telegram_group_link = models.CharField(
+        'enlace al grupo de telegram', max_length=64, blank=True, default=''
+    )
+
+    managers = models.ManyToManyField(
+        get_user_model(), 'managed_clubs', verbose_name='gestores'
+    )
+
+    image = models.ImageField(
+        'imagen', upload_to='clubs/', blank=True,
+        help_text='Imagen para mostrar en la lista de clubes'
+    )
 
     def __str__(self):
         return self.name
@@ -33,13 +47,20 @@ class ClubMeeting(models.Model):
     Club meeting
     '''
 
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, verbose_name='club', related_name='meetings')
+    club = models.ForeignKey(
+        Club, models.CASCADE, 'meetings', verbose_name='club'
+    )
+
     title = models.CharField('título', max_length=200, blank=True)
     place = models.CharField('lugar', max_length=120)
     moment = models.DateTimeField('fecha')
 
     def __str__(self):
-        return '{} en {} ({})'.format(self.club.name, self.place, self.moment.strftime('%d %b %Y %H:%M'))
+        return '{} en {} ({})'.format(
+            self.club.name, self.place, self.moment.strftime('%d %b %Y %H:%M')
+        )
 
     class Meta:
         verbose_name = 'quedada'
+
+        ordering = ['moment']

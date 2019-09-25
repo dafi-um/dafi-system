@@ -4,8 +4,7 @@ from .models import Club, ClubMeeting
 
 
 class ClubAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'manager')
-    list_filter = ['manager']
+    list_display = ('name', 'slug')
 
     prepopulated_fields = {'slug': ('name',)}
 
