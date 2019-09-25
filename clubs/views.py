@@ -23,7 +23,7 @@ class DetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.is_authenticated:
-            context['is_manager'] = self.request.user in self.get_object().managers.all()
+            context['is_manager'] = self.request.user.is_superuser or self.request.user in self.get_object().managers.all()
 
         return context
 
@@ -46,7 +46,7 @@ class ClubMeetingMixin(UserPassesTestMixin):
     def test_func(self):
         club = self.get_club()
 
-        return club and self.request.user in club.managers.all()
+        return club and (self.request.user.is_superuser or self.request.user in club.managers.all())
 
 
 class MeetingAddView(ClubMeetingMixin, CreateView):
