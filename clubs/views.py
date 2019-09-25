@@ -16,13 +16,25 @@ class IndexView(ListView):
 class DetailView(DetailView):
     model = Club
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('managers')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.request.user.is_authenticated:
+            context['is_manager'] = self.request.user in self.get_object().managers.all()
+
+        return context
+
 
 class ClubMeetingMixin(UserPassesTestMixin):
     _club = None
 
     def get_club(self):
         if not self._club:
-            self._club = Club.objects.filter(slug=self.kwargs['slug']).first()
+            query = Club.objects.filter(slug=self.kwargs['slug'])
+            self._club = query.prefetch_related('managers').first()
 
         return self._club
 
@@ -34,7 +46,7 @@ class ClubMeetingMixin(UserPassesTestMixin):
     def test_func(self):
         club = self.get_club()
 
-        return club and self.request.user == club.manager
+        return club and self.request.user in club.managers.all()
 
 
 class MeetingAddView(ClubMeetingMixin, CreateView):

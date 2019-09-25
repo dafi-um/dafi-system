@@ -7,46 +7,63 @@
     <header class="major special">
         <div class="split">
             <h1>{{ club.name }}</h1>
-            {% if user == club.manager %}
-                <p><a class="button alt" href="{% url 'clubs:meeting_add' club.slug %}" title="Organizar quedada">Organizar quedada</a></p>
-            {% endif %}
+            <p>
+                {% if is_manager %}
+                    <a class="button alt" href="{% url 'clubs:meeting_add' club.slug %}" title="Organizar quedada">Organizar quedada</a>
+                {% endif %}
+                <a class="button alt" href="{% url 'clubs:list' %}" title="Lista de Clubes">Volver a la lista</a>
+            </p>
         </div>
 
-        <p>
-            Gestor: {{ club.manager | nice_name }}
-            {% if user == club.manager %}
-                - Club ID: {{ club.slug }}
-                {% if club.telegram_group %}- Grupo de Telegram: {{ club.telegram_group }}{% endif %}
-                {% if club.telegram_channel %}- Canal de Telegram: {{ club.telegram_channel }}{% endif %}
-            {% endif %}
-        </p>
+        {% if is_manager %}
+            <p>Club ID: {{ club.slug }}</p>
+        {% endif %}
     </header>
 
-    <p>{{ club.description }}</p>
+    <div class="box wrapper style3">
+        <div class="row">
+            <div class="6u 12u(small)">
+                <h4>Sobre nosotros</h4>
+                <p>{{ club.description }}</p>
+            </div>
 
-    {% for m in club.meetings.all|dictsortreversed:'moment' %}
-        {% if forloop.first %}
-            <hr style="margin: 0.5em 0;" />
+            <div class="6u 12u(small)">
+                <h4>Responsables</h4>
 
-            <ul id="meetings" class="alt">
+                <ul class="alt">
+                    {% for manager in club.managers.all %}
+                        <li>
+                            <span>{{ manager | nice_name }}</span>
+                            {% if manager.telegram_id %}
+                                <span>- <span class="icon fa-send"></span> @{{ manager.telegram_user }}</span>
+                            {% endif %}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        {% if club.telegram_group_link %}
+            <div style="text-align: center;">
+                <a class="button alt" href="{{ club.telegram_group_link }}" title="Unirse al Grupo de Telegram">Unirse al Grupo de Telegram</a>
+            </div>
         {% endif %}
+    </div>
 
-        <li>
-            <header>
-                <h5>{{ m.title }}</h5>
-                {% if user == club.manager %}
-                    <p>
-                        <a href="{% url 'clubs:meeting_edit' club.slug m.id %}" title="Editar">Editar</a>&nbsp;|&nbsp;
-                        <a href="{% url 'clubs:meeting_delete' club.slug m.id %}" title="Eliminar">Eliminar</a>
-                    </p>
-                {% endif %}
-            </header>
+    <ul id="meetings" class="alt">
+        {% for m in club.meetings.all %}
+            <li>
+                <header>
+                    <h5>{{ m.title }}</h5>
+                    {% if is_manager %}
+                        <p>
+                            <a href="{% url 'clubs:meeting_edit' club.slug m.id %}" title="Editar">Editar</a>&nbsp;|&nbsp;
+                            <a href="{% url 'clubs:meeting_delete' club.slug m.id %}" title="Eliminar">Eliminar</a>
+                        </p>
+                    {% endif %}
+                </header>
 
-            <p>En {{ m.place }} el {{ m.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
-        </li>
-
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
-    {% endfor %}
+                <p>En {{ m.place }} el {{ m.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock content %}
