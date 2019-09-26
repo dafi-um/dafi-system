@@ -111,6 +111,15 @@ DATABASES = {
 
 ADMINS = getaddresses([env('ADMINS')])
 
+DEFAULT_FROM_EMAIL = env('EMAIL_FROM')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_USE_SSL = True
+
+EMAIL_CONFIG = env.email_url('EMAIL')
+vars().update(EMAIL_CONFIG)
+
 
 # Auth
 
