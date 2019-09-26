@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
     'pagedown',
     'markdown_deux',
+    'meta',
 ]
 
 MIDDLEWARE = [
@@ -159,3 +160,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+
+# Metadata
+
+META_SITE_PROTOCOL = 'http' if DEBUG else 'https'
+
+META_USE_OG_PROPERTIES = True
+
+META_USE_TWITTER_PROPERTIES = True
+
+META_USE_SITES = True
