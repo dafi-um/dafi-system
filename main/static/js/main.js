@@ -28,44 +28,28 @@
 				}, 100);
 			});
 
-		// Fix: Placeholder polyfill.
-			$('form').placeholder();
+		// User menu toggle button
+			userMenuShown = false;
 
-		// Prioritize "important" elements on medium.
-			skel.on('+medium -medium', function() {
-				$.prioritize(
-					'.important\\28 medium\\29',
-					skel.breakpoint('medium').active
-				);
+			$('.user-menu-button').click(function() {
+				if (userMenuShown) {
+					$('.user-menu').removeClass('shown');
+				} else {
+					$('.user-menu').addClass('shown');
+				}
+
+				userMenuShown = !userMenuShown;
 			});
 
-		// Off-Canvas Navigation.
-
-			// Navigation Panel Toggle.
-				$('<a href="#navPanel" class="navPanelToggle"></a>')
-					.appendTo($body);
-
-			// Navigation Panel.
-				$(
-					'<div id="navPanel">' +
-						$('#nav').html() +
-						'<a href="#navPanel" class="close"></a>' +
-					'</div>'
-				)
-					.appendTo($body)
-					.panel({
-						delay: 500,
-						hideOnClick: true,
-						hideOnSwipe: true,
-						resetScroll: true,
-						resetForms: true,
-						side: 'left'
-					});
-
-			// Fix: Remove transitions on WP<10 (poor/buggy performance).
-				if (skel.vars.os == 'wp' && skel.vars.osVersion < 10)
-					$('#navPanel')
-						.css('transition', 'none');
+		// Navigation Panel.
+			$('#navPanel').panel({
+				delay: 500,
+				hideOnClick: true,
+				hideOnSwipe: true,
+				resetScroll: true,
+				resetForms: true,
+				side: 'left'
+			});
 
 	});
 

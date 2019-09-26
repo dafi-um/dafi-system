@@ -3228,6 +3228,45 @@
 
 			}
 
+		#header .user-menu-wrapper {
+			display: inline;
+			position: relative;
+		}
+
+			#header .user-menu-button {
+				cursor: pointer;
+			}
+
+		#header .user-menu {
+			position: absolute;
+			right: 0.75em;
+			top: 1em;
+			display: flex;
+			flex-direction: column;
+			margin: 1em 0;
+			padding: 0 1em;
+			transition: max-height 0.25s ease-out;
+			max-height: 0;
+			overflow: hidden;
+			background: #1c1c1c;
+			box-shadow: 0 4px 10px #1c1c1c;
+			text-align: center;
+		}
+
+			#header .user-menu.shown {
+				max-height: 300px;
+				transition: max-height 0.25s ease-in;
+			}
+
+			#header .user-menu a {
+				padding: 0.75em 0;
+				border-top: 1px solid #fff;
+			}
+
+				#header .user-menu a:first-child {
+					border-top: 0;
+				}
+
 	@media screen and (max-width: 480px) {
 
 		#header {
@@ -3398,6 +3437,21 @@
 			#navPanel .close:hover {
 				color: inherit;
 			}
+
+		#navPanel a.user-menu-button:not(.close) {
+			margin-top: 1em;
+			padding-bottom: 0.25em;
+			border-bottom: 1px solid #fff;
+		}
+
+			#navPanel a.user-menu-button span:last-child {
+				display: none;
+			}
+
+		#navPanel .user-menu-wrapper,
+		#navPanel .user-menu {
+			display: inline;
+		}
 
 		@media screen and (max-width: 980px) {
 

@@ -1,0 +1,23 @@
+<a href="{% url 'main:index' %}">Inicio</a>
+<a href="{% url 'blog:list' %}">Blog</a>
+<a href="{% url 'clubs:list' %}">Clubes</a>
+
+{% if user.is_authenticated %}
+    <div class="user-menu-wrapper">
+        <a class="user-menu-button">
+            <span>Hola, {{ user.first_name | default:user.username }}</span>
+            <span><i class="fa fa-chevron-down"></i></span>
+        </a>
+
+        <div class="user-menu">
+            {% if user.is_staff %}
+                <a href="/admin/" title="Admin">Admin</a>
+            {% endif %}
+
+            <a href="{% url 'profile' %}" title="Mi Perfil">Mi Perfil</a>
+            <a href="{% url 'logout' %}" title="Cerrar Sesión">Cerrar Sesión</a>
+        </div>
+    </div>
+{% else %}
+    <a href="{% url 'login' %}" title="Iniciar Sesión">Iniciar Sesión</a>
+{% endif %}
