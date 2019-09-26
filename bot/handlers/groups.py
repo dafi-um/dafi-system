@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from heart.models import Group
+from clubs.models import Club
 
 from .handlers import add_handler, CommandHandler
 
@@ -20,8 +21,6 @@ class GroupsLink(CommandHandler):
     user_required = True
 
     def handle(self, update, context):
-        message = update.message
-
         try:
             group_year, group_num = [int(x) for x in context.args[0].split('.')]
         except (ValueError, IndexError):
@@ -89,3 +88,72 @@ class GroupsUnlink(CommandHandler):
         group.save()
 
         return 'Grupo desvinculado correctamente'
+
+
+@add_handler('vincularclub')
+class GroupsLink(CommandHandler):
+    '''Links a telegram group to a club (only staff and managers)'''
+
+    chat_type = 'group'
+
+    bot_admin_required = True
+    user_required = True
+
+    def handle(self, update, context):
+        if not context.args or not context.args[0]:
+            return '**Uso**: _/vincularclub <ID-del-club>_'
+
+        slug = context.args[0]
+        chat_id = str(update.effective_chat.id)
+        query = Q(telegram_group=chat_id) | Q(slug=slug)
+
+        club = Club.objects.filter(query).prefetch_related('managers').first()
+
+        if not club:
+            return 'No se ha encontrado el club _{}_'.format(slug)
+        elif club.telegram_group:
+            return 'Este chat ya está vinculado a _{}_ ⚠️'.format(club.name)
+
+        user = self.get_user()
+
+        if not user.is_superuser and user not in club.managers.all():
+            return 'No tienes permisos para realizar esta acción ⚠️'
+
+        club.telegram_group = chat_id
+
+        try:
+            club.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
+        except BadRequest:
+            return 'Ha ocurrido un error inesperado durante la vinculación'
+
+        club.save()
+
+        return '¡Club vinculado correctamente!'
+
+
+@add_handler('desvincularclub')
+class GroupsUnlink(CommandHandler):
+    '''Unlinks a telegram group from a club (only staff and managers)'''
+
+    chat_type = 'group'
+
+    user_required = True
+
+    def handle(self, update, context):
+        query = Q(telegram_group=update.message.chat.id)
+        club = Club.objects.filter(query).prefetch_related('managers').first()
+
+        if not club:
+            return '⚠️ Este chat de Telegram no está vinculado a ningún club ⚠️'
+
+        user = self.get_user()
+
+        if not user.is_superuser and user not in club.managers.all():
+            return 'No tienes los permisos necesarios para ejecutar este comando ⚠️'
+
+        club.telegram_group = ''
+        club.telegram_group_link = ''
+
+        club.save()
+
+        return '¡Club desvinculado correctamente!'
