@@ -173,6 +173,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Metadata
 
+META_SITE_NAME = 'DAFI'
+
 META_SITE_PROTOCOL = 'http' if DEBUG else 'https'
 
 META_USE_OG_PROPERTIES = True
