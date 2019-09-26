@@ -48,13 +48,23 @@ class BasicCallbackHandler(QueryHandler):
 
 @add_handler('getid')
 class GetGroupID(CommandHandler):
-    '''Prints the chat ID (only staff members)'''
-
-    user_required = True
-    user_required_msg = 'No tienes los permisos adecuados para realizar esta acción'
-
-    def user_filter(self, user):
-        return user.is_staff
+    '''Sends the user a chat ID keeping it secret (only superusers)'''
 
     def handle(self, update, context):
-        return 'ID: {}'.format(update.message.chat.id)
+        user = self.get_user()
+
+        if not user or not user.is_superuser:
+            return
+
+        chat = update.effective_chat
+
+        msg = 'ID de {}: {}'.format(
+            chat.title or chat.username or 'desconocido', chat.id
+        )
+
+        try:
+            update.effective_message.delete()
+        except:
+            msg += '\n(No he podido eliminar el comando del chat)'
+
+        self.context.bot.send_message(update.effective_user.id, msg)
