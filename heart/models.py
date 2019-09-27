@@ -7,6 +7,7 @@ from django.utils.functional import cached_property
 User = get_user_model()
 
 NUM_YEARS = 4
+YEARS_RANGE = range(1, NUM_YEARS + 1)
 YEARS_VALIDATORS = [MinValueValidator(1), MaxValueValidator(NUM_YEARS)]
 
 

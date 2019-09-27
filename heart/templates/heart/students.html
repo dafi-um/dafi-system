@@ -1,0 +1,38 @@
+{% extends 'generic.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Grupos de Alumnos GII</h1>
+    </header>
+
+    {% regroup groups_all by year as groups_list %}
+
+    {% for year, groups in groups_list %}
+        <h3>Año {{ year }}</h3>
+
+        {% for group in groups %}
+            <div class="box wrapper style3 students-groups">
+                <header class="special">
+                    <h4>{{ group.name }}</h4>
+                    <p>Subgrupos: {{ group.subgroups }}</p>
+                </header>
+
+                <ul class="alt">
+                    {% if group.delegate %}
+                        <li>Delegado: {{ group.delegate | nice_name }}</li>
+                    {% endif %}
+
+                    {% if group.subdelegate %}
+                        <li>Subdelegado: {{ group.subdelegate | nice_name }}</li>
+                    {% endif %}
+                </ul>
+
+                {% if group.telegram_group_link %}
+                    <a href="{{ group.telegram_group_link }}" class="button alt" title="Unirse al Grupo de Telegram de {{ group.name }}">Grupo de Telegram</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endblock content %}

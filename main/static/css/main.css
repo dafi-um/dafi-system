@@ -4070,6 +4070,51 @@
 			margin-bottom: 0;
 		}
 
+/* Students */
+
+	.students-groups header {
+		margin: 0.5em 0;
+	}
+
+		.students-groups header p {
+			margin: 0;
+		}
+
+	@media screen and (max-width: 480px) {
+
+		.students-groups header h4 {
+			margin-bottom: 0.25em;
+		}
+
+		.students-groups ul.alt {
+			margin: 0.5em 0;
+		}
+
+		.students-groups a.button {
+			display: block;
+			margin-bottom: 1em;
+		}
+
+	}
+
+	@media screen and (min-width: 481px) {
+
+		.students-groups {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+			.students-groups ul.alt {
+				margin: 0;
+			}
+
+				.students-groups ul.alt li:last-child {
+					padding-bottom: 0;
+				}
+
+	}
+
 /* Trading */
 
 	#get-started p,

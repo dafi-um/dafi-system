@@ -9,6 +9,7 @@ admin.site.site_header = 'Administración de DAFI'
 
 urlpatterns = [
     path('', include('main.urls')),
+    path('', include('heart.urls')),
     path('blog/', include('blog.urls')),
     path('clubs/', include('clubs.urls')),
     path('permutas/', include('trading.urls')),
