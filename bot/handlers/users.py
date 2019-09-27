@@ -17,7 +17,7 @@ class UsersLink(CommandHandler):
 
     def handle(self, update, context):
         telegram_user = update.message.from_user
-        user = User.objects.filter(telegram_user=telegram_user.username).first()
+        user = User.objects.filter(telegram_user__iexact=telegram_user.username).first()
 
         if user and not user.telegram_id:
             msg = (
@@ -83,7 +83,7 @@ class UsersCallbackHandler(QueryHandler):
         action = query.data.replace('users:', '')
 
         if action == 'link':
-            user = User.objects.filter(telegram_user=query.from_user.username).first()
+            user = User.objects.filter(telegram_user__iexact=query.from_user.username).first()
 
             if not user:
                 return 'Parece que ha ocurrido un error...'
