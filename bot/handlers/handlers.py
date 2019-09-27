@@ -55,7 +55,7 @@ class BasicHandler():
     def run_checks(self):
         chat = self.update.effective_chat
 
-        if self.chat_type and chat.type != self.chat_type:
+        if self.chat_type and self.chat_type not in chat.type:
             self.msg = 'Este comando solamente puede utilizarse en {} ⚠️'.format(
                 self.chat_type_messages[self.chat_type]
             )
