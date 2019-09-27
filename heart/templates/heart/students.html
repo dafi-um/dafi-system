@@ -19,15 +19,27 @@
                     <p>Subgrupos: {{ group.subgroups }}</p>
                 </header>
 
-                <ul class="alt">
+                <div class="delegates">
                     {% if group.delegate %}
-                        <li>Delegado: {{ group.delegate | nice_name }}</li>
+                        <h6>Delegado</h6>
+                        <p>
+                            <span>{{ group.delegate | nice_name }}</span>
+                            {% if group.delegate.telegram_id %}
+                                <span> - <i class="fa fa-send"></i> @{{ group.delegate.telegram_user }}</span>
+                            {% endif %}
+                        </p>
                     {% endif %}
 
                     {% if group.subdelegate %}
-                        <li>Subdelegado: {{ group.subdelegate | nice_name }}</li>
+                        <h6>Subdelegado</h6>
+                        <p>
+                            <span>{{ group.subdelegate | nice_name }}</span>
+                            {% if group.subdelegate.telegram_id %}
+                                <span> - <i class="fa fa-send"></i> @{{ group.subdelegate.telegram_user }}</span>
+                            {% endif %}
+                        </p>
                     {% endif %}
-                </ul>
+                </div>
 
                 {% if group.telegram_group_link %}
                     <a href="{{ group.telegram_group_link }}" class="button alt" title="Unirse al Grupo de Telegram de {{ group.name }}">Grupo de Telegram</a>

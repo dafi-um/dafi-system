@@ -4073,11 +4073,16 @@
 /* Students */
 
 	.students-groups header {
-		margin: 0.5em 0;
+		margin: 0;
 	}
 
-		.students-groups header p {
+		.students-groups p {
 			margin: 0;
+		}
+
+		.students-groups h6 {
+			margin: 0;
+			border-bottom: 1px solid #e5474b;
 		}
 
 	@media screen and (max-width: 480px) {
@@ -4086,13 +4091,12 @@
 			margin-bottom: 0.25em;
 		}
 
-		.students-groups ul.alt {
-			margin: 0.5em 0;
+		.students-groups .delegates {
+			margin: 0.5em 0 1em 0;
 		}
 
 		.students-groups a.button {
 			display: block;
-			margin-bottom: 1em;
 		}
 
 	}
@@ -4103,15 +4107,8 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+			padding: 1em;
 		}
-
-			.students-groups ul.alt {
-				margin: 0;
-			}
-
-				.students-groups ul.alt li:last-child {
-					padding-bottom: 0;
-				}
 
 	}
 
