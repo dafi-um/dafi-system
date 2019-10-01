@@ -41,5 +41,42 @@ def main():
 
     print('Bot started!')
 
+    while True:
+        cmd = input('bot> ')
+
+        if cmd == 'stop' or cmd == 'exit':
+            break
+        elif cmd == 'data':
+            print('Persistent data:')
+
+            for k, v in persistence.get_all():
+                print('  {}: {}'.format(k, v))
+        elif cmd == 'save' or cmd == 'sync':
+            print('Saving persistent data...')
+            persistence.sync()
+            print('Done!')
+        elif cmd == 'flush':
+            persistence.flush()
+            print('Persistent data flushed!!')
+        elif cmd == 'help':
+            print(
+                'DAFIBot commands help:\n'
+                '  data - displays persistent data in memory\n'
+                '  exit - stops the bot gracefully\n'
+                '  flush - flushes the persistent data\n'
+                '  save - saves the persistent data to disk\n'
+                '  help - displays this help'
+            )
+        else:
+            print('Unknown command!')
+
+    print('Stopping polling...')
+    updater.stop()
+
+    print('Saving persistent data...')
+    persistence.close()
+
+    print('Bye!')
+
 if __name__ == '__main__':
     main()
