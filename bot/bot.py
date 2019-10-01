@@ -28,13 +28,15 @@ def main():
 
     print('Loading handlers...')
 
-    from . import handlers
+    from . import handlers, persistence
 
     for handler in handlers.get_handlers():
         updater.dispatcher.add_handler(handler)
 
-    print('Starting polling...')
+    print('Loading persistent data...')
+    persistence.load()
 
+    print('Starting polling...')
     updater.start_polling()
 
     print('Bot started!')
