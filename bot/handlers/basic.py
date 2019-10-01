@@ -42,8 +42,12 @@ class BasicCallbackHandler(QueryHandler):
     '''Generic callback queries handler'''
 
     def handle(self, update, context):
-        if update.callback_query.data == 'main:abort':
+        action = update.callback_query.data.replace('main:', '')
+
+        if action == 'abort':
             return 'Operación cancelada.'
+        elif action == 'okey':
+            return '¡De acuerdo!'
 
 
 @add_handler('getid')
