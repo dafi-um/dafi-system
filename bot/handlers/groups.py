@@ -51,10 +51,13 @@ class GroupsLink(CommandHandler):
 
         group.telegram_group = chat_id
 
-        try:
-            group.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
-        except BadRequest:
-            return 'Ha ocurrido un error inesperado durante la vinculación'
+        if update.effective_chat.invite_link:
+            group.telegram_group_link = update.effective_chat.invite_link
+        else:
+            try:
+                group.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
+            except BadRequest:
+                return 'Ha ocurrido un error inesperado durante la vinculación'
 
         group.save()
 
@@ -121,10 +124,13 @@ class GroupsLink(CommandHandler):
 
         club.telegram_group = chat_id
 
-        try:
-            club.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
-        except BadRequest:
-            return 'Ha ocurrido un error inesperado durante la vinculación'
+        if update.effective_chat.invite_link:
+            club.telegram_group_link = update.effective_chat.invite_link
+        else:
+            try:
+                club.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
+            except BadRequest:
+                return 'Ha ocurrido un error inesperado durante la vinculación'
 
         club.save()
 
