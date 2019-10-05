@@ -109,7 +109,7 @@ class DafiRoom(RoomMixin, CommandHandler):
 
         user = self.get_user()
 
-        if not user or not user.has_perm('heart.can_change_room_state'):
+        if not user or not user.has_perm('bot.can_change_room_state'):
             return 'No puedes llevar a cabo esta acción'
 
         if action == 'on':
