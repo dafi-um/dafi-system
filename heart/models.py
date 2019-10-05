@@ -128,19 +128,3 @@ class Subject(models.Model):
             cache.set('grouped_subjects', d)
 
         return d
-
-
-class Room(models.Model):
-    name = models.CharField('nombre de la sala', max_length=64)
-    code = models.CharField('código de la sala', max_length=64, unique=True)
-    members = models.ManyToManyField(User, verbose_name='miembros en la sala')
-
-    class Meta:
-        verbose_name = 'sala'
-
-        permissions = [
-            ('can_change_room_state', 'Puede cambiar el estado de una sala')
-        ]
-
-    def __str__(self):
-        return self.name

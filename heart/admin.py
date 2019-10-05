@@ -8,11 +8,6 @@ class GroupAdmin(admin.ModelAdmin):
     list_display = ('year', 'name', 'delegate', 'subdelegate')
 
 
-@admin.register(models.Room)
-class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code')
-
-
 @admin.register(models.Subject)
 class SubjectAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'year', 'quarter')

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'blog.apps.BlogConfig',
     'clubs.apps.ClubsConfig',
     'trading.apps.TradingConfig',
+    'bot.apps.BotConfig',
     'django_cleanup.apps.CleanupConfig',
     'pagedown',
     'markdown_deux',
@@ -178,6 +179,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 META_SITE_NAME = 'DAFI'
 
 META_SITE_PROTOCOL = 'http' if DEBUG else 'https'
+
+META_USE_TITLE_TAG = True
 
 META_USE_OG_PROPERTIES = True
 
