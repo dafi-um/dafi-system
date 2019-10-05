@@ -34,7 +34,7 @@ class GroupsLink(CommandHandler):
 
         if group:
             return (
-                'Este chat de Telegram ya está vinculado al grupo {}.{}'
+                'Este chat de Telegram ya está vinculado al grupo {}.{} ⚠️'
             ).format(group.year, group.number)
 
         user = self.get_user()
@@ -48,17 +48,16 @@ class GroupsLink(CommandHandler):
 
         if not group:
             return 'No se ha encontrado el grupo indicado o el usuario no es un delegado'
+        elif group.telegram_group:
+            return 'El grupo {}.{} ya está vinculado a otro chat ⚠️'.format(group_year, group_num)
+
+        invite_link = self.get_invite_link()
+
+        if not invite_link:
+            return 'Ha ocurrido un error inesperado durante la vinculación'
 
         group.telegram_group = chat_id
-
-        if update.effective_chat.invite_link:
-            group.telegram_group_link = update.effective_chat.invite_link
-        else:
-            try:
-                group.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
-            except BadRequest:
-                return 'Ha ocurrido un error inesperado durante la vinculación'
-
+        group.telegram_group_link = invite_link
         group.save()
 
         return '¡Grupo vinculado correctamente!'
@@ -114,24 +113,23 @@ class GroupsLink(CommandHandler):
 
         if not club:
             return 'No se ha encontrado el club _{}_'.format(slug)
-        elif club.telegram_group:
+        elif club.telegram_group == chat_id:
             return 'Este chat ya está vinculado a _{}_ ⚠️'.format(club.name)
+        elif club.telegram_group:
+            return 'El club _{}_ ya está vinculado a otro chat ⚠️'.format(club.name)
 
         user = self.get_user()
 
         if not user.is_superuser and user not in club.managers.all():
             return 'No tienes permisos para realizar esta acción ⚠️'
 
+        invite_link = self.get_invite_link()
+
+        if not invite_link:
+            return 'Ha ocurrido un error inesperado durante la vinculación'
+
         club.telegram_group = chat_id
-
-        if update.effective_chat.invite_link:
-            club.telegram_group_link = update.effective_chat.invite_link
-        else:
-            try:
-                club.telegram_group_link = context.bot.export_chat_invite_link(chat_id)
-            except BadRequest:
-                return 'Ha ocurrido un error inesperado durante la vinculación'
-
+        club.telegram_group_link = invite_link
         club.save()
 
         return '¡Club vinculado correctamente!'

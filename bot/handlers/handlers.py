@@ -1,4 +1,5 @@
 from telegram import ParseMode as _ParseMode
+from telegram.error import BadRequest
 
 from telegram.ext import (
     CallbackQueryHandler as _CallbackQueryHandler,
@@ -52,6 +53,18 @@ class BasicHandler():
     def user_filter(self, user):
         return True
 
+    def get_invite_link(self):
+        chat_id = self.update.effective_chat.id
+        chat = self.context.bot.get_chat(chat_id)
+
+        if chat.invite_link:
+            return chat.invite_link
+
+        try:
+            return self.context.bot.export_chat_invite_link(chat_id)
+        except BadRequest:
+            return None
+
     def run_checks(self):
         chat = self.update.effective_chat
 
@@ -61,7 +74,7 @@ class BasicHandler():
             )
             return False
 
-        if self.bot_admin_required and chat.type == 'group':
+        if self.bot_admin_required and 'group' in chat.type:
             bot_id = self.context.bot.get_me().id
 
             if chat.get_member(bot_id).status != 'administrator':
