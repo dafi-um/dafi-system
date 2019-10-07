@@ -42,7 +42,7 @@ def main():
     print('Bot started!')
 
     while True:
-        cmd = input('bot> ')
+        cmd = input('bot> ').strip().lower()
 
         if cmd == 'stop' or cmd == 'exit':
             break
