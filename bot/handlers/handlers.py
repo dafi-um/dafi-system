@@ -1,5 +1,5 @@
 from telegram import ParseMode as _ParseMode
-from telegram.error import BadRequest
+from telegram.error import BadRequest, ChatMigrated
 
 from telegram.ext import (
     CallbackQueryHandler as _CallbackQueryHandler,
@@ -61,9 +61,16 @@ class BasicHandler():
             return chat.invite_link
 
         try:
-            return self.context.bot.export_chat_invite_link(chat_id)
+            return chat_id, self.context.bot.export_chat_invite_link(chat_id)
         except BadRequest:
-            return None
+            return None, None
+        except ChatMigrated as e:
+            chat_id = e.new_chat_id
+
+        try:
+            return chat_id, self.context.bot.export_chat_invite_link(chat_id)
+        except BadRequest:
+            return None, None
 
     def run_checks(self):
         chat = self.update.effective_chat

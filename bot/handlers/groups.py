@@ -29,8 +29,7 @@ class GroupsLink(CommandHandler):
                 '**Ej**: para el grupo 1 de tercero usa `/vinculargrupo 3.1`'
             )
 
-        chat_id = str(update.effective_chat.id)
-        group = Group.objects.filter(telegram_group=chat_id).first()
+        group = Group.objects.filter(telegram_group=update.effective_chat.id).first()
 
         if group:
             return (
@@ -51,9 +50,9 @@ class GroupsLink(CommandHandler):
         elif group.telegram_group:
             return 'El grupo {}.{} ya está vinculado a otro chat ⚠️'.format(group_year, group_num)
 
-        invite_link = self.get_invite_link()
+        chat_id, invite_link = self.get_invite_link()
 
-        if not invite_link:
+        if not chat_id or not invite_link:
             return 'Ha ocurrido un error inesperado durante la vinculación'
 
         group.telegram_group = chat_id
@@ -123,9 +122,9 @@ class GroupsLink(CommandHandler):
         if not user.is_superuser and user not in club.managers.all():
             return 'No tienes permisos para realizar esta acción ⚠️'
 
-        invite_link = self.get_invite_link()
+        chat_id, invite_link = self.get_invite_link()
 
-        if not invite_link:
+        if not chat_id or not invite_link:
             return 'Ha ocurrido un error inesperado durante la vinculación'
 
         club.telegram_group = chat_id
