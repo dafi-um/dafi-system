@@ -171,4 +171,4 @@ class DafiCallback(RoomMixin, QueryHandler):
 
             self.leave_room(user)
 
-            return 'He anotado que has salido de DAFI  ✅'
+            return 'He anotado que has salido de DAFI ✅'
