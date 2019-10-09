@@ -43,13 +43,9 @@ class RoomMixin():
         self._members.remove(user)
         self._sync_members()
 
-    def room_empty(self):
+    def room_members(self):
         self._refresh_members()
-        return len(self._members) == 0
-
-    def in_room(self, user):
-        self._refresh_members()
-        return user in self._members
+        return self._members
 
     def _refresh_queue(self):
         self._queue = persistence.get_item(ROOM_QUEUE_LIST, [])
@@ -78,8 +74,10 @@ class RoomMixin():
 @add_handler('dafi')
 class DafiRoom(RoomMixin, CommandHandler):
     def handle(self, update, context):
+        members = self.room_members()
+
         if not context.args:
-            if self.room_empty():
+            if not members:
                 reply_markup = InlineKeyboardMarkup([[
                     InlineKeyboardButton(
                         'Avísame cuando llegue alguien ✔️',
@@ -91,14 +89,18 @@ class DafiRoom(RoomMixin, CommandHandler):
 
                 return 'Ahora mismo no hay nadie en DAFI 😓', reply_markup
 
-            if update.message.chat.type != 'private':
-                return 'Hay alguien en DAFI ✅'
+            msg = '🏠 *DAFI* 🎓\nEn la delegación está{}...\n'.format('n' if len(members) > 1 else '')
+            reply_markup = None
 
-            msg = 'Hay alguien en DAFI, ¿quieres que avise de que vas?'
-            reply_markup = InlineKeyboardMarkup([
-                [InlineKeyboardButton('Sí, estoy de camino 🏃🏻‍♂️', callback_data='dafi:omw')],
-                [InlineKeyboardButton('No, iré luego ☕️', callback_data='main:okey')]
-            ])
+            for user in members:
+                msg += '\n@{}'.format(user.telegram_user)
+
+            if update.message.chat.type == 'private':
+                msg += '\n\n¿Quieres que avise de que vas?'
+                reply_markup = InlineKeyboardMarkup([
+                    [InlineKeyboardButton('Sí, estoy de camino 🏃🏻‍♂️', callback_data='dafi:omw')],
+                    [InlineKeyboardButton('No, iré luego ☕️', callback_data='main:okey')]
+                ])
 
             return msg, reply_markup
 
@@ -113,7 +115,7 @@ class DafiRoom(RoomMixin, CommandHandler):
             return 'No puedes llevar a cabo esta acción'
 
         if action == 'on':
-            if self.in_room(user):
+            if user in members:
                 return 'Ya tenía constancia de que estás en DAFI ⚠️'
 
             self.enter_room(user)
@@ -132,7 +134,7 @@ class DafiRoom(RoomMixin, CommandHandler):
             return 'He anotado que estás DAFI ✅', reply_markup
 
         else:
-            if not self.in_room(user):
+            if user not in members:
                 return 'No sabía que estabas en DAFI ⚠️'
 
             self.leave_room(user)
@@ -144,11 +146,12 @@ class DafiRoom(RoomMixin, CommandHandler):
 class DafiCallback(RoomMixin, QueryHandler):
     def handle(self, update, context):
         query = update.callback_query
-        parts = query.data.replace('dafi:', '').split(':')
-        action = parts[0]
+        _, action, *args = query.data.split(':')
+
+        members = self.room_members()
 
         if action == 'omw':
-            if self.room_empty():
+            if not members:
                 return 'Ahora mismo no hay nadie en DAFI 😓'
 
             if DAFI_MAIN_GROUP:
@@ -166,7 +169,7 @@ class DafiCallback(RoomMixin, QueryHandler):
             if not user:
                 return 'No he encontrado una cuenta para tu usuario ⚠️'
 
-            if not self.in_room(user):
+            if user not in members:
                 return 'No sabía que estabas en DAFI ⚠️'
 
             self.leave_room(user)
