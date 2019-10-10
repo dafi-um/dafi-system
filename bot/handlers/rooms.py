@@ -93,7 +93,7 @@ class DafiRoom(RoomMixin, CommandHandler):
             reply_markup = None
 
             for user in members:
-                msg += '\n@{}'.format(user.telegram_user)
+                msg += '\n[{}](tg://user?id={})'.format(user.get_full_name(), user.telegram_id)
 
             if update.message.chat.type == 'private':
                 msg += '\n\n¿Quieres que avise de que vas?'
