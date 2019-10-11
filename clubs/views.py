@@ -7,7 +7,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 from meta.views import MetadataMixin
 
-from .forms import ClubMeetingForm
+from .forms import ClubForm, ClubMeetingForm
 from .models import Club, ClubMeeting
 
 
@@ -46,6 +46,25 @@ class DetailView(MetadataMixin, DetailView):
             )
 
         return context
+
+
+class ClubEditView(UserPassesTestMixin, UpdateView):
+    model = Club
+    form_class = ClubForm
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related('managers')
+            .prefetch_related('members')
+        )
+
+    def test_func(self):
+        user = self.request.user
+        managers = self.get_object().managers.all()
+
+        return user and (user.is_superuser or user in managers)
 
 
 class ClubMeetingMixin(UserPassesTestMixin):

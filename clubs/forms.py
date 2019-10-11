@@ -1,6 +1,12 @@
 from django.forms import DateTimeInput, ModelForm
 
-from .models import ClubMeeting
+from .models import Club, ClubMeeting
+
+
+class ClubForm(ModelForm):
+    class Meta:
+        model = Club
+        fields = ('description', 'members')
 
 
 class ClubMeetingForm(ModelForm):

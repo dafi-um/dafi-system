@@ -1,0 +1,21 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Editar {{ club.name }}</h1>
+            <p>
+                <a class="button alt" href="{% url 'clubs:detail' club.slug %}" title="Volver al Club">Volver al Club</a>
+            </p>
+        </div>
+
+        <p>Club ID: {{ club.slug }}</p>
+    </header>
+
+    <form method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+
+        <input class="button special" type="submit" value="Guardar" />
+    </form>
+{% endblock content %}
