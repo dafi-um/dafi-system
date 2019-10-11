@@ -4063,10 +4063,14 @@
 		margin: 1em;
 	}
 
+		.clubs .img-container {
+			padding: 1em;
+		}
+
 		.clubs .img {
 			width: 100%;
-			max-width: 100%;
 			padding-top: 100%;
+			border-radius: 100%;
 			background-position: center center;
 			background-size: 100% 100%;
 			background-repeat: no-repeat;

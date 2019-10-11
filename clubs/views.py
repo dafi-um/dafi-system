@@ -4,16 +4,22 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
+from meta.views import MetadataMixin
+
 from .forms import ClubMeetingForm
 from .models import Club, ClubMeeting
 
 
-class IndexView(ListView):
+class IndexView(MetadataMixin, ListView):
+    title = 'Los Clubes de DAFI'
+    description = 'Los Clubes de Estudiantes de la Delegación'
+    image = 'images/favicon.png'
+
     def get_queryset(self):
-        return Club.objects.all()
+        return Club.objects.order_by('name')
 
 
-class DetailView(DetailView):
+class DetailView(MetadataMixin, DetailView):
     model = Club
 
     def get_queryset(self):
@@ -22,8 +28,13 @@ class DetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context['meta'] = self.get_object().as_meta(self.request)
+
         if self.request.user.is_authenticated:
-            context['is_manager'] = self.request.user.is_superuser or self.request.user in self.get_object().managers.all()
+            context['is_manager'] = (
+                self.request.user.is_superuser
+                or self.request.user in self.get_object().managers.all()
+            )
 
         return context
 
