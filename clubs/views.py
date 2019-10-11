@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
@@ -23,17 +24,25 @@ class DetailView(MetadataMixin, DetailView):
     model = Club
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('managers')
+        return (
+            super().get_queryset()
+            .prefetch_related('managers')
+            .prefetch_related('members')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['meta'] = self.get_object().as_meta(self.request)
+        club = self.get_object()
+
+        context['meta'] = club.as_meta(self.request)
+        context['meetings'] = club.meetings.exclude(moment__lt=timezone.now())
+        context['members'] = club.members.order_by('first_name', 'last_name')
 
         if self.request.user.is_authenticated:
             context['is_manager'] = (
                 self.request.user.is_superuser
-                or self.request.user in self.get_object().managers.all()
+                or self.request.user in club.managers.all()
             )
 
         return context

@@ -9,6 +9,7 @@
             <h1>{{ club.name }}</h1>
             <p>
                 {% if is_manager %}
+                    <a class="button alt" href="{% url 'clubs:edit' club.slug %}" title="Editar club">Editar</a>
                     <a class="button alt" href="{% url 'clubs:meeting_add' club.slug %}" title="Organizar quedada">Organizar quedada</a>
                 {% endif %}
                 <a class="button alt" href="{% url 'clubs:list' %}" title="Lista de Clubes">Volver a la lista</a>
@@ -49,21 +50,39 @@
         {% endif %}
     </div>
 
-    <ul id="meetings" class="alt">
-        {% for m in club.meetings.all %}
-            <li>
-                <header>
-                    <h5>{{ m.title }}</h5>
-                    {% if is_manager %}
-                        <p>
-                            <a href="{% url 'clubs:meeting_edit' club.slug m.id %}" title="Editar">Editar</a>&nbsp;|&nbsp;
-                            <a href="{% url 'clubs:meeting_delete' club.slug m.id %}" title="Eliminar">Eliminar</a>
-                        </p>
-                    {% endif %}
-                </header>
+    <div class="row">
+        <div class="6u 12u(xsmall)">
+            <h3>Quedadas</h3>
 
-                <p>En {{ m.place }} el {{ m.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
-            </li>
-        {% endfor %}
-    </ul>
+            <ul id="meetings" class="alt">
+                {% for meeting in meetings %}
+                    <li>
+                        <header>
+                            <h5>{{ meeting.title }}</h5>
+                            {% if is_manager %}
+                                <p>
+                                    <a href="{% url 'clubs:meeting_edit' club.slug meeting.id %}">Editar</a>&nbsp;|&nbsp;
+                                    <a href="{% url 'clubs:meeting_delete' club.slug meeting.id %}">Eliminar</a>
+                                </p>
+                            {% endif %}
+                        </header>
+
+                        <p>En {{ meeting.place }} el {{ meeting.moment | date:'j/m/Y \a \l\a\s H:i' }}</p>
+                    </li>
+                {% empty %}
+                    <p>No hay quedadas próximamente.</p>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="6u 12u(xsmall)">
+            <h3>Miembros</h3>
+
+            <ul>
+                {% for member in members %}
+                    <li>{{ member | nice_name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 {% endblock content %}
