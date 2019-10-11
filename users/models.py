@@ -13,3 +13,6 @@ class User(AbstractUser):
     telegram_id = models.IntegerField('ID de telegram', blank=True, null=True)
 
     first_year = models.IntegerField('año de ingreso', default=current_year)
+
+    def __str__(self):
+        return '{} {} - {}'.format(self.first_name, self.last_name, self.email)
