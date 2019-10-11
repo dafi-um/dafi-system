@@ -81,6 +81,8 @@
             <ul>
                 {% for member in members %}
                     <li>{{ member | nice_name }}</li>
+                {% empty %}
+                    <p>No hay miembros para mostrar.</p>
                 {% endfor %}
             </ul>
         </div>
