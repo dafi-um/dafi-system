@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
+from django.urls import reverse
 
 from meta.models import ModelMeta
 
@@ -33,6 +34,10 @@ class Club(ModelMeta, models.Model):
         get_user_model(), 'managed_clubs', verbose_name='gestores'
     )
 
+    members = models.ManyToManyField(
+        get_user_model(), 'clubs', verbose_name='miembros'
+    )
+
     _metadata = {
         'title': 'name',
         'description': 'description',
@@ -49,6 +54,9 @@ class Club(ModelMeta, models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('clubs:detail', args=[self.slug])
 
     def get_image(self):
         return self.image.url if self.image else static('images/favicon.png')
