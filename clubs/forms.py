@@ -4,6 +4,11 @@ from .models import Club, ClubMeeting
 
 
 class ClubForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        query = self.fields['members'].queryset
+        self.fields['members'].queryset = query.order_by('first_name', 'last_name')
+
     class Meta:
         model = Club
         fields = ('description', 'members')
