@@ -9,13 +9,19 @@
 
     {% for club in club_list %}
         {% if forloop.first %}
-            <ul class="alt">
+            <div class="row clubs">
         {% endif %}
 
-        <li><a href="{% url 'clubs:detail' club.slug %}">{{ club.name }}</a></li>
+        <div class="3u 4u(small) 12u(xsmall)">
+            <a href="{% url 'clubs:detail' club.slug %}">
+                <div class="img" style="background-image: url({{ club.get_image }});"></div>
+
+                <h3>{{ club.name }}</h3>
+            </a>
+        </div>
 
         {% if forloop.last %}
-            </ul>
+            </div>
         {% endif %}
     {% empty %}
         <p>No hay clubes disponibles.</p>

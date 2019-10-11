@@ -4058,6 +4058,24 @@
 
 /* Clubs */
 
+	.clubs a {
+		display: block;
+		margin: 1em;
+	}
+
+		.clubs .img {
+			width: 100%;
+			max-width: 100%;
+			padding-top: 100%;
+			background-position: center center;
+			background-size: 100% 100%;
+			background-repeat: no-repeat;
+		}
+
+		.clubs h3 {
+			text-align: center;
+		}
+
 	#meetings li {
 		padding-top: 1em;
 	}

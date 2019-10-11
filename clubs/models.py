@@ -1,8 +1,11 @@
 from django.contrib.auth import get_user_model
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
 
+from meta.models import ModelMeta
 
-class Club(models.Model):
+
+class Club(ModelMeta, models.Model):
     '''
     Club
     '''
@@ -12,6 +15,11 @@ class Club(models.Model):
     slug = models.SlugField('slug', max_length=64)
 
     description = models.TextField('descripción', max_length=300)
+
+    image = models.ImageField(
+        'imagen', upload_to='clubs/', blank=True,
+        help_text='Imagen para mostrar en la lista de clubes'
+    )
 
     telegram_group = models.CharField(
         'grupo de telegram', max_length=64, blank=True, default=''
@@ -25,13 +33,11 @@ class Club(models.Model):
         get_user_model(), 'managed_clubs', verbose_name='gestores'
     )
 
-    image = models.ImageField(
-        'imagen', upload_to='clubs/', blank=True,
-        help_text='Imagen para mostrar en la lista de clubes'
-    )
-
-    def __str__(self):
-        return self.name
+    _metadata = {
+        'title': 'name',
+        'description': 'description',
+        'image': 'get_image',
+    }
 
     class Meta:
         verbose_name = 'club'
@@ -40,6 +46,12 @@ class Club(models.Model):
         permissions = [
             ('can_link_club', 'Puede vincular un grupo de Telegram con un club')
         ]
+
+    def __str__(self):
+        return self.name
+
+    def get_image(self):
+        return self.image.url if self.image else static('images/favicon.png')
 
 
 class ClubMeeting(models.Model):
