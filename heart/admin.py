@@ -5,7 +5,7 @@ from . import models
 
 @admin.register(models.Group)
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ('year', 'name', 'delegate', 'subdelegate')
+    list_display = ('year', 'name', 'delegate', 'subdelegate', 'telegram_group_link')
 
 
 @admin.register(models.Subject)
