@@ -18,6 +18,7 @@ class StudentsView(MetadataMixin, ListView):
 
     title = 'Los Estudiantes - DAFI'
     description = 'Grupos de Estudiantes y Asambleas de Alumnos de la Facultad de Informática'
+    image = 'images/favicon.png'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -16,7 +16,7 @@ class IndexView(MetadataMixin, ListView):
         return Post.objects.order_by('-pub_date')[:5]
 
 
-class DetailView(MetadataMixin, DetailView):
+class DetailView(DetailView):
     model = Post
 
     def get_context_data(self, **kwargs):

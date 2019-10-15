@@ -1,4 +1,3 @@
-from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
@@ -9,14 +8,14 @@ urlpatterns = [
 ]
 
 urls = [
-    ('acceder/', 'login', auth_views.LoginView),
-    ('salir/', 'logout', auth_views.LogoutView),
-    ('cambiar-clave/', 'password_change', auth_views.PasswordChangeView),
-    ('cambiar-clave/exito/', 'password_change_done', auth_views.PasswordChangeDoneView),
-    ('clave-olvidada/', 'password_reset', auth_views.PasswordResetView),
-    ('clave-olvidada/exito/', 'password_reset_done', auth_views.PasswordResetDoneView),
-    ('reiniciar-clave/<uidb64>/<token>/', 'password_reset_confirm', auth_views.PasswordResetConfirmView),
-    ('reiniciar-clave/exito/', 'password_reset_complete', auth_views.PasswordResetCompleteView),
+    ('acceder/', 'login', views.LoginView),
+    ('salir/', 'logout', views.LogoutView),
+    ('cambiar-clave/', 'password_change', views.PasswordChangeView),
+    ('cambiar-clave/exito/', 'password_change_done', views.PasswordChangeDoneView),
+    ('clave-olvidada/', 'password_reset', views.PasswordResetView),
+    ('clave-olvidada/exito/', 'password_reset_done', views.PasswordResetDoneView),
+    ('reiniciar-clave/<uidb64>/<token>/', 'password_reset_confirm', views.PasswordResetConfirmView),
+    ('reiniciar-clave/exito/', 'password_reset_complete', views.PasswordResetCompleteView),
 ]
 
 for url, name, view_class in urls:

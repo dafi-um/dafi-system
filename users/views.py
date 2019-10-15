@@ -1,13 +1,18 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 
+from meta.views import MetadataMixin
+
 from .forms import ProfileUserForm, ProfileTelegramForm, SignUpForm
 
 
-class ProfileView(LoginRequiredMixin, TemplateView):
+class ProfileView(LoginRequiredMixin, MetadataMixin, TemplateView):
     template_name = 'users/profile.html'
+
+    title = 'Mi Perfil - DAFI'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,10 +56,14 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         return super().get(request, **kwargs)
 
 
-class SignUpView(UserPassesTestMixin, FormView):
+class SignUpView(UserPassesTestMixin, MetadataMixin, FormView):
     template_name = 'users/signup.html'
     form_class = SignUpForm
     success_url = reverse_lazy('profile')
+
+    title = 'Crear Cuenta - DAFI'
+    description = 'Crear una cuenta en la Delegación de Estudiantes de Informática'
+    image = 'images/favicon.png'
 
     def test_func(self):
         return not self.request.user.is_authenticated
@@ -68,3 +77,39 @@ class SignUpView(UserPassesTestMixin, FormView):
         user.save()
 
         return super().form_valid(form)
+
+
+class LoginView(MetadataMixin, auth_views.LoginView):
+    title = 'Iniciar Sesión - DAFI'
+    description = 'Iniciar sesión en la Delegación de Estudiantes de Informática'
+    image = 'images/favicon.png'
+
+
+class LogoutView(MetadataMixin, auth_views.LogoutView):
+    title = 'Cerrar Sesión - DAFI'
+
+
+class PasswordChangeView(MetadataMixin, auth_views.PasswordChangeView):
+    title = 'Cambiar clave - DAFI'
+
+
+class PasswordChangeDoneView(MetadataMixin, auth_views.PasswordChangeDoneView):
+    title = 'Clave cambiada - DAFI'
+
+
+class PasswordResetView(MetadataMixin, auth_views.PasswordResetView):
+    title = 'Recuperar clave - DAFI'
+    description = 'Recuperar clave en la Delegación de Estudiantes de Informática'
+    image = 'images/favicon.png'
+
+
+class PasswordResetDoneView(MetadataMixin, auth_views.PasswordResetDoneView):
+    title = 'Recuperación de clave enviada - DAFI'
+
+
+class PasswordResetConfirmView(MetadataMixin, auth_views.PasswordResetConfirmView):
+    title = 'Confirmar recuperación de clave - DAFI'
+
+
+class PasswordResetCompleteView(MetadataMixin, auth_views.PasswordResetCompleteView):
+    title = 'Clave recuperada - DAFI'

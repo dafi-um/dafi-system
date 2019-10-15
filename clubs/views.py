@@ -77,7 +77,7 @@ class ClubEditView(UserPassesTestMixin, UpdateView):
         return context
 
 
-class ClubMeetingMixin(UserPassesTestMixin):
+class ClubMeetingMixin(MetadataMixin, UserPassesTestMixin):
     _club = None
 
     def get_club(self):
@@ -126,6 +126,8 @@ class MeetingEditView(ClubMeetingMixin, UpdateView):
 
 class MeetingDeleteView(ClubMeetingMixin, DeleteView):
     model = ClubMeeting
+
+    title = 'Eliminar quedada'
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('clubs:detail', args=[self.kwargs['slug']])
