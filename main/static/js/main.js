@@ -28,19 +28,6 @@
 				}, 100);
 			});
 
-		// User menu toggle button
-			userMenuShown = false;
-
-			$('.user-menu-button').click(function() {
-				if (userMenuShown) {
-					$('.user-menu').removeClass('shown');
-				} else {
-					$('.user-menu').addClass('shown');
-				}
-
-				userMenuShown = !userMenuShown;
-			});
-
 		// Navigation Panel.
 			$('#navPanel').panel({
 				delay: 500,

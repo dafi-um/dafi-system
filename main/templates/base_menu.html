@@ -1,15 +1,26 @@
-<a href="{% url 'main:index' %}">Inicio</a>
-<a href="{% url 'blog:list' %}">Blog</a>
-<a href="{% url 'clubs:list' %}">Clubes</a>
+<a href="{% url 'main:index' %}" title="DAFI">Inicio</a>
+<a href="{% url 'clubs:list' %}" title="Los Clubes de DAFI">Clubes</a>
+
+<div class="submenu-wrapper">
+    <a class="submenu-button">
+        <span>La Delegación</span>
+        <span><i class="fa fa-chevron-down"></i></span>
+    </a>
+
+    <div class="submenu">
+        <a href="{% url 'blog:list' %}" title="El Blog de DAFI">Blog</a>
+        <a href="{% url 'heart:students' %}" title="Los Estudiantes">Estudiantes</a>
+    </div>
+</div>
 
 {% if user.is_authenticated %}
-    <div class="user-menu-wrapper">
-        <a class="user-menu-button">
+    <div class="submenu-wrapper">
+        <a class="submenu-button">
             <span>Hola, {{ user.first_name | default:user.username }}</span>
             <span><i class="fa fa-chevron-down"></i></span>
         </a>
 
-        <div class="user-menu">
+        <div class="submenu">
             {% if user.is_staff %}
                 <a href="/admin/" title="Admin">Admin</a>
             {% endif %}

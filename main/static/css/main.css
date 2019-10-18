@@ -3228,23 +3228,20 @@
 
 			}
 
-		#header .user-menu-wrapper {
-			display: inline;
+		#header .submenu-wrapper {
+			display: inline-block;
 			position: relative;
+			height: 100%;
 		}
 
-			#header .user-menu-button {
-				cursor: pointer;
-			}
-
-		#header .user-menu {
+		#header .submenu {
 			position: absolute;
-			right: 0.75em;
-			top: 1em;
+			width: 100%;
+			top: 75%;
+			top: calc(100% - 1.5em);
 			display: flex;
 			flex-direction: column;
-			margin: 1em 0;
-			padding: 0 1em;
+			padding: 0 1em 0.25em;
 			transition: max-height 0.25s ease-out;
 			max-height: 0;
 			overflow: hidden;
@@ -3253,17 +3250,17 @@
 			text-align: center;
 		}
 
-			#header .user-menu.shown {
+			#header .submenu-wrapper:hover > .submenu {
 				max-height: 300px;
 				transition: max-height 0.25s ease-in;
 			}
 
-			#header .user-menu a {
+			#header .submenu a {
 				padding: 0.75em 0;
 				border-top: 1px solid #fff;
 			}
 
-				#header .user-menu a:first-child {
+				#header .submenu a:first-child {
 					border-top: 0;
 				}
 
@@ -3438,18 +3435,18 @@
 				color: inherit;
 			}
 
-		#navPanel a.user-menu-button:not(.close) {
+		#navPanel a.submenu-button:not(.close) {
 			margin-top: 1em;
 			padding-bottom: 0.25em;
 			border-bottom: 1px solid #fff;
 		}
 
-			#navPanel a.user-menu-button span:last-child {
+			#navPanel a.submenu-button span:last-child {
 				display: none;
 			}
 
-		#navPanel .user-menu-wrapper,
-		#navPanel .user-menu {
+		#navPanel .submenu-wrapper,
+		#navPanel .submenu {
 			display: inline;
 		}
 
