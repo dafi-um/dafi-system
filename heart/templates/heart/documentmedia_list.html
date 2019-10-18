@@ -1,0 +1,15 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Documentos y Archivos</h1>
+    </header>
+
+    <ul class="alt">
+        {% for doc in documentmedia_list %}
+            <li>{{ doc.name }} - <a href="{{ doc.file.url }}" target="_blank">{{ doc.get_filename }}</a></li>
+        {% empty %}
+            <li>No hay documentos para mostrar...</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

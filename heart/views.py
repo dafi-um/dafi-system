@@ -1,12 +1,20 @@
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView
 
 from meta.views import MetadataMixin
 
-from .models import Group, YEARS_RANGE
+from .models import DocumentMedia, Group, YEARS_RANGE
 
 
-class DelegationView(MetadataMixin, TemplateView):
-    pass
+class DocumentsView(MetadataMixin, ListView):
+    model = DocumentMedia
+    ordering = ('name',)
+
+    title = 'Documentos - DAFI'
+    description = 'Documentos importantes y archivos relacionados de la Delegación'
+    image = 'images/favicon.png'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(hidden=False)
 
 
 class StudentsView(MetadataMixin, ListView):

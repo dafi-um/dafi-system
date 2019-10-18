@@ -17,3 +17,9 @@ class SubjectAdmin(admin.ModelAdmin):
 @admin.register(models.Year)
 class YearAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'groups', 'subgroups')
+
+
+@admin.register(models.DocumentMedia)
+class DocumentMediaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'hidden')
+    list_filter = ('hidden',)

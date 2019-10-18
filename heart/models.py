@@ -1,3 +1,5 @@
+from os.path import basename
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -128,3 +130,25 @@ class Subject(models.Model):
             cache.set('grouped_subjects', d)
 
         return d
+
+
+class DocumentMedia(models.Model):
+    '''Document and media files'''
+
+    name = models.CharField('nombre', max_length=120)
+
+    file = models.FileField('archivo', upload_to='docs/')
+
+    hidden = models.BooleanField(
+        'oculto', default=False,
+        help_text='Ocultar el archivo en las listas'
+    )
+
+    class Meta:
+        verbose_name = 'documento'
+
+    def __str__(self):
+        return self.name
+
+    def get_filename(self):
+        return basename(self.file.name)

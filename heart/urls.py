@@ -5,6 +5,6 @@ from . import views
 app_name = 'heart'
 
 urlpatterns = [
-    path('delegacion/', views.DelegationView.as_view(), name='delegation'),
+    path('documentos/', views.DocumentsView.as_view(), name='docs'),
     path('estudiantes/', views.StudentsView.as_view(), name='students'),
 ]
