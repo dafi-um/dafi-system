@@ -4053,6 +4053,25 @@
 
 		}
 
+		@media screen and (min-width: 481px) {
+
+			#footer span + span {
+				margin-left: 0.4em;
+				padding-left: 0.5em;
+				border-left: 1px solid #ec7679;
+			}
+
+		}
+
+		@media screen and (max-width: 480px) {
+
+			#footer .copyright span {
+				display: block;
+				margin: 0.5em 0;
+			}
+
+		}
+
 /* Clubs */
 
 	.clubs a {
