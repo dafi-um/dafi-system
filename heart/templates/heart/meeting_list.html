@@ -1,0 +1,25 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Asambleas de Alumnos</h1>
+    </header>
+
+    <ul class="alt">
+        {% for meeting in meeting_list %}
+            <li>
+                <h4 style="margin-bottom: 0;">{{ meeting.date | date:'j \d\e F \d\e Y H:i' }}</h4>
+
+                {% if meeting.call %}
+                    <span><a href="{{ meeting.call.url }}" title="Convocatoria {{ meeting }}">Convocatoria</a></span>
+                {% endif %}
+
+                {% if meeting.minutes %}
+                    <span>- <a href="{{ meeting.minutes.url }}" title="Acta {{ meeting }}">Acta</a></span>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>No hay asambleas para mostrar...</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

@@ -2,7 +2,7 @@ from django.views.generic import ListView
 
 from meta.views import MetadataMixin
 
-from .models import DocumentMedia, Group, YEARS_RANGE
+from .models import DocumentMedia, Group, Meeting, YEARS_RANGE
 
 
 class DocumentsView(MetadataMixin, ListView):
@@ -15,6 +15,15 @@ class DocumentsView(MetadataMixin, ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(hidden=False)
+
+
+class MeetingsView(MetadataMixin, ListView):
+    model = Meeting
+    ordering = ('-date',)
+
+    title = 'Asambleas de Alumnos - DAFI'
+    description = 'Convocatorias y Actas de las Asambleas de Alumnos de la Delegación'
+    image = 'images/favicon.png'
 
 
 class StudentsView(MetadataMixin, ListView):

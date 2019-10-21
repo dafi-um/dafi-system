@@ -19,6 +19,11 @@ class YearAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'groups', 'subgroups')
 
 
+@admin.register(models.Meeting)
+class MeetingAdmin(admin.ModelAdmin):
+    list_display = ('date',)
+
+
 @admin.register(models.DocumentMedia)
 class DocumentMediaAdmin(admin.ModelAdmin):
     list_display = ('name', 'hidden')

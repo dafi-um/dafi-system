@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.template.defaultfilters import date
 from django.utils.functional import cached_property
 
 User = get_user_model()
@@ -130,6 +131,33 @@ class Subject(models.Model):
             cache.set('grouped_subjects', d)
 
         return d
+
+
+class Meeting(models.Model):
+    '''Assembly and commitees meetings'''
+
+    date = models.DateTimeField('fecha')
+
+    call = models.FileField('convocatoria', upload_to='meetings/')
+
+    minutes = models.FileField('acta', upload_to='meetings/')
+
+    attendees = models.ManyToManyField(
+        User, 'meetings_attended', verbose_name='asistentes'
+    )
+
+    absents = models.ManyToManyField(
+        User, 'meetings_absent', verbose_name='ausencias justificadas'
+    )
+
+    class Meta:
+        verbose_name = 'asamblea de alumnos'
+        verbose_name_plural = 'asambleas de alumnos'
+
+        ordering = ('-date',)
+
+    def __str__(self):
+        return 'Asamblea de Alumnos {}'.format(date(self.date, 'j F Y'))
 
 
 class DocumentMedia(models.Model):
