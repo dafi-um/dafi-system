@@ -11,6 +11,37 @@ from .handlers import add_handler, CommandHandler
 User = get_user_model()
 
 
+@add_handler('grupos')
+class GroupsList(CommandHandler):
+    '''Returns a list of all the groups'''
+
+    def handle(self, update, context):
+        groups = (
+            Group
+            .objects
+            .filter(~Q(telegram_group_link=''))
+            .order_by('course', 'year', 'number')
+        )
+
+        msg = '*~~Grupos de Telegram~~*\n'
+
+        y = None
+
+        for group in groups:
+            if group.year != y:
+                y = group.year
+                msg += '\n'
+
+            if group.course == group.GII:
+                name = '{} {}º {}'.format(group.course, group.year, group.name)
+            else:
+                name = group.name
+
+            msg += '[{}]({})\n'.format(name, group.telegram_group_link)
+
+        return msg
+
+
 @add_handler('vinculargrupo')
 class GroupsLink(CommandHandler):
     '''Links a telegram group to a students group (only staff and delegates)'''
