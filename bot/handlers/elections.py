@@ -70,7 +70,7 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
         prefix = '' if self.is_delegate else 'sub'
 
         try:
-            group_year, group_num = [int(x) for x in context.args[0].split('.')]
+            group_year, group_num = context.args[0].split('.')
         except (ValueError, IndexError):
             return (
                 '**Uso**: _/soy{0}delegado <curso>.<grupo>_\n\n'
@@ -80,25 +80,36 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
         telegram_user = update.effective_user
         user = self.get_user()
 
-        g_msg = (
+        group = Group.objects.filter(year=group_year, number=group_num).first()
+
+        if not group:
+            return 'El grupo especificado no existe'
+
+        msg = (
             '*Petición para ser {}delegado*\n\n'
-            'Año: {}\nGrupo: {}\nNombre: {}\nEmail: {}\nTelegram: @{}'
+            'Estudios: {}\nAño: {}\nGrupo: {}\n'
+            'Nombre: {}\nEmail: {}\nTelegram: @{}'
         ).format(
-            prefix, group_year, group_num,
+            prefix, group.course, group.year, group.number,
             user.get_full_name(), user.email, telegram_user.username
         )
 
-        query = 'elections:request:{}:{}.{}:{}'.format(
-            telegram_user.id, group_year, group_num, int(self.is_delegate)
+        current = group.delegate if self.is_delegate else group.subdelegate
+
+        if current:
+            msg += '\n\nActual {}delegado: {}'.format(prefix, current.get_full_name())
+
+        query = '{}:{}.{}:{}'.format(
+            telegram_user.id, group.year, group.number, int(self.is_delegate)
         )
 
-        g_reply_markup = InlineKeyboardMarkup([[
-            InlineKeyboardButton('Autorizar ✅', callback_data=query),
-            InlineKeyboardButton('Denegar ❌', callback_data='main:okey'),
+        reply_markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton('Autorizar ✅', callback_data='elections:request:' + query),
+            InlineKeyboardButton('Denegar ❌', callback_data='elections:deny:' + query),
         ]])
 
         context.bot.send_message(
-            DAFI_MAIN_GROUP, g_msg, ParseMode.MARKDOWN, reply_markup=g_reply_markup
+            DAFI_MAIN_GROUP, msg, ParseMode.MARKDOWN, reply_markup=reply_markup
         )
 
         return '¡Tu solicitud se ha enviado correctamente!'
@@ -145,29 +156,32 @@ class ElectionsToggleCallback(ElectionsMixin, QueryHandler):
             self.set_elections_active(False)
 
             return 'Ahora el periodo de elecciones está inactivo ✅'
-        elif action == 'request':
-            if len(args) != 3:
-                return 'Formato de petición incorrecto'
 
+        if action != 'deny' and action != 'request':
+            return
+
+        try:
             user_id = args[0]
-            user = User.objects.filter(telegram_id=user_id).first()
-
-            if not user:
-                return 'El usuario no ha vinculado su cuenta'
-
-            try:
-                group_year, group_num = args[1].split('.')
-            except (IndexError, ValueError):
-                return 'Formato de petición incorrecto'
-
-            group = Group.objects.filter(year=group_year, number=group_num).first()
-
-            if not group:
-                return 'El grupo indicado no existe'
-
+            group_year, group_num = args[1].split('.')
             is_delegate = bool(int(args[2]))
-            prefix = '' if is_delegate else 'sub'
+        except (IndexError, ValueError):
+            return 'Formato de petición incorrecto'
 
+        user = User.objects.filter(telegram_id=user_id).first()
+
+        if not user:
+            self.answer_as_reply()
+            return 'El usuario no ha vinculado su cuenta'
+
+        accepted = action == 'request'
+        prefix = '' if is_delegate else 'sub'
+
+        group = Group.objects.filter(year=group_year, number=group_num).first()
+
+        if not group:
+            return 'El grupo indicado no existe'
+
+        if action == 'request':
             query = Q(delegate=user) | Q(subdelegate=user)
 
             with transaction.atomic():
@@ -188,11 +202,26 @@ class ElectionsToggleCallback(ElectionsMixin, QueryHandler):
 
             group.save()
 
-            context.bot.send_message(user_id,
+        if accepted:
+            msg = (
                 'Tu petición ha sido aceptada, ahora eres {}delegado '
-                'del grupo {} del año {} 🎓'.format(prefix, group_num, group_year)
-            )
+                'del grupo {} del año {} 🎓'
+            ).format(prefix, group_num, group_year)
+        else:
+            msg = 'Tu petición para ser {}delegado ha sido denegada ❌'.format(prefix)
 
-            return 'Petición aceptada, ahora {} es {}delegado del {}.{}'.format(
-                user.get_full_name(), prefix, group_year, group_num
+        context.bot.send_message(user_id, msg)
+
+        msg = 'La solicitud de {} ha sido {} por {}'.format(
+            user.get_full_name(), 'aceptada' if accepted else 'denegada',
+            self.get_user().get_full_name()
+        )
+
+        if accepted:
+            msg += ' ✅\n\nAhora es delegado del {}.{} del {}'.format(
+                group.year, group.number, group.course
             )
+        else:
+            msg += ' ❌'
+
+        return msg

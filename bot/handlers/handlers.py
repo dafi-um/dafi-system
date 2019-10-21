@@ -31,6 +31,9 @@ class BasicHandler():
         'Debes vincular tu cuenta de usuario primero: '
         'ejecuta /vincular en un chat privado conmigo'
     )
+    user_denied_msg = 'No tienes los permisos necesarios para realizar esta acción'
+
+    keep_original_message = True
 
     def __init__(self, update, context):
         self.update = update
@@ -90,12 +93,26 @@ class BasicHandler():
 
         if self.user_required:
             user = self.get_user()
+            error = None
 
-            if not user or not self.user_filter(user):
-                self.msg = self.user_required_msg
+            if not user:
+                error = self.user_required_msg
+            elif not self.user_filter(user):
+                error = self.user_denied_msg
+
+            if error:
+                self.keep_original_message = True
+                self.msg = error
                 return False
 
         return True
+
+    def answer_as_reply(self):
+        self.keep_original_message = True
+
+    def answer_private(self, msg, reply_markup=None):
+        # TODO: Implement this
+        raise NotImplementedError()
 
     def handle(self, update, context):
         raise NotImplementedError("Must create a `handle' method in the class")
@@ -149,8 +166,7 @@ class CommandHandler(BasicHandler):
 class QueryHandler(BasicHandler):
     '''Bot callback query handler'''
 
-    def _get_user_id(self):
-        return self.update.callback_query.from_user.id
+    keep_original_message = False
 
     def parse_answer(self):
         self.update.callback_query.answer()
@@ -161,9 +177,14 @@ class QueryHandler(BasicHandler):
         return True
 
     def send_answer(self):
-        self.update.callback_query.edit_message_text(
-            self.msg, reply_markup=self.reply_markup
-        )
+        if self.keep_original_message:
+            self.update.effective_message.reply_text(
+                self.msg, reply_markup=self.reply_markup
+            )
+        else:
+            self.update.callback_query.edit_message_text(
+                self.msg, reply_markup=self.reply_markup
+            )
 
     @classmethod
     def as_handler(cls, pattern):
