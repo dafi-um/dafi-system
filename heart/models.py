@@ -11,11 +11,20 @@ User = get_user_model()
 
 NUM_YEARS = 4
 YEARS_RANGE = range(1, NUM_YEARS + 1)
-YEARS_VALIDATORS = [MinValueValidator(1), MaxValueValidator(NUM_YEARS)]
 
 
 class Group(models.Model):
     '''Group of Students'''
+
+    GII = 'GII'
+    MNTI = 'MNTI'
+    MBD = 'MBD'
+
+    COURSES = (
+        (GII, 'Grado en Ingeniería Informática'),
+        (MNTI, 'Máster en Nuevas Tecnologías de la Informática'),
+        (MBD, 'Máster en Big Data'),
+    )
 
     name = models.CharField(
         'nombre', max_length=64
@@ -26,7 +35,11 @@ class Group(models.Model):
     )
 
     year = models.IntegerField(
-        'año', validators=YEARS_VALIDATORS
+        'año'
+    )
+
+    course = models.CharField(
+        'estudios', max_length=6, choices=COURSES, default=GII
     )
 
     subgroups = models.IntegerField(
@@ -149,6 +162,8 @@ class Meeting(models.Model):
     absents = models.ManyToManyField(
         User, 'meetings_absent', verbose_name='ausencias justificadas'
     )
+
+    # TODO: Add related docs (fk: DocumentMedia)
 
     class Meta:
         verbose_name = 'asamblea de alumnos'

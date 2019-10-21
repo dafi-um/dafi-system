@@ -3,48 +3,50 @@
 {% load users_tags %}
 
 {% block content %}
-    <header class="major special">
-        <h1>Grupos de Estudiantes del Grado</h1>
-    </header>
+    {% for group in group_list %}
+        {% ifchanged group.course %}
+            <header class="major special">
+                <h1>{{ group.get_course_display }}</h1>
+            </header>
+        {% endifchanged %}
 
-    {% regroup groups_all by year as groups_list %}
+        {% if group.course == group.GII %}
+            {% ifchanged group.year %}
+                <h3>Año {{ group.year }}</h3>
+            {% endifchanged %}
+        {% endif %}
 
-    {% for year, groups in groups_list %}
-        <h3>Año {{ year }}</h3>
+        <div class="box wrapper style3 students-groups">
+            <header class="special">
+                <h4>{{ group.name }}</h4>
+                <p>ID: {{ group.year }}.{{ group.number }}</p>
+            </header>
 
-        {% for group in groups %}
-            <div class="box wrapper style3 students-groups">
-                <header class="special">
-                    <h4>{{ group.name }}</h4>
-                    <p>Subgrupos: {{ group.subgroups }}</p>
-                </header>
+            <div class="delegates">
+                {% if group.delegate %}
+                    <h6>Delegado</h6>
+                    <p>
+                        <span>{{ group.delegate | nice_name }}</span>
+                        {% if group.delegate.telegram_id %}
+                            <span> - <i class="fa fa-send"></i> @{{ group.delegate.telegram_user }}</span>
+                        {% endif %}
+                    </p>
+                {% endif %}
 
-                <div class="delegates">
-                    {% if group.delegate %}
-                        <h6>Delegado</h6>
-                        <p>
-                            <span>{{ group.delegate | nice_name }}</span>
-                            {% if group.delegate.telegram_id %}
-                                <span> - <i class="fa fa-send"></i> @{{ group.delegate.telegram_user }}</span>
-                            {% endif %}
-                        </p>
-                    {% endif %}
-
-                    {% if group.subdelegate %}
-                        <h6>Subdelegado</h6>
-                        <p>
-                            <span>{{ group.subdelegate | nice_name }}</span>
-                            {% if group.subdelegate.telegram_id %}
-                                <span> - <i class="fa fa-send"></i> @{{ group.subdelegate.telegram_user }}</span>
-                            {% endif %}
-                        </p>
-                    {% endif %}
-                </div>
-
-                {% if group.telegram_group_link %}
-                    <a href="{{ group.telegram_group_link }}" class="button alt" title="Unirse al Grupo de Telegram de {{ group.name }}">Grupo de Telegram</a>
+                {% if group.subdelegate %}
+                    <h6>Subdelegado</h6>
+                    <p>
+                        <span>{{ group.subdelegate | nice_name }}</span>
+                        {% if group.subdelegate.telegram_id %}
+                            <span> - <i class="fa fa-send"></i> @{{ group.subdelegate.telegram_user }}</span>
+                        {% endif %}
+                    </p>
                 {% endif %}
             </div>
-        {% endfor %}
+
+            {% if group.telegram_group_link %}
+                <a href="{{ group.telegram_group_link }}" class="button alt" title="Unirse al Grupo de Telegram de {{ group.name }}">Grupo de Telegram</a>
+            {% endif %}
+        </div>
     {% endfor %}
 {% endblock content %}
