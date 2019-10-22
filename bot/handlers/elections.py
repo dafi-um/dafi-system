@@ -91,7 +91,7 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
             'Nombre: {}\nEmail: {}\nTelegram: @{}'
         ).format(
             prefix, group.course, group.year, group.number,
-            user.get_full_name(), user.email, telegram_user.username
+            user.get_full_name(), user.email, telegram_user.username.replace('_', '\\_')
         )
 
         current = group.delegate if self.is_delegate else group.subdelegate
@@ -218,8 +218,8 @@ class ElectionsToggleCallback(ElectionsMixin, QueryHandler):
         )
 
         if accepted:
-            msg += ' ✅\n\nAhora es delegado del {}.{} del {}'.format(
-                group.year, group.number, group.course
+            msg += ' ✅\n\nAhora es {}delegado del {}.{} del {}'.format(
+                prefix, group.year, group.number, group.course
             )
         else:
             msg += ' ❌'
