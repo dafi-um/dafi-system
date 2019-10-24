@@ -2382,6 +2382,19 @@
 				width: 100%;
 			}
 
+	.image-square-container {
+		padding: 1em;
+	}
+
+		.image-square {
+			width: 100%;
+			padding-top: 100%;
+			border-radius: 100%;
+			background-position: center center;
+			background-size: 100% 100%;
+			background-repeat: no-repeat;
+		}
+
 /* List */
 
 	ol {
@@ -4078,19 +4091,6 @@
 		display: block;
 		margin: 1em;
 	}
-
-		.clubs .img-container {
-			padding: 1em;
-		}
-
-		.clubs .img {
-			width: 100%;
-			padding-top: 100%;
-			border-radius: 100%;
-			background-position: center center;
-			background-size: 100% 100%;
-			background-repeat: no-repeat;
-		}
 
 		.clubs h3 {
 			text-align: center;

@@ -12,8 +12,8 @@
 
         <div class="3u 4u(small) 12u(xsmall)">
             <a href="{% url 'clubs:detail' club.slug %}">
-                <div class="img-container">
-                    <div class="img" style="background-image: url({{ club.get_image }});"></div>
+                <div class="image-square-container">
+                    <div class="image-square" style="background-image: url({{ club.get_image }});"></div>
                 </div>
 
                 <h3>{{ club.name }}</h3>
