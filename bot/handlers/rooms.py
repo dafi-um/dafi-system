@@ -17,64 +17,10 @@ ROOM_MEMBERS_LIST = 'room_members'
 ROOM_QUEUE_LIST = 'room_queue'
 
 
-class RoomMixin():
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._members = None
-        self._refresh_members()
-
-        self._queue = None
-        self._refresh_queue()
-
-    def _refresh_members(self):
-        self._members = persistence.get_item(ROOM_MEMBERS_LIST, [])
-
-    def _sync_members(self):
-        persistence.set_item(ROOM_MEMBERS_LIST, self._members)
-
-    def enter_room(self, user):
-        self._refresh_members()
-        self._members.append(user)
-        self._sync_members()
-
-    def leave_room(self, user):
-        self._refresh_members()
-        self._members.remove(user)
-        self._sync_members()
-
-    def room_members(self):
-        self._refresh_members()
-        return self._members
-
-    def _refresh_queue(self):
-        self._queue = persistence.get_item(ROOM_QUEUE_LIST, [])
-
-    def _sync_queue(self):
-        persistence.set_item(ROOM_QUEUE_LIST, self._queue)
-
-    def in_queue(self, user_id):
-        self._refresh_queue()
-        return user_id in self._queue
-
-    def add_to_queue(self, user_id):
-        self._refresh_queue()
-        self._queue.append(user_id)
-        self._sync_queue()
-
-    def get_queue(self):
-        self._refresh_queue()
-        return self._queue
-
-    def clear_queue(self):
-        self._queue = []
-        self._sync_queue()
-
-
 @add_handler('dafi')
-class DafiRoom(RoomMixin, CommandHandler):
+class DafiRoom(CommandHandler):
     def handle(self, update, context):
-        members = self.room_members()
+        members = persistence.get_item(ROOM_MEMBERS_LIST, [])
 
         if not context.args:
             if not members:
@@ -118,14 +64,17 @@ class DafiRoom(RoomMixin, CommandHandler):
             if user in members:
                 return 'Ya tenía constancia de que estás en DAFI ⚠️'
 
-            self.enter_room(user)
+            members.append(user)
 
             msg = '@{} acaba de llegar a DAFI 🔔'.format(user.telegram_user)
 
-            for user_id in self.get_queue():
-                context.bot.send_message(user_id, msg)
+            queue = persistence.get_item(ROOM_QUEUE_LIST, [])
 
-            self.clear_queue()
+            if queue:
+                for user_id in queue:
+                    context.bot.send_message(user_id, msg)
+
+                queue.clear()
 
             reply_markup = InlineKeyboardMarkup([[
                 InlineKeyboardButton('Me voy 💤', callback_data='dafi:off')
@@ -137,18 +86,19 @@ class DafiRoom(RoomMixin, CommandHandler):
             if user not in members:
                 return 'No sabía que estabas en DAFI ⚠️'
 
-            self.leave_room(user)
+            members.remove(user)
 
             return 'He anotado que has salido de DAFI ✅'
 
 
 @add_handler('dafi')
-class DafiCallback(RoomMixin, QueryHandler):
+class DafiCallback(QueryHandler):
     def handle(self, update, context):
         query = update.callback_query
         _, action, *args = query.data.split(':')
 
-        members = self.room_members()
+        members = persistence.get_item(ROOM_MEMBERS_LIST, [])
+        queue = persistence.get_item(ROOM_QUEUE_LIST, [])
 
         if action == 'omw':
             if not members:
@@ -160,7 +110,10 @@ class DafiCallback(RoomMixin, QueryHandler):
 
             return 'Hecho, les he avisado 😉'
         elif action == 'notify':
-            self.add_to_queue(update.effective_user.id)
+            user_id = update.effective_user.id
+
+            if user_id not in queue:
+                queue.append(user_id)
 
             return 'Hecho, te avisaré 😉'
         elif action == 'off':
@@ -172,6 +125,6 @@ class DafiCallback(RoomMixin, QueryHandler):
             if user not in members:
                 return 'No sabía que estabas en DAFI ⚠️'
 
-            self.leave_room(user)
+            members.remove(user)
 
             return 'He anotado que has salido de DAFI ✅'
