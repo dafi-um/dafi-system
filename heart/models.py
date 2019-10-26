@@ -151,16 +151,22 @@ class Meeting(models.Model):
 
     date = models.DateTimeField('fecha')
 
-    call = models.FileField('convocatoria', upload_to='meetings/')
+    call = models.FileField(
+        'convocatoria', upload_to='meetings/'
+    )
 
-    minutes = models.FileField('acta', upload_to='meetings/')
+    minutes = models.FileField(
+        'acta', upload_to='meetings/', blank=True
+    )
 
     attendees = models.ManyToManyField(
-        User, 'meetings_attended', verbose_name='asistentes'
+        User, 'meetings_attended',
+        verbose_name='asistentes', blank=True
     )
 
     absents = models.ManyToManyField(
-        User, 'meetings_absent', verbose_name='ausencias justificadas'
+        User, 'meetings_absent',
+        verbose_name='ausencias justificadas', blank=True
     )
 
     # TODO: Add related docs (fk: DocumentMedia)
