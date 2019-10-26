@@ -6,11 +6,14 @@
             <h1>{{ view.title }}</h1>
 
             {% if object.date %}
-                <p>Fecha: {{ object.date | date:'j \d\e F \d\e Y H:i' }}</p>
+                <p>Fecha: {{ object.date | date:'j \d\e F \d\e Y H:i' }} - <a href="{% url 'heart:meetings_detail' object.id %}" title="Ver detalles">Ver detalles</a></p>
             {% endif %}
         </div>
 
-        <a class="button alt" href="{% url 'heart:meetings' %}">Volver a la lista</a>
+        <div>
+            <a class="button alt" href="{% url 'heart:meetings_delete' object.id %}" title="Eliminar asamblea">Eliminar</a>
+            <a class="button alt" href="{% url 'heart:meetings' %}" title="Volver a la lista">Volver a la lista</a>
+        </div>
     </header>
 
     {{ form.non_field_errors }}

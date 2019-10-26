@@ -1640,6 +1640,7 @@
 		-webkit-transition: color 0.2s ease-in-out;
 		-ms-transition: color 0.2s ease-in-out;
 		transition: color 0.2s ease-in-out;
+		line-height: 1.25;
 		text-decoration: none;
 	}
 
@@ -4163,9 +4164,9 @@
 		margin-bottom: 0.5em;
 	}
 
-		.year-block .split h4, a {
+		.year-block .split h4,
+		.year-block .split a {
 			margin-bottom: 0;
-			line-height: 1.25;
 		}
 
 			.year-block .split a {

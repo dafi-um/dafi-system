@@ -1,0 +1,48 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special split">
+        <div>
+            <h1>Asamblea de Alumnos</h1>
+            <p>Fecha: {{ object.date | date:'j \d\e F \d\e Y H:i' }}</p>
+        </div>
+
+        <div>
+            {% if perms.heart.change_meeting %}
+                <a class="button alt" href="{% url 'heart:meetings_update' object.id %}">Editar</a>
+            {% endif %}
+
+            <a class="button alt" href="{% url 'heart:meetings' %}">Volver a la lista</a>
+        </div>
+    </header>
+
+    <h3>Documentos</h3>
+
+    <ul class="alt">
+        <li>Convocatoria: <a href="{{ object.call.url }}" target="_blank" title="Ver Convocatoria">{{ object.call.name }}</a></li>
+
+        {% if object.minutes %}
+            <li>Acta: <a href="{{ object.minutes.url }}" target="_blank" title="Ver Acta">{{ object.minutes.name }}</a></li>
+        {% endif %}
+    </ul>
+
+    {% if perms.heart.view_meeting %}
+        <h3>Listas de Asistencia</h3>
+
+        <div class="box wrapper style3">
+            <h4>Asistentes</h4>
+            <ul class="alt">
+                {% for user in attendees %}
+                    <li>{{ user.last_name }}, {{ user.first_name }}</li>
+                {% endfor %}
+            </ul>
+
+            <h4>Ausencias justificadas</h4>
+            <ul class="alt">
+                {% for user in absents %}
+                    <li>{{ user.last_name }}, {{ user.first_name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock content %}

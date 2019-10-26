@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from meta.views import MetadataMixin
 
@@ -27,6 +27,26 @@ class MeetingsView(MetadataMixin, ListView):
     title = 'Asambleas de Alumnos - DAFI'
     description = 'Convocatorias y Actas de las Asambleas de Alumnos de la Delegación'
     image = 'images/favicon.png'
+
+
+class MeetingsDetailView(DetailView):
+    model = Meeting
+
+    def get_queryset(self):
+        return (
+            super().get_queryset()
+            .prefetch_related('attendees')
+            .prefetch_related('absents')
+        )
+
+    def get_context_data(self, **kwargs):
+        obj = self.get_object()
+
+        context = super().get_context_data(**kwargs)
+        context['meta'] = obj.as_meta(self.request)
+        context['attendees'] = obj.attendees.order_by('last_name', 'first_name')
+        context['absents'] = obj.absents.order_by('last_name', 'first_name')
+        return context
 
 
 class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, CreateView):

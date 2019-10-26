@@ -13,7 +13,9 @@
         {% for meeting in meeting_list %}
             <li class="split">
                 <div>
-                    <h4 style="margin-bottom: 0;">{{ meeting.date | date:'j \d\e F \d\e Y H:i' }}</h4>
+                    <h4 style="margin-bottom: 0;">
+                        <a href="{% url 'heart:meetings_detail' meeting.id %}" title="Ver {{ meeting }}">{{ meeting.date | date:'j \d\e F \d\e Y H:i' }}</a>
+                    </h4>
 
                     {% if meeting.call %}
                         <span><a href="{{ meeting.call.url }}" title="Convocatoria {{ meeting }}">Convocatoria</a></span>
@@ -25,6 +27,8 @@
                 </div>
 
                 <div>
+                    <a class="button alt small" href="{% url 'heart:meetings_detail' meeting.id %}" title="Ver Asamblea en Detalle">Ver Asamblea</a>
+
                     {% if perms.heart.change_meeting %}
                         <a class="button alt small" href="{% url 'heart:meetings_update' meeting.id %}" title="Editar Asamblea">Editar</a>
                     {% endif %}
