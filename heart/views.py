@@ -81,7 +81,6 @@ class MeetingsDeleteView(PermissionRequiredMixin, MetadataMixin, DeleteView):
 
 class StudentsView(MetadataMixin, ListView):
     model = Group
-    ordering = ('course', 'year', 'number')
 
     template_name = 'heart/students.html'
 

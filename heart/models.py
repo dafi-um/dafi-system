@@ -72,6 +72,8 @@ class Group(models.Model):
     class Meta():
         verbose_name = 'grupo'
 
+        ordering = ('course', 'year', 'number')
+
         permissions = [
             ('can_link_group', 'Puede vincular un grupo de Telegram con un grupo de alumnos')
         ]
