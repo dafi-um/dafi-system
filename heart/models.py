@@ -5,7 +5,10 @@ from django.core.cache import cache
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import date
+from django.urls import reverse
 from django.utils.functional import cached_property
+
+from meta.models import ModelMeta
 
 User = get_user_model()
 
@@ -146,7 +149,7 @@ class Subject(models.Model):
         return d
 
 
-class Meeting(models.Model):
+class Meeting(ModelMeta, models.Model):
     '''Assembly and commitees meetings'''
 
     date = models.DateTimeField('fecha')
@@ -169,7 +172,9 @@ class Meeting(models.Model):
         verbose_name='ausencias justificadas', blank=True
     )
 
-    # TODO: Add related docs (fk: DocumentMedia)
+    _metadata = {
+        'title': '__str__',
+    }
 
     class Meta:
         verbose_name = 'asamblea de alumnos'
@@ -179,6 +184,9 @@ class Meeting(models.Model):
 
     def __str__(self):
         return 'Asamblea de Alumnos {}'.format(date(self.date, 'j F Y'))
+
+    def get_absolute_url(self):
+        return reverse('heart:meetings_update', args=[self.pk])
 
 
 class DocumentMedia(models.Model):

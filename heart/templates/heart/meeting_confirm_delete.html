@@ -1,0 +1,19 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Eliminar una Asamblea</h1>
+
+            <a class="button alt" href="{% url 'heart:meetings' %}" title="Volver a la Lista">Volver a la Lista</a>
+        </div>
+    </header>
+
+    <form method="post">
+        <p>Vas a eliminar la asamblea del {{ object.date | date:'j M Y H:i' }}. ¿Quieres continuar?</p>
+
+        {% csrf_token %}
+
+        <input class="button special" type="submit" value="Eliminar asamblea" />
+    </form>
+{% endblock content %}

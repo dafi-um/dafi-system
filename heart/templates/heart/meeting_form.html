@@ -1,0 +1,136 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special split">
+        <div>
+            <h1>{{ view.title }}</h1>
+
+            {% if object.date %}
+                <p>Fecha: {{ object.date | date:'j \d\e F \d\e Y H:i' }}</p>
+            {% endif %}
+        </div>
+
+        <a class="button alt" href="{% url 'heart:meetings' %}">Volver a la lista</a>
+    </header>
+
+    {{ form.non_field_errors }}
+
+    <form enctype="multipart/form-data" method="post">
+        <p>
+            {{ form.date.errors }}
+            {{ form.date.label_tag }}
+            {{ form.date }}
+            <span class="helptext">Formato: DD/MM/YYYY HH:mm</span>
+        </p>
+
+        <h3>Archivos</h3>
+
+        <div class="row">
+            <div class="6u 12u$(small)">
+                <p>
+                    {{ form.call.errors }}
+                    {{ form.call.label_tag }}
+                    {{ form.call }}
+                </p>
+            </div>
+
+            <div class="6u$ 12u$(small)">
+                <p>
+                    {{ form.minutes.errors }}
+                    {{ form.minutes.label_tag }}
+                    {{ form.minutes }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 2em;">
+            <div class="6u 12u$(small)">
+                <h3>Asistentes</h3>
+
+                {% for group in groups %}
+                    {% if group.course == group.GII %}
+                        {% ifchanged group.year %}
+                            <h4>Año {{ group.year }}</h4>
+                        {% endifchanged %}
+                    {% else %}
+                        <h4>{{ group.get_course_display }}</h4>
+                    {% endif %}
+
+                    <h5>{{ group.name }}</h5>
+
+                    {% if group.delegate %}
+                        <p style="margin: 0;">
+                            <input
+                                type="checkbox"
+                                name="attendees"
+                                id="attendee-{{ group.delegate.id }}"
+                                value="{{ group.delegate.id }}"
+                                {% if group.delegate in attendees %}checked{% endif %} />
+
+                            <label for="attendee-{{ group.delegate.id }}">{{ group.delegate.get_full_name }}</label>
+                        </p>
+                    {% endif %}
+
+                    {% if group.subdelegate %}
+                        <p style="margin: 0;">
+                            <input
+                                type="checkbox"
+                                name="attendees"
+                                id="attendee-{{ group.subdelegate.id }}"
+                                value="{{ group.subdelegate.id }}"
+                                {% if group.subdelegate in attendees %}checked{% endif %} />
+
+                            <label for="attendee-{{ group.subdelegate.id }}">{{ group.subdelegate.get_full_name }}</label>
+                        </p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="6u$ 12u$(small)">
+                <h3>Ausencias justificadas</h3>
+
+                {% for group in groups %}
+                    {% if group.course == group.GII %}
+                        {% ifchanged group.year %}
+                            <h4>Año {{ group.year }}</h4>
+                        {% endifchanged %}
+                    {% else %}
+                        <h4>{{ group.get_course_display }}</h4>
+                    {% endif %}
+
+                    <h5>{{ group.name }}</h5>
+
+                    {% if group.delegate %}
+                        <p style="margin: 0;">
+                            <input
+                                type="checkbox"
+                                name="absents"
+                                id="absent-{{ group.delegate.id }}"
+                                value="{{ group.delegate.id }}"
+                                {% if group.delegate in absents %}checked{% endif %} />
+
+                            <label for="absent-{{ group.delegate.id }}">{{ group.delegate.get_full_name }}</label>
+                        </p>
+                    {% endif %}
+
+                    {% if group.subdelegate %}
+                        <p style="margin: 0;">
+                            <input
+                                type="checkbox"
+                                name="absents"
+                                id="absent-{{ group.subdelegate.id }}"
+                                value="{{ group.subdelegate.id }}"
+                                {% if group.subdelegate in absents %}checked{% endif %} />
+
+                            <label for="absent-{{ group.subdelegate.id }}">{{ group.subdelegate.get_full_name }}</label>
+                        </p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        {% csrf_token %}
+
+        <input class="button special" style="margin-top: 2em;" type="submit" value="Guardar" />
+    </form>
+{% endblock content %}
