@@ -24,14 +24,14 @@ class BasicHandler():
     }
 
     bot_admin_required = False
-    bot_admin_required_msg = 'El bot debe ser administrador para vincular el grupo'
+    bot_admin_required_msg = 'El bot debe ser administrador para vincular el grupo.'
 
     user_required = False
     user_required_msg = (
         'Debes vincular tu cuenta de usuario primero: '
-        'ejecuta /vincular en un chat privado conmigo'
+        'ejecuta /vincular en un chat privado conmigo.'
     )
-    user_denied_msg = 'No tienes los permisos necesarios para realizar esta acción'
+    user_denied_msg = 'No tienes los permisos necesarios para realizar esta acción.'
 
     keep_original_message = True
 
@@ -111,7 +111,9 @@ class BasicHandler():
         self.keep_original_message = True
 
     def answer_private(self, msg, reply_markup=None):
-        # TODO: Implement this
+        raise NotImplementedError()
+
+    def notify_group(self, msg, reply_markup=None):
         raise NotImplementedError()
 
     def handle(self, update, context):
