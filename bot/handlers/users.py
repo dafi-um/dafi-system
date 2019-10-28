@@ -1,12 +1,99 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 from main.utils import get_url
 
 from .handlers import add_handler, CommandHandler, QueryHandler
 
 User = get_user_model()
+
+
+@add_handler('veracceso')
+class ViewGroupsPermissions(CommandHandler):
+    '''Prints the users in the given group'''
+
+    user_required = True
+
+    def user_filter(self, user):
+        return user.has_perm('bot.can_manage_permissions')
+
+    def handle(self, update, context):
+        try:
+            group_name = context.args[0]
+        except IndexError:
+            return 'Uso: /veracceso <nombre_grupo>'
+
+        group = Group.objects.filter(name=group_name).first()
+
+        if not group:
+            return 'No he encontrado el grupo especificado 😓'
+
+        msg = '*Usuarios en el grupo {}*:\n'.format(group.name)
+
+        for user in group.user_set.all():
+            msg += '\n[{}](tg://user?id={})'.format(
+                user.get_full_name(), user.telegram_id
+            )
+
+        return msg
+
+
+class UserPermissionsMixin(CommandHandler):
+    user_required = True
+
+    def user_filter(self, user):
+        return user.has_perm('bot.can_manage_permissions')
+
+    def handle(self, update, context):
+        try:
+            user_name, group_name = context.args
+        except IndexError:
+            return self.usage_msg
+
+        username = context.args[0].strip().replace('@', '')
+        user = User.objects.filter(telegram_user__iexact=username).first()
+
+        if not user:
+            return 'No he encontrado al usuario especificado 😓'
+        elif not user.telegram_id:
+            return 'El usuario no ha vinculado su cuenta 😓'
+
+        group = Group.objects.filter(name=group_name).first()
+
+        if not group:
+            return 'No he encontrado el grupo especificado 😓'
+
+        return self.do_action(user, group)
+
+
+@add_handler('daracceso')
+class AddUserPermissions(UserPermissionsMixin):
+    '''Adds the given user to the given group'''
+
+    usage_msg = 'Uso: /daracceso <nombre_usuario> <nombre_grupo>'
+
+    def do_action(self, user, group):
+        group.user_set.add(user)
+
+        return 'He agregado a {} al grupo {} ✅'.format(
+            user.get_full_name(), group.name
+        )
+
+
+@add_handler('quitaracceso')
+class RemoveUserPermissions(UserPermissionsMixin):
+    '''Removes the given user from the given group'''
+
+    usage_msg = 'Uso: /daracceso <nombre_usuario> <nombre_grupo>'
+
+    def do_action(self, user, group):
+        group.user_set.remove(user)
+
+        return 'He eliminado a {} del grupo {} ✅'.format(
+            user.get_full_name(), group.name
+        )
 
 
 @add_handler('vincular')
