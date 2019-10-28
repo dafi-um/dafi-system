@@ -36,11 +36,18 @@ def get_all():
     global _shelf
     return _shelf.items()
 
-def get_item(key, default=None):
-    '''Gets an item from the persistent data dictionary'''
+def get_item(key, default):
+    '''
+    Gets an item from the persistent data dictionary.
+    If it does not exist, creates it.
+    '''
 
     global _shelf
-    return _shelf.get(key, default)
+
+    if key not in _shelf:
+        _shelf[key] = default
+
+    return _shelf[key]
 
 def set_item(key, value):
     '''Updates an item value in the persistent data dictionary'''
