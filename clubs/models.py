@@ -17,6 +17,16 @@ class Club(ModelMeta, models.Model):
 
     description = models.TextField('descripción', max_length=300)
 
+    document = models.FileField(
+        'documento', upload_to='clubs/docs/', blank=True,
+        help_text='Útil para bases de concursos o información de actividades.'
+    )
+
+    document_name = models.CharField(
+        'nombre del documento', max_length=120, default='', blank=True,
+        help_text='Texto que aparecerá en el enlace del documento.'
+    )
+
     image = models.ImageField(
         'imagen', upload_to='clubs/', blank=True,
         help_text='Imagen para mostrar en la lista de clubes'

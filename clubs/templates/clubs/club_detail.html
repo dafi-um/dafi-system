@@ -23,7 +23,11 @@
         <div class="row">
             <div class="6u 12u(small)">
                 <h4>Sobre nosotros</h4>
-                <p>{{ club.description }}</p>
+                <p style="margin-bottom: 1em;">{{ club.description }}</p>
+
+                {% if club.document and club.document_name %}
+                    <p><a href="{{ club.document.url }}" target="_blank" title="{{ club.document_name }}">{{ club.document_name }}</a></p>
+                {% endif %}
             </div>
 
             <div class="6u 12u(small)">

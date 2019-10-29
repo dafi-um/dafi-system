@@ -11,7 +11,7 @@ class ClubForm(ModelForm):
 
     class Meta:
         model = Club
-        fields = ('description', 'members')
+        fields = ('description', 'document_name', 'document', 'members')
 
 
 class ClubMeetingForm(ModelForm):

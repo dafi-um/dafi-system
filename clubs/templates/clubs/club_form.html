@@ -12,7 +12,7 @@
         <p>Club ID: {{ club.slug }}</p>
     </header>
 
-    <form method="post">
+    <form enctype="multipart/form-data" method="post">
         {{ form.as_p }}
         {% csrf_token %}
 
