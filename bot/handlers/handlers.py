@@ -9,6 +9,8 @@ from telegram.ext import (
 
 from django.contrib.auth import get_user_model as _get_user_model
 
+from main.models import Config
+
 _user_model = _get_user_model()
 
 _handlers = []
@@ -113,8 +115,20 @@ class BasicHandler():
     def answer_private(self, msg, reply_markup=None):
         raise NotImplementedError()
 
-    def notify_group(self, msg, reply_markup=None):
-        raise NotImplementedError()
+    def notify_group(self, msg, reply_markup=None, parse_mode=None, config_key=None):
+        if not config_key:
+            config_key = Config.MAIN_GROUP_ID
+
+        group_id = Config.get(config_key)
+
+        if not group_id:
+            return False
+
+        self.context.bot.send_message(
+            group_id, msg, parse_mode, reply_markup=reply_markup
+        )
+
+        return True
 
     def handle(self, update, context):
         raise NotImplementedError("Must create a `handle' method in the class")
@@ -187,6 +201,14 @@ class QueryHandler(BasicHandler):
             self.update.callback_query.edit_message_text(
                 self.msg, reply_markup=self.reply_markup
             )
+
+    def callback(self, update, action, *args):
+        raise NotImplementedError("Must create a `callback' method in the class")
+
+    def handle(self, update, context):
+        _, action, *args = update.callback_query.data.split(':')
+
+        return self.callback(update, action, *args)
 
     @classmethod
     def as_handler(cls, pattern):
