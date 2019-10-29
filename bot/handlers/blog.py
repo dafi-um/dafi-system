@@ -1,8 +1,8 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
 from blog.models import Post
 
 from main.utils import get_url
+
+from ..utils import create_reply_markup
 
 from .handlers import CommandHandler, add_handler
 
@@ -22,8 +22,8 @@ class BlogListHandler(CommandHandler):
         buttons = []
 
         for p in posts:
-            buttons.append([
-                InlineKeyboardButton(p.title, url=get_url('blog:detail', args=[p.slug]))
-            ])
+            buttons.append(
+                [(p.title, None, get_url('blog:detail', args=[p.slug]))]
+            )
 
-        return msg, InlineKeyboardMarkup(buttons)
+        return msg, create_reply_markup(*buttons)

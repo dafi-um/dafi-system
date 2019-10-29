@@ -1,9 +1,9 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
 from main.utils import get_url
+
+from ..utils import create_reply_markup, create_users_list
 
 from .handlers import add_handler, CommandHandler, QueryHandler
 
@@ -32,12 +32,7 @@ class ViewGroupsPermissions(CommandHandler):
 
         msg = '*Usuarios en el grupo {}*:\n'.format(group.name)
 
-        for user in group.user_set.all():
-            msg += '\n[{}](tg://user?id={})'.format(
-                user.get_full_name(), user.telegram_id
-            )
-
-        return msg
+        return msg + create_users_list(group.user_set.all())
 
 
 class UserPermissionsMixin(CommandHandler):
@@ -45,6 +40,9 @@ class UserPermissionsMixin(CommandHandler):
 
     def user_filter(self, user):
         return user.has_perm('bot.can_manage_permissions')
+
+    def do_action(self, user, group):
+        raise NotImplementedError("Must create a `do_action' method in the class")
 
     def handle(self, update, context):
         try:
@@ -112,10 +110,10 @@ class UsersLink(CommandHandler):
                 '¿quieres vincular esta cuenta con tu usuario de Telegram?'
             ).format(user.email)
 
-            reply_markup = InlineKeyboardMarkup([[
-                InlineKeyboardButton('Vincular cuenta', callback_data='users:link'),
-                InlineKeyboardButton('Cancelar', callback_data='main:abort')
-            ]])
+            reply_markup = create_reply_markup([
+                ('Vincular cuenta', 'users:link'),
+                ('Cancelar', 'main:abort'),
+            ])
         elif not user:
             msg = (
                 'No he encontrado ninguna cuenta para vincular, '
@@ -123,9 +121,9 @@ class UsersLink(CommandHandler):
                 'apartado Mi Perfil de la web.'
             )
 
-            reply_markup = InlineKeyboardMarkup([[
-                InlineKeyboardButton('Mi Perfil', url=get_url('profile')),
-            ]])
+            reply_markup = create_reply_markup([
+                ('Mi Perfil', None, get_url('profile')),
+            ])
         else:
             if user.telegram_id == telegram_user.id:
                 msg_end = 'tu usuario ✅'
@@ -153,10 +151,10 @@ class UsersUnlink(CommandHandler):
             'tu cuenta de nuevo. ¿Estás seguro de que deseas continuar?'
         )
 
-        reply_markup = InlineKeyboardMarkup([[
-            InlineKeyboardButton('Sí, desvincular cuenta', callback_data='users:unlink'),
-            InlineKeyboardButton('No, cancelar', callback_data='main:abort')
-        ]])
+        reply_markup = create_reply_markup([
+            ('Sí, desvincular cuenta', 'users:unlink'),
+            ('No, cancelar', 'main:abort'),
+        ])
 
         return msg, reply_markup
 
@@ -165,17 +163,21 @@ class UsersUnlink(CommandHandler):
 class UsersCallbackHandler(QueryHandler):
     '''Link and unlink command buttons callbacks'''
 
-    def handle(self, update, context):
-        query = update.callback_query
-        action = query.data.replace('users:', '')
-
+    def callback(self, update, action, *args):
         if action == 'link':
-            user = User.objects.filter(telegram_user__iexact=query.from_user.username).first()
+            telegram_user = update.effective_user
+
+            user = (
+                User
+                .objects
+                .filter(telegram_user__iexact=telegram_user.username)
+                .first()
+            )
 
             if not user:
                 return 'Parece que ha ocurrido un error...'
 
-            user.telegram_id = query.from_user.id
+            user.telegram_id = telegram_user.id
             user.save()
 
             return (

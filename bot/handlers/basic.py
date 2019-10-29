@@ -1,6 +1,6 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
 from django.contrib.auth import get_user_model
+
+from ..utils import create_reply_markup
 
 from .handlers import CommandHandler, QueryHandler, add_handler
 
@@ -29,10 +29,10 @@ class StartHandler(CommandHandler):
                 'ahora a tu cuenta de Telegram?'
             ).format(user.email)
 
-            reply_markup = InlineKeyboardMarkup([[
-                InlineKeyboardButton('Sí, vincular cuenta', callback_data='users:link'),
-                InlineKeyboardButton('No, cancelar', callback_data='main:abort')
-            ]])
+            reply_markup = create_reply_markup([
+                ('Sí, vincular cuenta', 'users:link'),
+                ('No, cancelar', 'main:abort'),
+            ])
 
             return msg, reply_markup
 

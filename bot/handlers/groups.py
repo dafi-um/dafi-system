@@ -174,8 +174,13 @@ class GroupsUnlink(CommandHandler):
     user_required = True
 
     def handle(self, update, context):
-        query = Q(telegram_group=update.message.chat.id)
-        club = Club.objects.filter(query).prefetch_related('managers').first()
+        club = (
+            Club
+            .objects
+            .filter(telegram_group=update.message.chat.id)
+            .prefetch_related('managers')
+            .first()
+        )
 
         if not club:
             return '⚠️ Este chat de Telegram no está vinculado a ningún club ⚠️'

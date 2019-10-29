@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import ParseMode
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -7,6 +7,7 @@ from django.db.models import Q
 from heart.models import Group
 
 from .. import persistence
+from ..utils import create_reply_markup
 
 from .handlers import add_handler, CommandHandler, QueryHandler
 
@@ -33,19 +34,19 @@ class ElectionsToggleHandler(ElectionsMixin, CommandHandler):
         return user.has_perm('bot.can_manage_elections')
 
     def handle(self, update, context):
+        msg = 'El periodo de elecciones está '
+
         if self.elections_active():
-            status = '*activo*. ¿Quieres finalizarlo?'
-            btn = InlineKeyboardButton('Sí, finalizar', callback_data='elections:off')
+            msg += '*activo*. ¿Quieres finalizarlo?'
+            btn = ('Sí, finalizar', 'elections:off')
         else:
-            status = '*inactivo*. ¿Quieres iniciarlo?'
-            btn = InlineKeyboardButton('Sí, iniciar', callback_data='elections:on')
+            msg += '*inactivo*. ¿Quieres iniciarlo?'
+            btn = ('Sí, iniciar', 'elections:on')
 
-        msg = 'El periodo de elecciones está ' + status
-
-        reply_markup = InlineKeyboardMarkup([[
+        reply_markup = create_reply_markup([
             btn,
-            InlineKeyboardButton('No, cancelar', callback_data='main:okey'),
-        ]])
+            ('No, cancelar', 'main:okey'),
+        ])
 
         return msg, reply_markup
 
@@ -97,10 +98,10 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
             telegram_user.id, group.year, group.number, int(self.is_delegate)
         )
 
-        reply_markup = InlineKeyboardMarkup([[
-            InlineKeyboardButton('Autorizar ✅', callback_data='elections:request:' + query),
-            InlineKeyboardButton('Denegar ❌', callback_data='elections:deny:' + query),
-        ]])
+        reply_markup = create_reply_markup([
+            ('Autorizar ✅', 'elections:request:' + query),
+            ('Denegar ❌', 'elections:deny:' + query),
+        ])
 
         if not self.notify_group(msg, reply_markup, ParseMode.MARKDOWN):
             return 'No se ha podido enviar tu solicitud ⚠️'

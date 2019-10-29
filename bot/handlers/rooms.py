@@ -1,8 +1,7 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
 from django.contrib.auth import get_user_model
 
 from .. import persistence
+from ..utils import create_reply_markup
 
 from .handlers import add_handler, CommandHandler, Config, QueryHandler
 
@@ -22,14 +21,13 @@ class DafiRoom(CommandHandler):
 
         if not context.args:
             if not members:
-                reply_markup = InlineKeyboardMarkup([[
-                    InlineKeyboardButton(
+                reply_markup = create_reply_markup(
+                    [(
                         'Avísame cuando llegue alguien ✔️',
-                        callback_data='dafi:notify:{}'.format(update.effective_user.id)
-                    )
-                ], [
-                    InlineKeyboardButton('No me avises ❌', callback_data='main:okey')
-                ]])
+                        'dafi:notify:{}'.format(update.effective_user.id)
+                    )],
+                    [('No me avises ❌', 'main:okey')]
+                )
 
                 return 'Ahora mismo no hay nadie en DAFI 😓', reply_markup
 
@@ -41,10 +39,10 @@ class DafiRoom(CommandHandler):
 
             if update.message.chat.type == 'private':
                 msg += '\n\n¿Quieres que avise de que vas?'
-                reply_markup = InlineKeyboardMarkup([
-                    [InlineKeyboardButton('Sí, estoy de camino 🏃🏻‍♂️', callback_data='dafi:omw')],
-                    [InlineKeyboardButton('No, iré luego ☕️', callback_data='main:okey')]
-                ])
+                reply_markup = create_reply_markup(
+                    [('Sí, estoy de camino 🏃🏻‍♂️', 'dafi:omw')],
+                    [('No, iré luego ☕️', 'main:okey')],
+                )
 
             return msg, reply_markup
 
@@ -74,9 +72,9 @@ class DafiRoom(CommandHandler):
 
                 queue.clear()
 
-            reply_markup = InlineKeyboardMarkup([[
-                InlineKeyboardButton('Me voy 💤', callback_data='dafi:off')
-            ]])
+            reply_markup = create_reply_markup([
+                ('Me voy 💤', 'dafi:off')
+            ])
 
             return 'He anotado que estás DAFI ✅', reply_markup
 
@@ -133,14 +131,13 @@ class AltRoomHandler(CommandHandler):
 
         if not context.args:
             if not members:
-                reply_markup = InlineKeyboardMarkup([[
-                    InlineKeyboardButton(
+                reply_markup = create_reply_markup(
+                    [(
                         'Avísame cuando llegue alguien ✔️',
-                        callback_data='alt_room:notify:{}'.format(update.effective_user.id)
-                    )
-                ], [
-                    InlineKeyboardButton('No me avises ❌', callback_data='main:okey')
-                ]])
+                        'alt_room:notify:{}'.format(update.effective_user.id)
+                    )],
+                    [('No me avises ❌', 'main:okey')]
+                )
 
                 return 'Ahora mismo no hay nadie en reprografía 😓', reply_markup
 
@@ -155,13 +152,10 @@ class AltRoomHandler(CommandHandler):
 
             if update.message.chat.type == 'private':
                 msg += '\n\n¿Quieres que avise de que vas?'
-                reply_markup = InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        'Sí, estoy de camino 🏃🏻‍♂️', callback_data='alt_room:omw'
-                    )],
-
-                    [InlineKeyboardButton('No, iré luego ☕️', callback_data='main:okey')]
-                ])
+                reply_markup = create_reply_markup(
+                    [('Sí, estoy de camino 🏃🏻‍♂️', 'alt_room:omw')],
+                    [('No, iré luego ☕️', 'main:okey')],
+                )
 
             return msg, reply_markup
 
@@ -191,9 +185,9 @@ class AltRoomHandler(CommandHandler):
 
                 queue.clear()
 
-            reply_markup = InlineKeyboardMarkup([[
-                InlineKeyboardButton('Me voy 💤', callback_data='alt_room:off')
-            ]])
+            reply_markup = create_reply_markup([
+                ('Me voy 💤', 'alt_room:off')
+            ])
 
             return 'He anotado que estás reprografía ✅', reply_markup
 
