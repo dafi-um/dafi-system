@@ -4,7 +4,13 @@ from django.contrib.flatpages.models import FlatPage
 
 from pagedown.widgets import AdminPagedownWidget
 
+from . import models
 from .forms import FlatPageForm
+
+
+@admin.register(models.Config)
+class ConfigAdmin(admin.ModelAdmin):
+    list_display = ('key', 'name', 'category')
 
 
 class PageAdmin(FlatPageAdmin):
