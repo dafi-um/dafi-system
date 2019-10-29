@@ -1,5 +1,3 @@
-from os import getenv
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 
 from django.contrib.auth import get_user_model
@@ -14,7 +12,6 @@ from .handlers import add_handler, CommandHandler, QueryHandler
 
 User = get_user_model()
 
-DAFI_MAIN_GROUP = getenv('DAFI_MAIN_GROUP', None)
 ELECTIONS_KEY = 'elections_active'
 
 
@@ -64,13 +61,10 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
         if not self.elections_active():
             return 'No hay un periodo de elecciones activo ⚠️'
 
-        if not DAFI_MAIN_GROUP:
-            return '⚠️ No se pudo procesar tu solicitud ⚠️\nContacta con los responsables de la Delegación.'
-
         prefix = '' if self.is_delegate else 'sub'
 
         try:
-            group_year, group_num = context.args[0].split('.')
+            group_year, group_num = [int(x) for x in context.args[0].split('.')]
         except (ValueError, IndexError):
             return (
                 '**Uso**: _/soy{0}delegado <curso>.<grupo>_\n\n'
@@ -108,9 +102,8 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
             InlineKeyboardButton('Denegar ❌', callback_data='elections:deny:' + query),
         ]])
 
-        context.bot.send_message(
-            DAFI_MAIN_GROUP, msg, ParseMode.MARKDOWN, reply_markup=reply_markup
-        )
+        if not self.notify_group(msg, reply_markup, ParseMode.MARKDOWN):
+            return 'No se ha podido enviar tu solicitud ⚠️'
 
         return '¡Tu solicitud se ha enviado correctamente!'
 
@@ -138,10 +131,7 @@ class ElectionsToggleCallback(ElectionsMixin, QueryHandler):
     def user_filter(self, user):
         return user.has_perm('bot.can_manage_elections')
 
-    def handle(self, update, context):
-        query = update.callback_query
-        _, action, *args = query.data.split(':')
-
+    def callback(self, update, action, *args):
         if action == 'on':
             if self.elections_active():
                 return 'El periodo de elecciones ya está activo.'
@@ -210,7 +200,7 @@ class ElectionsToggleCallback(ElectionsMixin, QueryHandler):
         else:
             msg = 'Tu petición para ser {}delegado ha sido denegada ❌'.format(prefix)
 
-        context.bot.send_message(user_id, msg)
+        self.context.bot.send_message(user_id, msg)
 
         msg = 'La solicitud de {} ha sido {} por {}'.format(
             user.get_full_name(), 'aceptada' if accepted else 'denegada',
