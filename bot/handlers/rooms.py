@@ -1,6 +1,11 @@
+import schedule
+
+from telegram import ParseMode
+
 from django.contrib.auth import get_user_model
 
 from .. import persistence
+from ..jobs import add_job
 from ..utils import create_reply_markup
 
 from .handlers import add_handler, CommandHandler, Config, QueryHandler
@@ -235,3 +240,27 @@ class AltRoomCallback(QueryHandler):
             members.remove(user)
 
             return 'He anotado que has salido de reprografía ✅'
+
+
+@add_job(schedule.every().day.at('21:10'))
+def remind_remaining_room_members(bot):
+    msg_pat = (
+        '¡Oye! Parece que te has dejado activado el '
+        '`/{0}` y la facultad ya ha cerrado, quizás deberías '
+        'ejecutar `/{0} off` para salir.'
+    )
+
+    commands = [
+        (ROOM_MEMBERS_LIST, 'dafi'),
+        (ALT_ROOM_MEMBERS_LIST, 'repro'),
+    ]
+
+    for list_key, cmd in commands:
+        members = persistence.get_item(list_key, [])
+
+        msg = msg_pat.format(cmd)
+
+        for member in members:
+            bot.send_message(
+                member.telegram_id, msg, parse_mode=ParseMode.MARKDOWN
+            )
