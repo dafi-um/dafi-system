@@ -1,3 +1,4 @@
+import schedule
 import shelve
 
 _shelf = None
@@ -7,6 +8,8 @@ def load():
 
     global _shelf
     _shelf = shelve.open('botstorage', writeback=True)
+
+    schedule.every(5).minutes.do(_shelf.sync)
 
 def close():
     '''Saves the data to the disk and closes the file'''

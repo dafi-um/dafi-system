@@ -1,16 +1,19 @@
 import logging
+import schedule
 
-from os import environ, getenv
 from importlib import import_module
+from os import environ, getenv
 
 from django import setup as django_setup
 
 from telegram.ext import Updater, CommandHandler
 
+from .jobs import SchedulerThread, load_jobs
+
 def main():
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(message)s',
-        level=logging.INFO
+        level=logging.WARNING
     )
 
     environ.setdefault('DJANGO_SETTINGS_MODULE', 'website.settings')
@@ -36,6 +39,13 @@ def main():
     print('Loading persistent data...')
     persistence.load()
 
+    print('Loading scheduled jobs...')
+    load_jobs(updater.bot)
+
+    print('Starting scheduler thread...')
+    thread = SchedulerThread()
+    thread.start()
+
     print('Starting polling...')
     updater.start_polling()
 
@@ -58,17 +68,27 @@ def main():
         elif cmd == 'flush':
             persistence.flush()
             print('Persistent data flushed!!')
+        elif cmd == 'jobs':
+            print('Scheduled jobs:')
+
+            for job in schedule.jobs:
+                print(' -', job)
         elif cmd == 'help':
             print(
                 'DAFIBot commands help:\n'
                 '  data - displays persistent data in memory\n'
                 '  exit - stops the bot gracefully\n'
                 '  flush - flushes the persistent data\n'
+                '  jobs - displays the scheduled jobs\n'
                 '  save - saves the persistent data to disk\n'
                 '  help - displays this help'
             )
         else:
             print('Unknown command!')
+
+    print('Stopping scheduler thread...')
+    thread.stopper.set()
+    thread.join()
 
     print('Stopping polling...')
     updater.stop()
