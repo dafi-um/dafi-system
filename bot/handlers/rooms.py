@@ -73,7 +73,12 @@ class DafiRoom(CommandHandler):
 
             if queue:
                 for user_id in queue:
-                    context.bot.send_message(user_id, msg)
+                    try:
+                        context.bot.send_message(user_id, msg)
+                    except:
+                        # So many errors can occur here but it's a simple
+                        # notification, so we'll just ignore a failed one
+                        pass
 
                 queue.clear()
 
@@ -186,7 +191,12 @@ class AltRoomHandler(CommandHandler):
 
             if queue:
                 for user_id in queue:
-                    context.bot.send_message(user_id, msg)
+                    try:
+                        context.bot.send_message(user_id, msg)
+                    except:
+                        # So many errors can occur here but it's a simple
+                        # notification, so we'll just ignore a failed one
+                        pass
 
                 queue.clear()
 
