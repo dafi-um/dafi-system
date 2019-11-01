@@ -17,7 +17,12 @@ class DocumentsView(MetadataMixin, ListView):
     image = 'images/favicon.png'
 
     def get_queryset(self):
-        return super().get_queryset().filter(hidden=False)
+        return (
+            super()
+            .get_queryset()
+            .filter(hidden=False)
+            .order_by('category', 'name')
+        )
 
 
 class MeetingsView(MetadataMixin, ListView):

@@ -7,6 +7,17 @@
 
     <ul class="alt">
         {% for doc in documentmedia_list %}
+            {% ifchanged doc.category %}
+                {% if doc.category %}
+                    </ul>
+
+                    <h3 id="{{ doc.category | slugify }}">
+                        <a href="#{{ doc.category | slugify }}" title="{{ doc.category }}">{{ doc.category }}</a>
+                    </h3>
+                    <ul class="alt">
+                {% endif %}
+            {% endifchanged %}
+
             <li>{{ doc.name }} - <a href="{{ doc.file.url }}" target="_blank">{{ doc.get_filename }}</a></li>
         {% empty %}
             <li>No hay documentos para mostrar...</li>

@@ -203,6 +203,14 @@ class DocumentMedia(models.Model):
         help_text='Ocultar el archivo en las listas'
     )
 
+    category = models.CharField(
+        'categoría', max_length=200, blank=True, default='',
+        help_text=(
+            'Los documentos con la misma categoría '
+            'aparecerán agrupados juntos en la lista.'
+        )
+    )
+
     class Meta:
         verbose_name = 'documento'
 
