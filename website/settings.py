@@ -165,6 +165,8 @@ USE_TZ = True
 
 # Files
 
+FILE_UPLOAD_PERMISSIONS = 0o644
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
