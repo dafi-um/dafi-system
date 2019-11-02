@@ -1,11 +1,11 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from meta.views import MetadataMixin
 
-from .models import DocumentMedia, Group, Meeting, YEARS_RANGE
+from .models import DocumentMedia, Group, Meeting
 
 
 class DocumentsView(MetadataMixin, ListView):

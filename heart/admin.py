@@ -17,14 +17,3 @@ class GroupAdmin(admin.ModelAdmin):
 @admin.register(models.Meeting)
 class MeetingAdmin(admin.ModelAdmin):
     list_display = ('date',)
-
-
-@admin.register(models.Subject)
-class SubjectAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'year', 'quarter')
-    list_filter = ['year', 'quarter']
-
-
-@admin.register(models.Year)
-class YearAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'groups', 'subgroups')
