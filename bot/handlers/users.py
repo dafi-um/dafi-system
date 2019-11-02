@@ -23,7 +23,7 @@ class ViewGroupsPermissions(CommandHandler):
         try:
             group_name = context.args[0]
         except IndexError:
-            return 'Uso: /veracceso <nombre_grupo>'
+            return 'Uso: `/veracceso <nombre-grupo>`'
 
         group = Group.objects.filter(name=group_name).first()
 
@@ -70,7 +70,7 @@ class UserPermissionsMixin(CommandHandler):
 class AddUserPermissions(UserPermissionsMixin):
     '''Adds the given user to the given group'''
 
-    usage_msg = 'Uso: /daracceso <nombre_usuario> <nombre_grupo>'
+    usage_msg = 'Uso: `/daracceso <nombre-usuario> <nombre-grupo>`'
 
     def do_action(self, user, group):
         group.user_set.add(user)
@@ -84,7 +84,7 @@ class AddUserPermissions(UserPermissionsMixin):
 class RemoveUserPermissions(UserPermissionsMixin):
     '''Removes the given user from the given group'''
 
-    usage_msg = 'Uso: /daracceso <nombre_usuario> <nombre_grupo>'
+    usage_msg = 'Uso: `/quitaracceso <nombre-usuario> <nombre-grupo>`'
 
     def do_action(self, user, group):
         group.user_set.remove(user)
