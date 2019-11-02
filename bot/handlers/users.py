@@ -47,7 +47,7 @@ class UserPermissionsMixin(CommandHandler):
     def handle(self, update, context):
         try:
             user_name, group_name = context.args
-        except IndexError:
+        except ValueError:
             return self.usage_msg
 
         username = context.args[0].strip().replace('@', '')
