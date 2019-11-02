@@ -11,11 +11,17 @@ class Club(ModelMeta, models.Model):
     Club
     '''
 
-    name = models.CharField('nombre', max_length=64)
+    name = models.CharField(
+        'nombre', max_length=64
+    )
 
-    slug = models.SlugField('slug', max_length=64)
+    slug = models.SlugField(
+        'slug', max_length=64, unique=True
+    )
 
-    description = models.TextField('descripción', max_length=300)
+    description = models.TextField(
+        'descripción', max_length=300
+    )
 
     document = models.FileField(
         'documento', upload_to='clubs/docs/', blank=True,
@@ -81,16 +87,22 @@ class ClubMeeting(models.Model):
         Club, models.CASCADE, 'meetings', verbose_name='club'
     )
 
-    title = models.CharField('título', max_length=200, blank=True)
-    place = models.CharField('lugar', max_length=120)
-    moment = models.DateTimeField('fecha')
+    title = models.CharField(
+        'título', max_length=200, blank=True
+    )
 
-    def __str__(self):
-        return '{} en {} ({})'.format(
-            self.club.name, self.place, self.moment.strftime('%d %b %Y %H:%M')
-        )
+    place = models.CharField(
+        'lugar', max_length=120
+    )
+
+    moment = models.DateTimeField('fecha')
 
     class Meta:
         verbose_name = 'quedada'
 
         ordering = ['moment']
+
+    def __str__(self):
+        return '{} en {} ({})'.format(
+            self.club.name, self.place, self.moment.strftime('%d %b %Y %H:%M')
+        )
