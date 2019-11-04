@@ -17,3 +17,14 @@ class GroupAdmin(admin.ModelAdmin):
 @admin.register(models.Meeting)
 class MeetingAdmin(admin.ModelAdmin):
     list_display = ('date',)
+
+
+class PeopleGroupMemberInline(admin.TabularInline):
+    model = models.PeopleGroup.members.through
+
+
+@admin.register(models.PeopleGroup)
+class PeopleGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_hidden', 'show_in_meetings')
+
+    inlines = (PeopleGroupMemberInline,)

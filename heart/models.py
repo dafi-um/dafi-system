@@ -120,6 +120,69 @@ class Meeting(ModelMeta, models.Model):
         return reverse('heart:meetings_update', args=[self.pk])
 
 
+class PeopleGroup(models.Model):
+    '''Groups of relevant people'''
+
+    name = models.CharField(
+        'nombre', max_length=120, unique=True
+    )
+
+    members = models.ManyToManyField(
+        User, through='PeopleGroupMember'
+    )
+
+    is_hidden = models.BooleanField(
+        'ocultar grupo', default=False,
+        help_text=(
+            'Ocultar los miembros de este colectivo '
+            'en las vistas públicas del sitio web'
+        )
+    )
+
+    show_in_meetings = models.BooleanField(
+        'mostrar en asambleas', default=True,
+        help_text=(
+            'Mostrar los miembros de este colectivo '
+            'en las listas de asistencia de las asambleas'
+        )
+    )
+
+    class Meta:
+        verbose_name = 'grupo de gente importante'
+        verbose_name_plural = 'grupos de gente importante'
+
+    def __str__(self):
+        return self.name
+
+
+class PeopleGroupMember(models.Model):
+    '''Members of groups of relevant people'''
+
+    group = models.ForeignKey(
+        PeopleGroup, models.CASCADE, verbose_name='grupo'
+    )
+
+    user = models.ForeignKey(
+        User, models.CASCADE, verbose_name='usuario'
+    )
+
+    title = models.CharField(
+        'título', max_length=120, default='', blank=True
+    )
+
+    class Meta:
+        verbose_name = 'grupo de gente importante'
+        verbose_name_plural = 'grupos de gente importante'
+
+    def __str__(self):
+        txt = '{} en {}'.format(self.user.email, self.group)
+
+        if self.title:
+            txt += ' ({})'.format(self.title)
+
+        return txt
+
+
 class DocumentMedia(models.Model):
     '''Document and media files'''
 
