@@ -11,7 +11,10 @@
         </div>
 
         <div>
-            <a class="button alt" href="{% url 'heart:meetings_delete' object.id %}" title="Eliminar asamblea">Eliminar</a>
+            {% if object.id %}
+                <a class="button alt" href="{% url 'heart:meetings_delete' object.id %}" title="Eliminar asamblea">Eliminar</a>
+            {% endif %}
+
             <a class="button alt" href="{% url 'heart:meetings' %}" title="Volver a la lista">Volver a la lista</a>
         </div>
     </header>
@@ -47,89 +50,36 @@
         </div>
 
         <div class="row" style="margin-top: 2em;">
-            <div class="6u 12u$(small)">
-                <h3>Asistentes</h3>
+            {% for title, name, list in lists %}
+                <div class="6u 12u$(small)">
+                    <h3>{{ title }}</h3>
 
-                {% for group in groups %}
-                    {% if group.course == group.GII %}
-                        {% ifchanged group.year %}
-                            <h4>Año {{ group.year }}</h4>
+                    {% for title_1, title_2, user in users %}
+                        {% ifchanged title_1 %}
+                            {% if title_1 %}
+                                <h4>{{ title_1 }}</h4>
+                            {% endif %}
                         {% endifchanged %}
-                    {% else %}
-                        <h4>{{ group.get_course_display }}</h4>
-                    {% endif %}
 
-                    <h5>{{ group.name }}</h5>
-
-                    {% if group.delegate %}
-                        <p style="margin: 0;">
-                            <input
-                                type="checkbox"
-                                name="attendees"
-                                id="attendee-{{ group.delegate.id }}"
-                                value="{{ group.delegate.id }}"
-                                {% if group.delegate in attendees %}checked{% endif %} />
-
-                            <label for="attendee-{{ group.delegate.id }}">{{ group.delegate.get_full_name }}</label>
-                        </p>
-                    {% endif %}
-
-                    {% if group.subdelegate %}
-                        <p style="margin: 0;">
-                            <input
-                                type="checkbox"
-                                name="attendees"
-                                id="attendee-{{ group.subdelegate.id }}"
-                                value="{{ group.subdelegate.id }}"
-                                {% if group.subdelegate in attendees %}checked{% endif %} />
-
-                            <label for="attendee-{{ group.subdelegate.id }}">{{ group.subdelegate.get_full_name }}</label>
-                        </p>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <div class="6u$ 12u$(small)">
-                <h3>Ausencias justificadas</h3>
-
-                {% for group in groups %}
-                    {% if group.course == group.GII %}
-                        {% ifchanged group.year %}
-                            <h4>Año {{ group.year }}</h4>
+                        {% ifchanged title_2 %}
+                            {% if title_2 %}
+                                <h5>{{ title_2 }}</h5>
+                            {% endif %}
                         {% endifchanged %}
-                    {% else %}
-                        <h4>{{ group.get_course_display }}</h4>
-                    {% endif %}
 
-                    <h5>{{ group.name }}</h5>
-
-                    {% if group.delegate %}
                         <p style="margin: 0;">
                             <input
                                 type="checkbox"
-                                name="absents"
-                                id="absent-{{ group.delegate.id }}"
-                                value="{{ group.delegate.id }}"
-                                {% if group.delegate in absents %}checked{% endif %} />
+                                name="{{ name }}"
+                                id="{{ name }}-{{ user.id }}"
+                                value="{{ user.id }}"
+                                {% if is_creation and user.id in list or user in list %}checked{% endif %} />
 
-                            <label for="absent-{{ group.delegate.id }}">{{ group.delegate.get_full_name }}</label>
+                            <label for="{{ name }}-{{ user.id }}">{{ user.get_full_name }}</label>
                         </p>
-                    {% endif %}
-
-                    {% if group.subdelegate %}
-                        <p style="margin: 0;">
-                            <input
-                                type="checkbox"
-                                name="absents"
-                                id="absent-{{ group.subdelegate.id }}"
-                                value="{{ group.subdelegate.id }}"
-                                {% if group.subdelegate in absents %}checked{% endif %} />
-
-                            <label for="absent-{{ group.subdelegate.id }}">{{ group.subdelegate.get_full_name }}</label>
-                        </p>
-                    {% endif %}
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
         </div>
 
         {% csrf_token %}

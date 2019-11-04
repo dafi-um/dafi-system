@@ -2,10 +2,11 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic.base import ContextMixin
 
 from meta.views import MetadataMixin
 
-from .models import DocumentMedia, Group, Meeting
+from .models import DocumentMedia, Group, Meeting, PeopleGroup
 
 
 class DocumentsView(MetadataMixin, ListView):
@@ -54,29 +55,8 @@ class MeetingsDetailView(DetailView):
         return context
 
 
-class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, CreateView):
+class MeetingMixin(ContextMixin):
     model = Meeting
-    fields = ('date', 'call', 'minutes', 'attendees', 'absents')
-
-    permission_required = 'heart.add_meeting'
-
-    title = 'Crear Asamblea de Alumnos'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['groups'] = Group.objects.filter(~Q(delegate=None) | ~Q(subdelegate=None))
-        context['attendees'] = self.request.POST.getlist('attendees')
-        context['absents'] = self.request.POST.getlist('absents')
-        return context
-
-
-class MeetingsUpdateView(PermissionRequiredMixin, UpdateView):
-    model = Meeting
-    fields = ('date', 'call', 'minutes', 'attendees', 'absents')
-
-    permission_required = 'heart.add_meeting'
-
-    title = 'Editar Asamblea de Alumnos'
 
     def get_queryset(self):
         return (
@@ -86,13 +66,96 @@ class MeetingsUpdateView(PermissionRequiredMixin, UpdateView):
         )
 
     def get_context_data(self, **kwargs):
+        groups = Group.objects.filter(
+            ~Q(delegate=None) | ~Q(subdelegate=None)
+        )
+
+        people = (
+            PeopleGroup.objects
+            .filter(show_in_meetings=True)
+            .prefetch_related('members')
+        )
+
+        users_list = []
+        users_ids = set()
+
+        for group in people:
+            for user in group.members.all():
+                if user.id in users_ids:
+                    continue
+
+                users_list.append(
+                    (group.name, None, user)
+                )
+
+                users_ids.add(user.id)
+
+        for group in groups:
+            if group.course == Group.GII:
+                title = 'Año {}'.format(group.year)
+            else:
+                title = group.get_course_display()
+
+            if group.delegate and group.delegate.id not in users_ids:
+                users_ids.add(group.delegate.id)
+
+                users_list.append(
+                    (title, group.name, group.delegate)
+                )
+
+            if group.subdelegate and group.subdelegate.id not in users_ids:
+                users_ids.add(group.subdelegate.id)
+
+                users_list.append(
+                    (title, group.name, group.subdelegate)
+                )
+
+        context = super().get_context_data(**kwargs)
+        context['users'] = users_list
+        return context
+
+
+class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, MeetingMixin, CreateView):
+    model = Meeting
+    fields = ('date', 'call', 'minutes', 'attendees', 'absents')
+
+    permission_required = 'heart.add_meeting'
+
+    title = 'Crear Asamblea de Alumnos'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lists'] = (
+            (
+                'Asistentes', 'attendees',
+                [int(x) for x in self.request.POST.getlist('attendees')]
+            ),
+            (
+                'Ausencias justificadas', 'absents',
+                [int(x) for x in self.request.POST.getlist('absents')]
+            ),
+        )
+        context['is_creation'] = True
+        return context
+
+
+class MeetingsUpdateView(PermissionRequiredMixin, MeetingMixin, UpdateView):
+    model = Meeting
+    fields = ('date', 'call', 'minutes', 'attendees', 'absents')
+
+    permission_required = 'heart.add_meeting'
+
+    title = 'Editar Asamblea de Alumnos'
+
+    def get_context_data(self, **kwargs):
         obj = self.get_object()
 
         context = super().get_context_data(**kwargs)
+        context['lists'] = (
+            ('Asistentes', 'attendees', obj.attendees.all()),
+            ('Ausencias justificadas', 'absents', obj.absents.all()),
+        )
         context['meta'] = obj.as_meta(self.request)
-        context['groups'] = Group.objects.filter(~Q(delegate=None) | ~Q(subdelegate=None))
-        context['attendees'] = obj.attendees.all()
-        context['absents'] = obj.absents.all()
         return context
 
 
