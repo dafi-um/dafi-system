@@ -19,6 +19,8 @@ class AboutUsView(MetadataMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context['committees'] = Committee.objects.all()
+
         context['groups'] = (
             PeopleGroup.objects
             .filter(is_hidden=False)

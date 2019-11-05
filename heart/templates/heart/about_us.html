@@ -21,10 +21,10 @@
                         src="{{ member.user | gravatar }}"
                         alt="{{ member.name }}" />
 
-                    <h4 style="margin: 0.2em;">{{ member.name }}</h4>
+                    <h4 style="margin-bottom: 0.2em;">{{ member.name }}</h4>
 
                     {% if member.title %}
-                        <p style="margin: 0.2em;opacity: 0.8;">{{ member.title }}</p>
+                        <p style="margin-bottom: 0.2em;opacity: 0.8;">{{ member.title }}</p>
                     {% endif %}
 
                     {% if member.user.telegram_id %}
@@ -33,5 +33,21 @@
                 </div>
             {% endfor %}
         </div>
+    {% endfor %}
+
+    <h3>Comisiones de La Delegación</h3>
+
+    {% for committee in committees %}
+        <div class="box wrapper style3">
+            <div class="split">
+                <h4>{{ committee.name }}</h4>
+
+                <p style="margin-bottom: 1em;">Responsable: {{ committee.manager.get_full_name }}{% if committee.manager.telegram_id %} - <i class="fa fa-send"></i> @{{ committee.manager.telegram_user }}{% endif %}</p>
+            </div>
+
+            <p style="margin-bottom: 0;">{{ committee.description }}</p>
+        </div>
+    {% empty %}
+        <p>No hay comisiones para mostrar...</p>
     {% endfor %}
 {% endblock content %}
