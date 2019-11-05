@@ -12,6 +12,28 @@ from meta.models import ModelMeta
 User = get_user_model()
 
 
+class Committee(models.Model):
+    '''Internal committee'''
+
+    name = models.CharField(
+        'nombre', max_length=120
+    )
+
+    description = models.TextField(
+        'descripción'
+    )
+
+    manager = models.ForeignKey(
+        User, models.PROTECT, verbose_name='responsable'
+    )
+
+    class Meta:
+        verbose_name = 'comisión'
+        verbose_name_plural = 'comisiones'
+
+        ordering = ('name',)
+
+
 class Group(models.Model):
     '''Group of Students'''
 

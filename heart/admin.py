@@ -3,6 +3,11 @@ from django.contrib import admin
 from . import models
 
 
+@admin.register(models.Committee)
+class CommitteeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'manager')
+
+
 @admin.register(models.DocumentMedia)
 class DocumentMediaAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'hidden')
