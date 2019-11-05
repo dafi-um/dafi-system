@@ -154,6 +154,11 @@ class PeopleGroup(models.Model):
         User, through='PeopleGroupMember'
     )
 
+    order = models.IntegerField(
+        'orden', default=1,
+        help_text='Se ordena de forma creciente (menor número sale antes).'
+    )
+
     is_hidden = models.BooleanField(
         'ocultar grupo', default=False,
         help_text=(
@@ -174,6 +179,8 @@ class PeopleGroup(models.Model):
         verbose_name = 'grupo de gente importante'
         verbose_name_plural = 'grupos de gente importante'
 
+        ordering = ('order', 'name')
+
     def __str__(self):
         return self.name
 
@@ -193,9 +200,16 @@ class PeopleGroupMember(models.Model):
         'título', max_length=120, default='', blank=True
     )
 
+    order = models.IntegerField(
+        'orden', default=1,
+        help_text='Se ordena de forma creciente (menor número sale antes).'
+    )
+
     class Meta:
         verbose_name = 'grupo de gente importante'
         verbose_name_plural = 'grupos de gente importante'
+
+        ordering = ('order', 'user__first_name')
 
     def __str__(self):
         txt = '{} en {}'.format(self.user.email, self.group)
