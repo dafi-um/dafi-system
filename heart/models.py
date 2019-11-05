@@ -5,6 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import date
 from django.urls import reverse
+from django.utils.functional import cached_property
 
 from meta.models import ModelMeta
 
@@ -181,6 +182,10 @@ class PeopleGroupMember(models.Model):
             txt += ' ({})'.format(self.title)
 
         return txt
+
+    @cached_property
+    def name(self):
+        return self.user.get_full_name()
 
 
 class DocumentMedia(models.Model):
