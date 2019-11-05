@@ -4,7 +4,18 @@
 {% block content %}
     <header class="major special">
         <div class="split">
-            <h1>Mi Perfil</h1>
+            <div>
+                <h1>Mi Perfil</h1>
+
+                <a class="profile-img" href="https://www.gravatar.com/" title="Editar avatar" target="_blank">
+                    <img src="{{ user | gravatar }}" alt="Gravatar de {{ user.email }}" />
+                    <div class="profile-img-edit">
+                        <i class="fa fa-pencil"></i>
+                    </div>
+                </a>
+
+                <p>Has iniciado sesión como {{ user.email }}</p>
+            </div>
 
             <div class="actions">
                 <a class="button alt" href="{% url 'password_change' %}" title="Cambiar contraseña">Cambiar contraseña</a>
@@ -14,8 +25,6 @@
                 <a class="button alt" href="{% url 'logout' %}" title="Cerrar sesión">Cerrar sesión</a>
             </div>
         </div>
-
-        <p>Has iniciado sesión como {{ user.email }}</p>
     </header>
 
     {% if success %}
