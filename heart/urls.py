@@ -12,4 +12,5 @@ urlpatterns = [
     path('asambleas/<int:pk>/', views.MeetingsDetailView.as_view(), name='meetings_detail'),
     path('documentos/', views.DocumentsView.as_view(), name='docs'),
     path('estudiantes/', views.StudentsView.as_view(), name='students'),
+    path('delegacion/', views.AboutUsView.as_view(), name='about_us'),
 ]

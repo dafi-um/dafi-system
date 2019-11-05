@@ -1,0 +1,37 @@
+{% extends 'generic.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+    <header class="major special">
+        <h1>La Delegación</h1>
+    </header>
+
+    {% for group in groups %}
+        <h3>{{ group.name }}</h3>
+
+        <div class="row">
+            {% for member in group.peoplegroupmember_set.all %}
+                <div
+                    class="3u{% cycle '' '' '' '$' %} 6u{% cycle '' '$' %}(medium) 12u$(xsmall)"
+                    style="text-align: center;">
+
+                    <img
+                        style="border-radius: 100%;"
+                        src="{{ member.user | gravatar }}"
+                        alt="{{ member.name }}" />
+
+                    <h4 style="margin: 0.2em;">{{ member.name }}</h4>
+
+                    {% if member.title %}
+                        <p style="margin: 0.2em;opacity: 0.8;">{{ member.title }}</p>
+                    {% endif %}
+
+                    {% if member.user.telegram_id %}
+                        <p style="opacity: 0.8;"><i class="fa fa-send"></i> @{{ member.user.telegram_user }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% endblock content %}

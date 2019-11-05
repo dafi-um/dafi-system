@@ -1,12 +1,31 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 from django.views.generic.base import ContextMixin
 
 from meta.views import MetadataMixin
 
-from .models import DocumentMedia, Group, Meeting, PeopleGroup
+from .models import Committee, DocumentMedia, Group, Meeting, PeopleGroup
+
+
+class AboutUsView(MetadataMixin, TemplateView):
+    template_name = 'heart/about_us.html'
+
+    title = 'La Delegación - DAFI'
+    description = 'Información sobre la Delegación de Alumnos de la Facultad de Informática'
+    image = 'images/favicon.png'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['groups'] = (
+            PeopleGroup.objects
+            .filter(is_hidden=False)
+            .prefetch_related('members')
+        )
+
+        return context
 
 
 class DocumentsView(MetadataMixin, ListView):
