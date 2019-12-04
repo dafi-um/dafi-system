@@ -138,7 +138,7 @@ class MeetingMixin(ContextMixin):
 
 class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, MeetingMixin, CreateView):
     model = Meeting
-    fields = ('date', 'call', 'minutes', 'attendees', 'absents')
+    fields = ('date', 'call', 'minutes', 'documents', 'attendees', 'absents')
 
     permission_required = 'heart.add_meeting'
 
@@ -162,7 +162,7 @@ class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, MeetingMixin, C
 
 class MeetingsUpdateView(PermissionRequiredMixin, MeetingMixin, UpdateView):
     model = Meeting
-    fields = ('date', 'call', 'minutes', 'attendees', 'absents')
+    fields = ('date', 'call', 'minutes', 'documents', 'attendees', 'absents')
 
     permission_required = 'heart.add_meeting'
 

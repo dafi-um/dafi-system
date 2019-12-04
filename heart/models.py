@@ -34,6 +34,36 @@ class Committee(models.Model):
         ordering = ('name',)
 
 
+class DocumentMedia(models.Model):
+    '''Document and media files'''
+
+    name = models.CharField('nombre', max_length=120)
+
+    file = models.FileField('archivo', upload_to='docs/')
+
+    hidden = models.BooleanField(
+        'oculto', default=False,
+        help_text='Ocultar el archivo en las listas'
+    )
+
+    category = models.CharField(
+        'categoría', max_length=200, blank=True, default='',
+        help_text=(
+            'Los documentos con la misma categoría '
+            'aparecerán agrupados juntos en la lista.'
+        )
+    )
+
+    class Meta:
+        verbose_name = 'documento'
+
+    def __str__(self):
+        return self.name
+
+    def get_filename(self):
+        return basename(self.file.name)
+
+
 class Group(models.Model):
     '''Group of Students'''
 
@@ -114,6 +144,11 @@ class Meeting(ModelMeta, models.Model):
 
     minutes = models.FileField(
         'acta', upload_to='meetings/', blank=True
+    )
+
+    documents = models.ManyToManyField(
+        DocumentMedia, verbose_name='documentos relacionados',
+        blank=True
     )
 
     attendees = models.ManyToManyField(
@@ -222,33 +257,3 @@ class PeopleGroupMember(models.Model):
     @cached_property
     def name(self):
         return self.user.get_full_name()
-
-
-class DocumentMedia(models.Model):
-    '''Document and media files'''
-
-    name = models.CharField('nombre', max_length=120)
-
-    file = models.FileField('archivo', upload_to='docs/')
-
-    hidden = models.BooleanField(
-        'oculto', default=False,
-        help_text='Ocultar el archivo en las listas'
-    )
-
-    category = models.CharField(
-        'categoría', max_length=200, blank=True, default='',
-        help_text=(
-            'Los documentos con la misma categoría '
-            'aparecerán agrupados juntos en la lista.'
-        )
-    )
-
-    class Meta:
-        verbose_name = 'documento'
-
-    def __str__(self):
-        return self.name
-
-    def get_filename(self):
-        return basename(self.file.name)

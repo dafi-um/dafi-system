@@ -24,6 +24,21 @@
                     {% if meeting.minutes %}
                         <span>- <a href="{{ meeting.minutes.url }}" title="Acta {{ meeting }}">Acta</a></span>
                     {% endif %}
+
+                    {% for doc in meeting.documents.all %}
+                        {% if forloop.first %}
+                            <div>
+                                <span>Documentos relacionados: </span>
+                        {% else %}
+                            <span>&nbsp;-&nbsp;</span>
+                        {% endif %}
+
+                        <a href="{{ doc.file.url }}" target="_blank">{{ doc.name }}</a>
+
+                        {% if forloop.last %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
 
                 <div>
