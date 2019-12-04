@@ -3,6 +3,15 @@ from django.contrib import admin
 from . import models
 
 
+def make_hidden(modeladmin, request, queryset):
+    queryset.update(hidden=True)
+make_hidden.short_description = 'Ocultar documentos seleccionado/s'
+
+def make_not_hidden(modeladmin, request, queryset):
+    queryset.update(hidden=False)
+make_not_hidden.short_description = 'Mostrar documentos seleccionado/s'
+
+
 @admin.register(models.Committee)
 class CommitteeAdmin(admin.ModelAdmin):
     list_display = ('name', 'manager')
@@ -12,6 +21,7 @@ class CommitteeAdmin(admin.ModelAdmin):
 class DocumentMediaAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'hidden')
     list_filter = ('hidden',)
+    actions = (make_hidden, make_not_hidden)
 
 
 @admin.register(models.Group)
