@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 from django.views.generic.base import ContextMixin
@@ -55,6 +55,9 @@ class MeetingsView(MetadataMixin, ListView):
     description = 'Convocatorias y Actas de las Asambleas de Alumnos de la Delegación'
     image = 'images/favicon.png'
 
+    def get_queryset(self):
+        return super().get_queryset().annotate(Count('documents'))
+
 
 class MeetingsDetailView(DetailView):
     model = Meeting
@@ -64,6 +67,7 @@ class MeetingsDetailView(DetailView):
             super().get_queryset()
             .prefetch_related('attendees')
             .prefetch_related('absents')
+            .prefetch_related('documents')
         )
 
     def get_context_data(self, **kwargs):
@@ -84,6 +88,7 @@ class MeetingMixin(ContextMixin):
             super().get_queryset()
             .prefetch_related('attendees')
             .prefetch_related('absents')
+            .prefetch_related('documents')
         )
 
     def get_context_data(self, **kwargs):
