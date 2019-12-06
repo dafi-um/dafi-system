@@ -24,6 +24,10 @@
         {% if object.minutes %}
             <li>Acta: <a href="{{ object.minutes.url }}" target="_blank" title="Ver Acta">{{ object.minutes.name }}</a></li>
         {% endif %}
+
+        {% for doc in object.documents.all %}
+            <li>{{ doc.name }}: <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name }}</a></li>
+        {% endfor %}
     </ul>
 
     {% if perms.heart.view_meeting %}
