@@ -10,6 +10,8 @@ from telegram.ext import Updater, CommandHandler
 
 from .jobs import SchedulerThread, load_jobs
 
+from .cli import BotCLI
+
 def main():
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -49,42 +51,7 @@ def main():
     print('Starting polling...')
     updater.start_polling()
 
-    print('Bot started!')
-
-    while True:
-        cmd = input('bot> ').strip().lower()
-
-        if cmd == 'stop' or cmd == 'exit':
-            break
-        elif cmd == 'data':
-            print('Persistent data:')
-
-            for k, v in persistence.get_all():
-                print('  {}: {}'.format(k, v))
-        elif cmd == 'save' or cmd == 'sync':
-            print('Saving persistent data...')
-            persistence.sync()
-            print('Done!')
-        elif cmd == 'flush':
-            persistence.flush()
-            print('Persistent data flushed!!')
-        elif cmd == 'jobs':
-            print('Scheduled jobs:')
-
-            for job in schedule.jobs:
-                print(' -', job)
-        elif cmd == 'help':
-            print(
-                'DAFIBot commands help:\n'
-                '  data - displays persistent data in memory\n'
-                '  exit - stops the bot gracefully\n'
-                '  flush - flushes the persistent data\n'
-                '  jobs - displays the scheduled jobs\n'
-                '  save - saves the persistent data to disk\n'
-                '  help - displays this help'
-            )
-        else:
-            print('Unknown command!')
+    BotCLI().cmdloop()
 
     print('Stopping scheduler thread...')
     thread.stopper.set()
