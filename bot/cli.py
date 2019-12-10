@@ -6,7 +6,7 @@ from . import persistence
 
 
 class BotCLI(Cmd):
-    intro = 'Bot CLI started!. Type exit to stop the bot.'
+    intro = 'Bot started! Type exit to stop the bot.'
     prompt = 'bot> '
 
     def do_data(self, arg):
