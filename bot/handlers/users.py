@@ -5,21 +5,23 @@ from main.utils import get_url
 
 from ..utils import create_reply_markup, create_users_list
 
-from .handlers import add_handler, CommandHandler, QueryHandler
+from .handlers import add_handlers, BasicBotHandler
 
 User = get_user_model()
 
 
-@add_handler('veracceso')
-class ViewGroupsPermissions(CommandHandler):
+@add_handlers
+class ViewGroupsPermissions(BasicBotHandler):
     '''Prints the users in the given group'''
+
+    cmd = 'veracceso'
 
     user_required = True
 
     def user_filter(self, user):
         return user.has_perm('bot.can_manage_permissions')
 
-    def handle(self, update, context):
+    def command(self, update, context):
         try:
             group_name = context.args[0]
         except IndexError:
@@ -35,7 +37,7 @@ class ViewGroupsPermissions(CommandHandler):
         return msg + create_users_list(group.user_set.all())
 
 
-class UserPermissionsMixin(CommandHandler):
+class UserPermissionsMixin(BasicBotHandler):
     user_required = True
 
     def user_filter(self, user):
@@ -44,7 +46,7 @@ class UserPermissionsMixin(CommandHandler):
     def do_action(self, user, group):
         raise NotImplementedError("Must create a `do_action' method in the class")
 
-    def handle(self, update, context):
+    def command(self, update, context):
         try:
             user_name, group_name = context.args
         except ValueError:
@@ -66,9 +68,11 @@ class UserPermissionsMixin(CommandHandler):
         return self.do_action(user, group)
 
 
-@add_handler('daracceso')
+@add_handlers
 class AddUserPermissions(UserPermissionsMixin):
     '''Adds the given user to the given group'''
+
+    cmd = 'daracceso'
 
     usage_msg = 'Uso: `/daracceso <nombre-usuario> <nombre-grupo>`'
 
@@ -80,9 +84,11 @@ class AddUserPermissions(UserPermissionsMixin):
         )
 
 
-@add_handler('quitaracceso')
+@add_handlers
 class RemoveUserPermissions(UserPermissionsMixin):
     '''Removes the given user from the given group'''
+
+    cmd = 'quitaracceso'
 
     usage_msg = 'Uso: `/quitaracceso <nombre-usuario> <nombre-grupo>`'
 
@@ -94,13 +100,15 @@ class RemoveUserPermissions(UserPermissionsMixin):
         )
 
 
-@add_handler('vincular')
-class UsersLink(CommandHandler):
+@add_handlers
+class UsersLink(BasicBotHandler):
     '''Links a telegram user to a django user'''
+
+    cmd = 'vincular'
 
     chat_type = 'private'
 
-    def handle(self, update, context):
+    def command(self, update, context):
         telegram_user = update.message.from_user
         user = User.objects.filter(telegram_user__iexact=telegram_user.username).first()
 
@@ -135,16 +143,18 @@ class UsersLink(CommandHandler):
         return msg, reply_markup
 
 
-@add_handler('desvincular')
-class UsersUnlink(CommandHandler):
+@add_handlers
+class UsersUnlink(BasicBotHandler):
     '''Unlinks a telegram user from a django user'''
+
+    cmd = 'desvincular'
 
     user_required = True
     user_required_msg = 'Este usuario no está vinculado a ninguna cuenta.'
 
     chat_type = 'private'
 
-    def handle(self, update, context):
+    def command(self, update, context):
         msg = (
             '⚠️ Vas a desvincular tu cuenta ⚠️\n'
             'No podrás realizar acciones importantes salvo que vincules '
@@ -159,9 +169,11 @@ class UsersUnlink(CommandHandler):
         return msg, reply_markup
 
 
-@add_handler('users')
-class UsersCallbackHandler(QueryHandler):
+@add_handlers
+class UsersCallbackHandler(BasicBotHandler):
     '''Link and unlink command buttons callbacks'''
+
+    query_prefix = 'users'
 
     def callback(self, update, action, *args):
         if action == 'link':

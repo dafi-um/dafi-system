@@ -9,39 +9,40 @@ from heart.models import Group
 from .. import persistence
 from ..utils import create_reply_markup
 
-from .handlers import add_handler, CommandHandler, QueryHandler
+from .handlers import add_handlers, BasicBotHandler
 
 User = get_user_model()
 
 ELECTIONS_KEY = 'elections_active'
 
 
-class ElectionsMixin():
-    def elections_active(self):
-        return persistence.get_item(ELECTIONS_KEY, False)
-
-    def set_elections_active(self, value):
-        persistence.set_item(ELECTIONS_KEY, value)
-
-
-@add_handler('elecciones')
-class ElectionsToggleHandler(ElectionsMixin, CommandHandler):
+@add_handlers
+class ElectionsToggleHandler(BasicBotHandler):
     '''Toggle the elections period'''
+
+    cmd = 'elecciones'
+    query_prefix = 'elections_toggle'
 
     user_required = True
 
     def user_filter(self, user):
         return user.has_perm('bot.can_manage_elections')
 
-    def handle(self, update, context):
+    def elections_active(self):
+        return persistence.get_item(ELECTIONS_KEY, False)
+
+    def set_elections_active(self, value):
+        persistence.set_item(ELECTIONS_KEY, value)
+
+    def command(self, update, context):
         msg = 'El periodo de elecciones está '
 
         if self.elections_active():
             msg += '*activo*. ¿Quieres finalizarlo?'
-            btn = ('Sí, finalizar', 'elections:off')
+            btn = ('Sí, finalizar', 'elections_toggle:off')
         else:
             msg += '*inactivo*. ¿Quieres iniciarlo?'
-            btn = ('Sí, iniciar', 'elections:on')
+            btn = ('Sí, iniciar', 'elections_toggle:on')
 
         reply_markup = create_reply_markup([
             btn,
@@ -50,19 +51,46 @@ class ElectionsToggleHandler(ElectionsMixin, CommandHandler):
 
         return msg, reply_markup
 
+    def callback(self, update, action, *args):
+        if action == 'on':
+            if self.elections_active():
+                return 'El periodo de elecciones ya está activo.'
 
-class ElectionRequestMixin(ElectionsMixin, CommandHandler):
+            self.set_elections_active(True)
+
+            return 'Ahora el periodo de elecciones está activo ✅'
+        elif action == 'off':
+            if not self.elections_active():
+                return 'El periodo de elecciones ya está inactivo.'
+
+            self.set_elections_active(False)
+
+            return 'Ahora el periodo de elecciones está inactivo ✅'
+
+
+@add_handlers
+class ElectionRequestMixin(BasicBotHandler):
     '''Mixin to handle elections request commands'''
 
-    chat_type = 'private'
+    commands_available = [
+        'soydelegado',
+        'soysubdelegado'
+    ]
+
+    query_prefix = 'elections'
 
     user_required = True
 
-    def handle(self, update, context):
+    def elections_active(self):
+        return persistence.get_item(ELECTIONS_KEY, False)
+
+    def command(self, update, context):
         if not self.elections_active():
             return 'No hay un periodo de elecciones activo ⚠️'
 
-        prefix = '' if self.is_delegate else 'sub'
+        is_delegate = self.current_command == self.commands_available[0]
+
+        prefix = '' if is_delegate else 'sub'
 
         try:
             group_year, group_num = [int(x) for x in context.args[0].split('.')]
@@ -89,13 +117,13 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
             user.get_full_name(), user.email, telegram_user.username.replace('_', '\\_')
         )
 
-        current = group.delegate if self.is_delegate else group.subdelegate
+        current = group.delegate if is_delegate else group.subdelegate
 
         if current:
             msg += '\n\nActual {}delegado: {}'.format(prefix, current.get_full_name())
 
         query = '{}:{}.{}:{}'.format(
-            telegram_user.id, group.year, group.number, int(self.is_delegate)
+            telegram_user.id, group.year, group.number, int(is_delegate)
         )
 
         reply_markup = create_reply_markup([
@@ -108,46 +136,10 @@ class ElectionRequestMixin(ElectionsMixin, CommandHandler):
 
         return '¡Tu solicitud se ha enviado correctamente!'
 
-
-@add_handler('soydelegado')
-class ElectionsToggleHandler(ElectionRequestMixin):
-    '''Starts a delegate request'''
-
-    is_delegate = True
-
-
-@add_handler('soysubdelegado')
-class ElectionsToggleHandler(ElectionRequestMixin):
-    '''Starts a subdelegate request'''
-
-    is_delegate = False
-
-
-@add_handler('elections')
-class ElectionsToggleCallback(ElectionsMixin, QueryHandler):
-    '''Handles elections requests buttons'''
-
-    user_required = True
-
-    def user_filter(self, user):
+    def callback_user_filter(self, user):
         return user.has_perm('bot.can_manage_elections')
 
     def callback(self, update, action, *args):
-        if action == 'on':
-            if self.elections_active():
-                return 'El periodo de elecciones ya está activo.'
-
-            self.set_elections_active(True)
-
-            return 'Ahora el periodo de elecciones está activo ✅'
-        elif action == 'off':
-            if not self.elections_active():
-                return 'El periodo de elecciones ya está inactivo.'
-
-            self.set_elections_active(False)
-
-            return 'Ahora el periodo de elecciones está inactivo ✅'
-
         if action != 'deny' and action != 'request':
             return
 

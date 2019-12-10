@@ -6,16 +6,18 @@ from django.db.models import Q
 from heart.models import Group
 from clubs.models import Club
 
-from .handlers import add_handler, CommandHandler
+from .handlers import add_handlers, BasicBotHandler
 
 User = get_user_model()
 
 
-@add_handler('grupos')
-class GroupsList(CommandHandler):
+@add_handlers
+class GroupsList(BasicBotHandler):
     '''Returns a list of all the groups'''
 
-    def handle(self, update, context):
+    cmd = 'grupos'
+
+    def command(self, update, context):
         groups = (
             Group
             .objects
@@ -42,16 +44,18 @@ class GroupsList(CommandHandler):
         return msg
 
 
-@add_handler('vinculargrupo')
-class GroupsLink(CommandHandler):
+@add_handlers
+class GroupsLink(BasicBotHandler):
     '''Links a telegram group to a students group (only staff and delegates)'''
+
+    cmd = 'vinculargrupo'
 
     chat_type = 'group'
 
     bot_admin_required = True
     user_required = True
 
-    def handle(self, update, context):
+    def command(self, update, context):
         try:
             group_year, group_num = [int(x) for x in context.args[0].split('.')]
         except (ValueError, IndexError):
@@ -93,16 +97,25 @@ class GroupsLink(CommandHandler):
         return '¡Grupo vinculado correctamente!'
 
 
-@add_handler('desvinculargrupo')
-class GroupsUnlink(CommandHandler):
+@add_handlers
+class GroupsUnlink(BasicBotHandler):
     '''Unlinks a telegram group from a students group (only staff and delegates)'''
+
+    cmd = 'desvinculargrupo'
 
     chat_type = 'group'
 
     user_required = True
 
-    def handle(self, update, context):
-        group = Group.objects.filter(telegram_group=update.message.chat.id).first()
+    def command(self, update, context):
+        group = (
+            Group
+            .objects
+            .filter(telegram_group=update.message.chat.id)
+            .prefetch_related('delegate')
+            .prefetch_related('subdelegate')
+            .first()
+        )
 
         if not group:
             return '⚠️ Este chat de Telegram no está vinculado a ningún grupo ⚠️'
@@ -122,16 +135,18 @@ class GroupsUnlink(CommandHandler):
         return 'Grupo desvinculado correctamente'
 
 
-@add_handler('vincularclub')
-class GroupsLink(CommandHandler):
+@add_handlers
+class GroupsLink(BasicBotHandler):
     '''Links a telegram group to a club (only staff and managers)'''
+
+    cmd = 'vincularclub'
 
     chat_type = 'group'
 
     bot_admin_required = True
     user_required = True
 
-    def handle(self, update, context):
+    def command(self, update, context):
         if not context.args or not context.args[0]:
             return '**Uso**: _/vincularclub <ID-del-club>_'
 
@@ -139,7 +154,13 @@ class GroupsLink(CommandHandler):
         chat_id = str(update.effective_chat.id)
         query = Q(telegram_group=chat_id) | Q(slug=slug)
 
-        club = Club.objects.filter(query).prefetch_related('managers').first()
+        club = (
+            Club
+            .objects
+            .filter(query)
+            .prefetch_related('managers')
+            .first()
+        )
 
         if not club:
             return 'No se ha encontrado el club _{}_'.format(slug)
@@ -165,15 +186,17 @@ class GroupsLink(CommandHandler):
         return '¡Club vinculado correctamente!'
 
 
-@add_handler('desvincularclub')
-class GroupsUnlink(CommandHandler):
+@add_handlers
+class GroupsUnlink(BasicBotHandler):
     '''Unlinks a telegram group from a club (only staff and managers)'''
+
+    cmd = 'desvincularclub'
 
     chat_type = 'group'
 
     user_required = True
 
-    def handle(self, update, context):
+    def command(self, update, context):
         club = (
             Club
             .objects

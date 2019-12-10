@@ -8,7 +8,7 @@ from .. import persistence
 from ..jobs import add_job
 from ..utils import create_reply_markup
 
-from .handlers import add_handler, CommandHandler, Config, QueryHandler
+from .handlers import add_handlers, BasicBotHandler, Config
 
 User = get_user_model()
 
@@ -19,9 +19,14 @@ ALT_ROOM_MEMBERS_LIST = 'alt_room_members'
 ALT_ROOM_QUEUE_LIST = 'alt_room_queue'
 
 
-@add_handler('dafi')
-class DafiRoom(CommandHandler):
-    def handle(self, update, context):
+@add_handlers
+class DafiRoom(BasicBotHandler):
+    '''Main room handler'''
+
+    cmd = 'dafi'
+    query_prefix = 'dafi'
+
+    def command(self, update, context):
         members = persistence.get_item(ROOM_MEMBERS_LIST, [])
 
         if not context.args:
@@ -96,9 +101,6 @@ class DafiRoom(CommandHandler):
 
             return 'He anotado que has salido de DAFI ✅'
 
-
-@add_handler('dafi')
-class DafiCallback(QueryHandler):
     def callback(self, update, action, *args):
         members = persistence.get_item(ROOM_MEMBERS_LIST, [])
         queue = persistence.get_item(ROOM_QUEUE_LIST, [])
@@ -134,9 +136,14 @@ class DafiCallback(QueryHandler):
             return 'He anotado que has salido de DAFI ✅'
 
 
-@add_handler('repro')
-class AltRoomHandler(CommandHandler):
-    def handle(self, update, context):
+@add_handlers
+class AltRoomHandler(BasicBotHandler):
+    '''Alternative room handler'''
+
+    cmd = 'repro'
+    query_prefix = 'alt_room'
+
+    def command(self, update, context):
         members = persistence.get_item(ALT_ROOM_MEMBERS_LIST, [])
 
         if not context.args:
@@ -214,9 +221,6 @@ class AltRoomHandler(CommandHandler):
 
             return 'He anotado que has salido de reprografía ✅'
 
-
-@add_handler('alt_room')
-class AltRoomCallback(QueryHandler):
     def callback(self, update, action, *args):
         members = persistence.get_item(ALT_ROOM_MEMBERS_LIST, [])
         queue = persistence.get_item(ALT_ROOM_QUEUE_LIST, [])

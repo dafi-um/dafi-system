@@ -2,16 +2,19 @@ from django.contrib.auth import get_user_model
 
 from ..utils import create_reply_markup
 
-from .handlers import CommandHandler, QueryHandler, add_handler
+from .handlers import add_handlers, BasicBotHandler
 
 User = get_user_model()
 
 
-@add_handler('start')
-class StartHandler(CommandHandler):
-    '''Start command'''
+@add_handlers
+class MainHandler(BasicBotHandler):
+    '''Start command and generic callback handler'''
 
-    def handle(self, update, context):
+    cmd = 'start'
+    query_prefix = 'main'
+
+    def command(self, update, context):
         if update.effective_chat.type != 'private':
             return
 
@@ -36,25 +39,20 @@ class StartHandler(CommandHandler):
 
             return msg, reply_markup
 
-
-@add_handler('main')
-class BasicCallbackHandler(QueryHandler):
-    '''Generic callback queries handler'''
-
-    def handle(self, update, context):
-        action = update.callback_query.data.replace('main:', '')
-
+    def callback(self, update, action, *args):
         if action == 'abort':
             return 'Operación cancelada.'
         elif action == 'okey':
             return '¡De acuerdo!'
 
 
-@add_handler('getid')
-class GetGroupID(CommandHandler):
+@add_handlers
+class GetGroupID(BasicBotHandler):
     '''Sends the user a chat ID keeping it secret (only superusers)'''
 
-    def handle(self, update, context):
+    cmd = 'getid'
+
+    def command(self, update, context):
         user = self.get_user()
 
         if not user or not user.is_superuser:
@@ -71,4 +69,4 @@ class GetGroupID(CommandHandler):
         except:
             msg += '\n(No he podido eliminar el comando del chat)'
 
-        self.context.bot.send_message(update.effective_user.id, msg)
+        self.answer_private(msg)

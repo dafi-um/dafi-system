@@ -1,11 +1,6 @@
 from telegram import ParseMode as _ParseMode
 from telegram.error import BadRequest, ChatMigrated
-
-from telegram.ext import (
-    CallbackQueryHandler as _CallbackQueryHandler,
-    CommandHandler as _CommandHandler,
-    run_async
-)
+from telegram.ext import CallbackQueryHandler, CommandHandler, run_async
 
 from django.contrib.auth import get_user_model as _get_user_model
 
@@ -16,8 +11,12 @@ _user_model = _get_user_model()
 _handlers = []
 
 
-class BasicHandler():
+class BasicBotHandler():
     '''Basic bot handler functionality and checks'''
+
+    cmd = None
+    commands_available = []
+    query_prefix = None
 
     chat_type = None
     chat_type_messages = {
@@ -35,11 +34,14 @@ class BasicHandler():
     )
     user_denied_msg = 'No tienes los permisos necesarios para realizar esta acción.'
 
-    keep_original_message = True
+    keep_original_message = False
 
-    def __init__(self, update, context):
+    def __init__(self, update, context, cmd=None):
         self.update = update
         self.context = context
+
+        self.is_callback = not cmd
+        self.current_command = cmd
 
         self.user = None
         self.user_loaded = False
@@ -56,6 +58,9 @@ class BasicHandler():
         return self.user
 
     def user_filter(self, user):
+        return True
+
+    def callback_user_filter(self, user):
         return True
 
     def get_invite_link(self):
@@ -101,6 +106,8 @@ class BasicHandler():
                 error = self.user_required_msg
             elif not self.user_filter(user):
                 error = self.user_denied_msg
+            elif self.is_callback and not self.callback_user_filter(user):
+                error = self.user_denied_msg
 
             if error:
                 self.keep_original_message = True
@@ -113,7 +120,9 @@ class BasicHandler():
         self.keep_original_message = True
 
     def answer_private(self, msg, reply_markup=None):
-        raise NotImplementedError()
+        return self.context.bot.send_message(
+            self.update.effective_user.id, msg, reply_markup=reply_markup
+        )
 
     def notify_group(self, msg, reply_markup=None, parse_mode=None, config_key=None):
         if not config_key:
@@ -130,100 +139,94 @@ class BasicHandler():
 
         return True
 
-    def handle(self, update, context):
-        raise NotImplementedError("Must create a `handle' method in the class")
+    def command(self, update, context):
+        raise NotImplementedError("Must create a `command' method in the class")
 
-    def parse_answer(self):
-        answer = self.handle(self.update, self.context)
-
-        if not answer:
-            return False
-
-        if isinstance(answer, str):
-            self.msg = answer
-        elif isinstance(answer, tuple) and len(answer) == 2:
-            self.msg, self.reply_markup = answer
-
-        return True
+    def callback(self, update, action, *args):
+        raise NotImplementedError("Must create a `callback' method in the class")
 
     def send_answer(self):
-        pass
-
-    @run_async
-    def run(self):
-        if self.run_checks() and not self.parse_answer():
-            return
-
-        if self.msg:
-            self.send_answer()
-
-    @classmethod
-    def as_handler(cls, cmd):
-        def handler(update, context):
-            return cls(update, context).run()
-
-        return handler
-
-
-class CommandHandler(BasicHandler):
-    '''Bot command handler'''
-
-    def send_answer(self):
-        self.update.effective_message.reply_text(
-            self.msg, reply_markup=self.reply_markup,
-            parse_mode=_ParseMode.MARKDOWN
-        )
-
-    @classmethod
-    def as_handler(cls, cmd):
-        return _CommandHandler(cmd, super().as_handler(cmd))
-
-
-class QueryHandler(BasicHandler):
-    '''Bot callback query handler'''
-
-    keep_original_message = False
-
-    def parse_answer(self):
-        self.update.callback_query.answer()
-
-        if not super().parse_answer():
-            self.msg = 'Parece que ha ocurrido un error inesperado...'
-
-        return True
-
-    def send_answer(self):
-        if self.keep_original_message:
+        if not self.is_callback or self.keep_original_message:
             self.update.effective_message.reply_text(
-                self.msg, reply_markup=self.reply_markup
+                self.msg, reply_markup=self.reply_markup,
+                parse_mode=_ParseMode.MARKDOWN
             )
         else:
             self.update.callback_query.edit_message_text(
                 self.msg, reply_markup=self.reply_markup
             )
 
-    def callback(self, update, action, *args):
-        raise NotImplementedError("Must create a `callback' method in the class")
+    @run_async
+    def run(self):
+        if not self.run_checks():
+            return self.send_answer()
 
-    def handle(self, update, context):
-        _, action, *args = update.callback_query.data.split(':')
+        if self.is_callback:
+            query = self.update.callback_query
+            query.answer()
 
-        return self.callback(update, action, *args)
+            prefix, action, *args = query.data.split(':')
+
+            if prefix != self.query_prefix:
+                return
+
+            answer = self.callback(self.update, action, *args)
+
+            if not answer:
+                answer = 'Parece que ha ocurrido un error inesperado...'
+        else:
+            answer = self.command(self.update, self.context)
+
+            if not answer:
+                return
+
+        if isinstance(answer, str):
+            self.msg = answer
+        elif isinstance(answer, tuple) and len(answer) == 2:
+            self.msg, self.reply_markup = answer
+
+        self.send_answer()
 
     @classmethod
-    def as_handler(cls, pattern):
-        return _CallbackQueryHandler(super().as_handler(pattern), pattern=pattern)
+    def get_handlers(cls):
+        handlers = []
+        commands = []
+
+        if cls.cmd:
+            commands.append(cls.cmd)
+
+        if cls.commands_available:
+            commands += cls.commands_available
+
+        if commands and callable(getattr(cls, 'command', None)):
+            for cmd in commands:
+                handlers.append(create_cmd_handler(cls, cmd))
+
+        if cls.query_prefix and callable(getattr(cls, 'callback', None)):
+            def callback_handler(update, context):
+                return cls(update, context).run()
+
+            handlers.append(
+                CallbackQueryHandler(callback_handler, pattern=cls.query_prefix)
+            )
+
+        if len(handlers) == 0:
+            raise NotImplementedError('Must implement at least one handler method!')
+
+        return handlers
 
 
-def add_handler(cmd):
-    def decorator(cls):
-        handler = cls.as_handler(cmd)
+def create_cmd_handler(cls, cmd):
+    def cmd_handler(update, context):
+        return cls(update, context, cmd).run()
 
-        _handlers.append(handler)
+    return CommandHandler(cmd, cmd_handler)
 
-        return handler
+def add_handlers(cls):
+    global _handlers
 
-    return decorator
+    _handlers += cls.get_handlers()
+    return cls
 
 def get_handlers():
     return _handlers
