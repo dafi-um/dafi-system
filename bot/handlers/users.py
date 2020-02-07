@@ -1,3 +1,5 @@
+from telegram import ParseMode
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
@@ -35,6 +37,56 @@ class ViewGroupsPermissions(BasicBotHandler):
         msg = '*Usuarios en el grupo {}*:\n'.format(group.name)
 
         return msg + create_users_list(group.user_set.all())
+
+
+@add_handlers
+class BroadcastToGroup(BasicBotHandler):
+    '''Broadcasts a message to the users in the given group'''
+
+    cmd = 'broadcastgrupo'
+
+    user_required = True
+
+    def user_filter(self, user):
+        return user.has_perm('bot.can_manage_permissions')
+
+    def command(self, update, context):
+        try:
+            group_name = context.args[0]
+            text = ' '.join(context.args[1:])
+        except IndexError:
+            return 'Uso: `/{} <nombre-grupo> <mensaje>`'.format(self.cmd)
+
+        group = Group.objects.filter(name=group_name).first()
+
+        if not group:
+            return 'No he encontrado el grupo especificado 😓'
+
+        sent_text = 'Mensaje para miembros de *{}*:\n\n_{}_'.format(
+            group.name, text
+        )
+
+        sent = 0
+        fails = 0
+
+        for user in group.user_set.all():
+            try:
+                context.bot.send_message(
+                    user.telegram_id, sent_text, ParseMode.MARKDOWN
+                )
+
+                sent += 1
+            except:
+                # So many errors can occur here but it's a simple
+                # notification, so we'll just ignore a failed one
+                fails += 1
+
+        msg = 'Mensaje enviado a {} usuarios:\n\n_{}_'.format(sent, text)
+
+        if fails:
+            msg += '\n\nNo se pudo enviar a {} usuarios.'.format(fails)
+
+        return msg
 
 
 class UserPermissionsMixin(BasicBotHandler):
