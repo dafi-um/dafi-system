@@ -34,6 +34,12 @@ class DafiRoom(BasicBotHandler):
     room_name = 'DAFI'
     room_name_long = 'la delegación'
 
+    OPTION_ON = 'on'
+    OPTION_OFF = 'off'
+    OPTION_LIST = 'lista'
+
+    OPTIONS = (OPTION_ON, OPTION_OFF, OPTION_LIST)
+
     def command(self, update, context):
         members = persistence.get_item(self.members_list_key, [])
 
@@ -69,7 +75,7 @@ class DafiRoom(BasicBotHandler):
 
         action = context.args[0].lower()
 
-        if action != 'on' and action != 'off':
+        if action not in self.OPTIONS:
             return 'La opción indicada no existe'
 
         user = self.get_user()
@@ -77,7 +83,7 @@ class DafiRoom(BasicBotHandler):
         if not user or not user.has_perm(self.management_permission):
             return 'No puedes llevar a cabo esta acción'
 
-        if action == 'on':
+        if action == self.OPTION_ON:
             if user in members:
                 return 'Ya tenía constancia de que estás en {} ⚠️'.format(self.room_name)
 
@@ -106,13 +112,40 @@ class DafiRoom(BasicBotHandler):
 
             return 'He anotado que estás en DAFI ✅'.format(self.room_name), reply_markup
 
-        else:
+        elif action == self.OPTION_OFF:
             if user not in members:
                 return 'No sabía que estabas en {} ⚠️'.format(self.room_name)
 
             members.remove(user)
 
             return 'He anotado que has salido de {} ✅'.format(self.room_name)
+
+        elif action == self.OPTION_LIST:
+            queue = persistence.get_item(self.queue_list_key, [])
+
+            if not queue:
+                return 'No hay nadie esperando para ir a {} ✅'.format(self.room_name)
+
+            users = User.objects.filter(telegram_id__in=queue)
+
+            msg = 'Usuarios esperando para ir a {}:\n'.format(self.room_name)
+
+            for user in users:
+                msg += '\n[{}](tg://user?id={})'.format(
+                    user.get_full_name(), user.telegram_id
+                )
+
+            diff = len(queue) - len(users)
+
+            if diff == 1:
+                msg += '\n\nHay otra persona más esperando, pero no es un usuario registrado.'
+            elif diff > 1:
+                msg += (
+                    '\n\nHay otras {} personas más esperando, '
+                    'pero no son usuarios registrados.'
+                ).format(diff)
+
+            return msg
 
     def callback(self, update, action, *args):
         members = persistence.get_item(self.members_list_key, [])
