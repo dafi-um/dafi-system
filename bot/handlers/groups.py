@@ -242,7 +242,8 @@ class GroupsBroadcast(BasicBotHandler):
         if not len(groups):
             return 'No hay grupos a los que enviar el mensaje 😓'
 
-        sent_text = '*📣 Mensaje de DAFI 📣*\n\n_{}_'.format(' '.join(context.args))
+        fixed_text = ' '.join(context.args).replace(r'\n', '\n')
+        sent_text = '*📣 Mensaje de DAFI 📣*\n\n{}'.format(fixed_text)
 
         sent = 0
         fails = []
@@ -250,7 +251,7 @@ class GroupsBroadcast(BasicBotHandler):
         for group in groups:
             try:
                 context.bot.send_message(
-                    group.telegram_group, sent_text, ParseMode.MARKDOWN
+                    group.telegram_group, sent_text, 'MarkdownV2'
                 )
 
                 sent += 1
