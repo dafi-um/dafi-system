@@ -251,7 +251,7 @@ class GroupsBroadcast(BasicBotHandler):
         for group in groups:
             try:
                 context.bot.send_message(
-                    group.telegram_group, sent_text, 'MarkdownV2'
+                    group.telegram_group, sent_text, ParseMode.MARKDOWN
                 )
 
                 sent += 1
