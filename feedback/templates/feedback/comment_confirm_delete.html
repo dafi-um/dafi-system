@@ -1,0 +1,22 @@
+{% extends 'generic.html' %}
+{% load markdown_deux_tags %}
+
+{% block content %}
+    <header class="major special split">
+        <h1>Eliminar comentario - {{ comment.topic.title }}</h1>
+
+        <a class="button alt" href="{% url 'feedback:detail' comment.topic.slug %}">Volver atrás</a>
+    </header>
+
+    <form method="post">
+        <p style="margin-bottom: 1em;">Vas a eliminar tu comentario en <b>{{ comment.topic.title }}</b>:</p>
+
+        <blockquote style="margin-bottom: 1em;">{{ comment.text }}</blockquote>
+
+        <p>¿Deseas continuar?</p>
+
+        {% csrf_token %}
+
+        <button class="button special" type="submit">Sí, eliminar</button>
+    </form>
+{% endblock content %}

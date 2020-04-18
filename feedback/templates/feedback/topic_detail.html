@@ -1,0 +1,261 @@
+{% extends 'generic.html' %}
+
+{% load markdown_deux_tags %}
+
+{% block content %}
+    <style type="text/css">
+        [data-action-vote]:not(.button) {
+            cursor: pointer;
+            display: inline-block;
+            width: 27px;
+            text-align: center;
+            transition: font-size 0.1s;
+            text-decoration: none !important;
+        }
+
+        .reputation {
+            display: inline-block;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .voted {
+            font-size: 150%;
+        }
+    </style>
+
+    <header class="major special">
+        <div class="split">
+            <div>
+                <h1>{{ topic.title }}</h1>
+
+                <p style="margin-bottom: 0;">Creado: {{ topic.created | date:'j/m/Y H:i' }}</p>
+                <p>Actualizado: {{ topic.updated | date:'j/m/Y H:i' }}</p>
+            </div>
+
+            <a class="button alt" href="{% url 'feedback:list' %}">Volver a la Lista</a>
+        </div>
+    </header>
+
+    <div class="box">
+        <div class="row">
+            <div class="8u 6u(medium) 12u(small)">
+                <h4>Descripción</h4>
+
+                <div class="content">{{ topic.description | markdown }}</div>
+            </div>
+
+            <div class="4u 6u(medium) 12u(small)">
+                <h4>Asambleas</h4>
+
+                <ul>
+                    {% for meeting in topic.meetings.all %}
+                        <li><a href="{{ meeting.get_absolute_url }}" target="_blank">{{ meeting.date | date:'j M Y' }}</a></li>
+                    {% empty %}
+                        <p>No hay asambleas relacionadas.</p>
+                    {% endfor %}
+                </ul>
+
+                <h4>Documentos</h4>
+
+                <ul>
+                    {% for doc in topic.documents.all %}
+                        <li><a href="{{ doc.file.url }}" target="_blank">{{ doc.name }}</a></li>
+                    {% empty %}
+                        <p>No hay documentos relacionados.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div><!-- .row -->
+
+        {% if topic.official_position %}
+            <div class="box wrapper style1">
+                <div class="split">
+                    <h3 style="margin-bottom: 0;">Postura oficial</h3>
+
+                    <a
+                        class="button alt small"
+                        href="{% url 'feedback:history' topic.slug %}"
+                        title="Ver histórico del tema">Histórico</a>
+                </div>
+
+                <div
+                    class="content"
+                    style="margin-bottom: 0.25em;font-weight: 400;">
+
+                    {{ topic.official_position.text | linebreaks }}
+                </div>
+
+                {% with topic.official_position as comment %}
+                    <div
+                        style="margin-top: 1.5em;text-align: center;"
+                        data-url="{% url 'feedback:vote' comment.id %}"
+                        data-comment="{{ comment.id }}"
+                        data-class-name="special"
+
+                        {% if comment in upvotes %}
+                            data-voted="1"
+                        {% elif comment in downvotes %}
+                            data-voted="-1"
+                        {% else %}
+                            data-voted="0"
+                        {% endif %}>
+
+                        <a
+                            data-action-vote="1"
+                            class="button alt {% if comment in upvotes %}special{% endif %}">
+                            A favor
+                        </a>
+
+                        <span class="reputation">{{ comment.reputation }}</span>
+
+                        <a
+                            data-action-vote="-1"
+                            class="button alt {% if comment in downvotes %}special{% endif %}">
+                            En contra
+                        </a>
+                    </div>
+                {% endwith %}
+            </div>
+        {% else %}
+            <p>Aún no se ha definido una postura oficial para este tema.</p>
+        {% endif %}
+
+        {% if user.is_staff %}
+            <button
+                class="button special fit"
+                style="margin-bottom: 1.5em;"
+                data-toggle="#position-form">Cambiar postura oficial</button>
+
+            <form
+                id="position-form"
+                style="display: none;"
+                action="{% url 'feedback:position_create' %}"
+                method="post">
+
+                <h4>Cambiar postura oficial</h4>
+
+                <div class="row uniform 50%">
+                    <div class="12u$">
+                        <textarea name="text" rows="6">{% if topic.official_position %}{{ topic.official_position.text }}{% endif %}</textarea>
+                    </div>
+
+                    <input type="hidden" name="topic" value="{{ topic.id }}" />
+
+                    {% csrf_token %}
+
+                    <div class="12u$">
+                        <ul class="actions">
+                            <a data-toggle-btn="#position-form" class="button alt">Cancelar</a>
+                            <button class="button special" type="submit">Cambiar postura</button>
+                        </ul>
+                    </div>
+                </div><!-- .row -->
+            </form>
+        {% endif %}
+    </div><!-- .box -->
+
+    {% if user.is_authenticated %}
+        <div style="text-align: center;">
+            <button
+                class="button special fit"
+                style="margin-bottom: 1.5em;"
+                data-toggle="#comment-form">Crear opinión</button>
+        </div>
+
+        <form
+            id="comment-form"
+            style="display: none;"
+            action="{% url 'feedback:comment' topic.slug %}"
+            method="post">
+
+            <h4>Crear opinión</h4>
+
+            <div class="row uniform 50%">
+                <div class="12u$">
+                    <textarea name="text" rows="6"></textarea>
+                </div>
+
+                <div class="12u$">
+                    <input type="checkbox" name="is_anonymous" id="is_anonymous" />
+                    <label for="is_anonymous">Ocultar mi nombre (comentario anónimo)</label>
+                </div>
+
+                <input type="hidden" name="topic" value="{{ topic.id }}" />
+
+                {% csrf_token %}
+
+                <div class="12u$">
+                    <a data-toggle-btn="#comment-form" class="button alt">Cancelar</a>
+                    <button class="button special" type="submit">Crear opinión</button>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <div style="text-align: center;">
+            <a
+                class="button special fit"
+                style="margin-bottom: 1.5em;"
+                href="{% url 'login' %}">Crear opinión</a>
+        </div>
+    {% endif %}
+
+    <ul class="alt">
+        {% for comment in comments %}
+            <li>
+                <div class="split" style="align-items: center;">
+                    <h3 style="margin-bottom: 0;">
+                        {% if comment.is_anonymous %}
+                            <span>Anónimo</span>
+
+                            {% if user.is_staff %}
+                                <span>({{ comment.author.get_full_name }})</span>
+                            {% elif user.is_authenticated and comment.author == user %}
+                                <span>(Tú)</span>
+                            {% endif %}
+                        {% else %}
+                            <span>{{ comment.author.get_full_name }}</span>
+                        {% endif %}
+                    </h3>
+
+                    <h4 style="margin-bottom: 0;">{{ comment.created | date:'j/m/Y H:i' }}</h4>
+                </div><!-- .split -->
+
+                <p style="margin-bottom: 0.25em;">{{ comment.text }}</p>
+
+                <div class="split">
+                    <div
+                        data-url="{% url 'feedback:vote' comment.id %}"
+                        data-comment="{{ comment.id }}"
+
+                        {% if comment in upvotes %}
+                            data-voted="1"
+                        {% elif comment in downvotes %}
+                            data-voted="-1"
+                        {% else %}
+                            data-voted="0"
+                        {% endif %}>
+
+                        <a data-action-vote="1" {% if comment in upvotes %}class="voted"{% endif %}>
+                            <span class="icon fa-thumbs-up"></span>
+                        </a>
+
+                        <span class="reputation">{{ comment.reputation }}</span>
+
+                        <a data-action-vote="-1" {% if comment in downvotes %}class="voted"{% endif %}>
+                            <span class="icon fa-thumbs-down"></span>
+                        </a>
+                    </div><!-- votes -->
+
+                    <div>
+                        {% if user.is_authenticated and comment.author == user %}
+                            <a href="{% url 'feedback:comment_delete' comment.id %}">Eliminar</a>
+                        {% endif %}
+                    </div>
+                </div><!-- .split -->
+            </li>
+        {% empty %}
+            <li>No hay opiniones para mostrar.</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

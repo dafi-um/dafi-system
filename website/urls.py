@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('heart.urls')),
     path('blog/', include('blog.urls')),
     path('clubs/', include('clubs.urls')),
+    path('feedback/', include('feedback.urls')),
     path('cuenta/', include('users.urls')),
     path('admin/', admin.site.urls),
     path('p/<path:url>', views.flatpage),

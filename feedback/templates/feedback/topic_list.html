@@ -1,0 +1,29 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Feedback</h1>
+        <p>Temas candentes en la Delegación</p>
+    </header>
+
+    <div class="row">
+        {% for topic in topic_list %}
+            <div class="4u 6u(large) 12u(small)">
+                <a
+                    href="{% url 'feedback:detail' topic.slug %}"
+                    class="box wrapper style3"
+                    style="display: block;">
+
+                    <h3>{{ topic.title }}</h3>
+
+                    <p style="margin-bottom: 1em;">Creado: {{ topic.created | date:'j/m/Y H:i' }}</p>
+                    <p>Actualizado: {{ topic.updated | date:'j/m/Y H:i' }}</p>
+                </a>
+            </div>
+        {% empty %}
+            <div class="12u">
+                <p>No hay temas disponibles.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'heart.apps.HeartConfig',
     'blog.apps.BlogConfig',
     'clubs.apps.ClubsConfig',
+    'feedback.apps.FeedbackConfig',
     'bot.apps.BotConfig',
     'django_cleanup.apps.CleanupConfig',
     'pagedown',

@@ -1835,6 +1835,14 @@
 		border-color: #e5474b;
 	}
 
+	.box .content {
+		margin-bottom: 1em;
+	}
+
+		.box .content > p {
+			margin: 0;
+		}
+
 /* Button */
 
 	input[type="submit"],

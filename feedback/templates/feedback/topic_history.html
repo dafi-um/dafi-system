@@ -1,0 +1,39 @@
+{% extends 'generic.html' %}
+{% load markdown_deux_tags %}
+
+{% block content %}
+    <header class="major special split">
+        <h1>Histórico - {{ topic.title }}</h1>
+
+        <a class="button alt" href="{% url 'feedback:detail' topic.slug %}">Volver atrás</a>
+    </header>
+
+    {% if topic.official_position %}
+        <div class="box wrapper style1">
+            <h3 style="margin-bottom: 0;">Postura oficial</h3>
+
+                <div
+                    class="content"
+                    style="margin-bottom: 0.25em;font-weight: 400;">
+
+                    {{ topic.official_position.text | linebreaks }}
+                </div>
+        </div>
+    {% endif %}
+
+    {% for comment in comments %}
+        <div class="box wrapper style3">
+            <div class="split">
+                <h4>{{ comment.created | date:'j/m/Y H:i' }} - Reputación: {{ comment.reputation }}</h4>
+
+                {% if comment == topic.official_position %}
+                    <h4>Actual</h4>
+                {% endif %}
+            </div>
+
+            <div class="content">{{ comment.text | linebreaks }}</div>
+        </div>
+    {% empty %}
+        <P>No hay datos para mostrar.</P>
+    {% endfor %}
+{% endblock content %}
