@@ -50,7 +50,7 @@
 
                 <ul>
                     {% for meeting in topic.meetings.all %}
-                        <li><a href="{% url 'meetings_detail' meeting.id %}" target="_blank">{{ meeting.date | date:'j M Y' }}</a></li>
+                        <li><a href="{% url 'heart:meetings_detail' meeting.id %}" target="_blank">{{ meeting.date | date:'j M Y' }}</a></li>
                     {% empty %}
                         <p>No hay asambleas relacionadas.</p>
                     {% endfor %}
