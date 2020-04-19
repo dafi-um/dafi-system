@@ -9,6 +9,12 @@
     </header>
 
     <form method="post">
+        {% if comment.is_point %}
+            <div class="box wrapper style1">
+                <p style="font-weight: 400;">El comentario es un punto de debate.</p>
+            </div>
+        {% endif %}
+
         <p style="margin-bottom: 1em;">Vas a eliminar tu comentario en <b>{{ comment.topic.title }}</b>:</p>
 
         <blockquote style="margin-bottom: 1em;">{{ comment.text }}</blockquote>

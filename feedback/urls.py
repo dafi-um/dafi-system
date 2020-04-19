@@ -12,4 +12,5 @@ urlpatterns = [
     path('opinar/<str:slug>/', views.CreateCommentView.as_view(), name='comment'),
     path('desopinar/<int:pk>/', views.DeleteCommentView.as_view(), name='comment_delete'),
     path('postura/', views.CreateOfficialPositionView.as_view(), name='position_create'),
+    path('punto-debate/', views.CreateTopicPointView.as_view(), name='point_create'),
 ]

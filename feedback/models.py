@@ -17,7 +17,7 @@ class Topic(ModelMeta, models.Model):
     slug = models.SlugField('slug', max_length=200)
 
     description = models.TextField(
-        'descripción', max_length=2000
+        'descripción', max_length=10000
     )
 
     is_public = models.BooleanField(
@@ -72,11 +72,15 @@ class Comment(models.Model):
     )
 
     text = models.TextField(
-        'texto', max_length=2000
+        'texto', max_length=5000
     )
 
     is_official = models.BooleanField(
         'es un comentario oficial', default=False
+    )
+
+    is_point = models.BooleanField(
+        'es un punto de debate', default=False
     )
 
     is_anonymous = models.BooleanField(
@@ -88,16 +92,14 @@ class Comment(models.Model):
         blank=True, null=True, verbose_name='autor'
     )
 
-    reputation = models.IntegerField(
-        'reputación', default=0
-    )
-
     created = models.DateTimeField(
         'fecha de creación', auto_now_add=True
     )
 
     class Meta:
         verbose_name = 'comentario'
+
+        ordering = ('-created',)
 
     def __str__(self):
         if self.is_official:

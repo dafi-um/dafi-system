@@ -22,10 +22,10 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('topic', 'author', 'reputation', 'is_official')
+    list_display = ('topic', 'author', 'is_official', 'is_point')
     readonly_fields = ('created',)
 
 
 @admin.register(CommentVote)
 class CommentVoteAdmin(admin.ModelAdmin):
-    list_display = ('comment', 'user')
+    list_display = ('comment', 'user', 'is_upvote')

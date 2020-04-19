@@ -15,7 +15,8 @@
 
         .reputation {
             display: inline-block;
-            min-width: 30px;
+            min-width: 52px;
+            margin: 0 5px;
             text-align: center;
         }
 
@@ -86,7 +87,7 @@
                     {{ topic.official_position.text | linebreaks }}
                 </div>
 
-                {% with topic.official_position as comment %}
+                {% with official_position as comment %}
                     <div
                         style="margin-top: 1.5em;text-align: center;"
                         data-url="{% url 'feedback:vote' comment.id %}"
@@ -107,7 +108,11 @@
                             A favor
                         </a>
 
-                        <span class="reputation">{{ comment.reputation }}</span>
+                        <span class="reputation" style="font-weight: 400;">
+                            +<span class="total_upvotes">{{ comment.total_upvotes }}</span>
+                            &nbsp;/&nbsp;
+                            -<span class="total_downvotes">{{ comment.total_downvotes }}</span>
+                        </span>
 
                         <a
                             data-action-vote="-1"
@@ -137,7 +142,11 @@
 
                 <div class="row uniform 50%">
                     <div class="12u$">
-                        <textarea name="text" rows="6">{% if topic.official_position %}{{ topic.official_position.text }}{% endif %}</textarea>
+                        <textarea id="position-counter" name="text" rows="6">{% if topic.official_position %}{{ topic.official_position.text }}{% endif %}</textarea>
+
+                        <p style="margin: 0;">
+                            <span data-counter="#position-counter">0</span>/5000
+                        </p>
                     </div>
 
                     <input type="hidden" name="topic" value="{{ topic.id }}" />
@@ -148,6 +157,88 @@
                         <ul class="actions">
                             <a data-toggle-btn="#position-form" class="button alt">Cancelar</a>
                             <button class="button special" type="submit">Cambiar postura</button>
+                        </ul>
+                    </div>
+                </div><!-- .row -->
+            </form>
+        {% endif %}
+
+        <h3>Puntos de Debate</h3>
+
+        <ul class="alt">
+            {% for comment in points %}
+                <li class="split">
+                    <div class="content" style="margin: 0;">{{ comment.text | linebreaks }}</div>
+
+                    <div style="min-width: 150px;text-align: center;">
+                        {% if user.is_staff %}
+                            <a href="{% url 'feedback:comment_delete' comment.id %}">Eliminar</a>
+                        {% endif %}
+
+                        <div
+                            data-url="{% url 'feedback:vote' comment.id %}"
+                            data-comment="{{ comment.id }}"
+
+                            {% if comment in upvotes %}
+                                data-voted="1"
+                            {% elif comment in downvotes %}
+                                data-voted="-1"
+                            {% else %}
+                                data-voted="0"
+                            {% endif %}>
+
+                            <a data-action-vote="1" {% if comment in upvotes %}class="voted"{% endif %}>
+                                <span class="icon fa-thumbs-up"></span>
+                            </a>
+
+                            <span class="reputation">
+                                +<span class="total_upvotes">{{ comment.total_upvotes }}</span>
+                                &nbsp;/&nbsp;
+                                -<span class="total_downvotes">{{ comment.total_downvotes }}</span>
+                            </span>
+
+                            <a data-action-vote="-1" {% if comment in downvotes %}class="voted"{% endif %}>
+                                <span class="icon fa-thumbs-down"></span>
+                            </a>
+                        </div><!-- votes -->
+                    </div><!-- actions -->
+                </li>
+            {% empty %}
+                <li>No se han definido puntos de debate.</li>
+            {% endfor %}
+        </ul>
+
+        {% if user.is_staff %}
+            <button
+                class="button special fit"
+                style="margin-bottom: 1.5em;"
+                data-toggle="#point-form">Agregar punto de debate</button>
+
+            <form
+                id="point-form"
+                style="display: none;"
+                action="{% url 'feedback:point_create' %}"
+                method="post">
+
+                <h4>Agregar punto de debate</h4>
+
+                <div class="row uniform 50%">
+                    <div class="12u$">
+                        <textarea id="point-counter" name="text" rows="6"></textarea>
+
+                        <p style="margin: 0;">
+                            <span data-counter="#point-counter">0</span>/5000
+                        </p>
+                    </div>
+
+                    <input type="hidden" name="topic" value="{{ topic.id }}" />
+
+                    {% csrf_token %}
+
+                    <div class="12u$">
+                        <ul class="actions">
+                            <a data-toggle-btn="#point-form" class="button alt">Cancelar</a>
+                            <button class="button special" type="submit">Agregar punto</button>
                         </ul>
                     </div>
                 </div><!-- .row -->
@@ -173,7 +264,11 @@
 
             <div class="row uniform 50%">
                 <div class="12u$">
-                    <textarea name="text" rows="6"></textarea>
+                    <textarea id="comment-counter" name="text" rows="6"></textarea>
+
+                    <p style="margin: 0;">
+                        <span data-counter="#comment-counter">0</span>/5000
+                    </p>
                 </div>
 
                 <div class="12u$">
@@ -240,7 +335,11 @@
                             <span class="icon fa-thumbs-up"></span>
                         </a>
 
-                        <span class="reputation">{{ comment.reputation }}</span>
+                        <span class="reputation">
+                            +<span class="total_upvotes">{{ comment.total_upvotes }}</span>
+                            &nbsp;/&nbsp;
+                            -<span class="total_downvotes">{{ comment.total_downvotes }}</span>
+                        </span>
 
                         <a data-action-vote="-1" {% if comment in downvotes %}class="voted"{% endif %}>
                             <span class="icon fa-thumbs-down"></span>

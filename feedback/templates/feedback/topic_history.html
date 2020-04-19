@@ -24,7 +24,7 @@
     {% for comment in comments %}
         <div class="box wrapper style3">
             <div class="split">
-                <h4>{{ comment.created | date:'j/m/Y H:i' }} - Reputación: {{ comment.reputation }}</h4>
+                <h4>{{ comment.created | date:'j/m/Y H:i' }}</h4>
 
                 {% if comment == topic.official_position %}
                     <h4>Actual</h4>

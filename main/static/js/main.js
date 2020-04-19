@@ -60,6 +60,15 @@
 				$(target).slideUp(200);
 			});
 
+		// Form counter.
+			$('[data-counter]').each(function(i, el) {
+				const $el = $(el);
+
+				$($el.data('counter')).on('input', function(ev) {
+					$el.text(this.value.length);
+				});
+			});
+
 		// Comment vote.
 			$('[data-action-vote]').on('click', function() {
 				const $this = $(this);
@@ -82,8 +91,13 @@
 					method: 'POST',
 					data: { action },
 				}).done(function(res) {
+					if (res.noaction) {
+						return;
+					}
+
 					$parent.data('voted', action);
-					$parent.find('.reputation').text(res.reputation);
+					$parent.find('.total_upvotes').text(res.total_upvotes);
+					$parent.find('.total_downvotes').text(res.total_downvotes);
 
 					$parent
 						.find('[data-action-vote]:not([data-action-vote="' + action + '"])')

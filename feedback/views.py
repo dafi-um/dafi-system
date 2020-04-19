@@ -1,6 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db import transaction
-from django.db.models import F
+from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -41,7 +40,11 @@ class TopicDetailView(UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         topic = self.get_object()
-        comments = topic.comments.filter(is_official=False).order_by('-created')
+
+        comments = topic.comments.annotate(
+            total_upvotes=Count('votes', filter=Q(votes__is_upvote=True)),
+            total_downvotes=Count('votes', filter=Q(votes__is_upvote=False))
+        )
 
         upvotes = []
         downvotes = []
@@ -59,9 +62,16 @@ class TopicDetailView(UserPassesTestMixin, DetailView):
                 else:
                     downvotes.append(vote.comment)
 
+        if topic.official_position:
+            official_position = comments.filter(id=topic.official_position.id).first()
+        else:
+            official_position = None
+
         context = super().get_context_data(**kwargs)
         context['meta'] = topic.as_meta(self.request)
-        context['comments'] = comments
+        context['official_position'] = official_position
+        context['comments'] = comments.filter(is_official=False, is_point=False)
+        context['points'] = comments.filter(is_point=True)
         context['upvotes'] = upvotes
         context['downvotes'] = downvotes
 
@@ -86,7 +96,7 @@ class HistoryView(UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         topic = self.get_object()
-        comments = topic.comments.filter(is_official=True).order_by('-created')
+        comments = topic.comments.filter(is_official=True)
 
         context = super().get_context_data(**kwargs)
         context['meta'] = topic.as_meta(self.request)
@@ -119,6 +129,23 @@ class CreateOfficialPositionView(UserPassesTestMixin, CreateView):
         return res
 
 
+class CreateTopicPointView(UserPassesTestMixin, CreateView):
+    model = Comment
+
+    fields = ('text', 'topic')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_success_url(self):
+        return reverse('feedback:detail', args=[self.object.topic.slug])
+
+    def form_valid(self, form):
+        form.instance.is_point = True
+
+        return super().form_valid(form)
+
+
 class CreateCommentView(LoginRequiredMixin, CreateView):
     model = Comment
 
@@ -142,7 +169,7 @@ class DeleteCommentView(LoginRequiredMixin, UserPassesTestMixin, MetadataMixin, 
     image = 'images/favicon.png'
 
     def test_func(self):
-        if not self.get_object().topic.is_public:
+        if self.get_object().is_point:
             return self.request.user.is_staff
 
         return self.request.user == self.get_object().author
@@ -162,6 +189,21 @@ class CommentVoteView(DetailView):
 
     def get(self, request, *args, **kwargs):
         return HttpResponseNotAllowed(['POST'], args, kwargs)
+
+    def get_totals(self):
+        totals = (
+            CommentVote.objects
+                .filter(comment=self.get_object())
+                .aggregate(
+                    upvotes=Count('pk', filter=Q(is_upvote=True)),
+                    downvotes=Count('pk', filter=Q(is_upvote=False))
+                )
+        )
+
+        return JsonResponse({
+            'total_upvotes': totals['upvotes'],
+            'total_downvotes': totals['downvotes']
+        })
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -190,48 +232,25 @@ class CommentVoteView(DetailView):
             if not vote:
                 return JsonResponse({'error': 'invalid action'}, status=400)
 
-            rep = -1 if vote.is_upvote else 1
+            vote.delete()
 
-            with transaction.atomic():
-                vote.delete()
-
-                Comment.objects.filter(pk=comment.pk).update(reputation=F('reputation') + rep)
-
-            try:
-                comment.refresh_from_db()
-            except:
-                return JsonResponse({'error': 'unknown error'}, status=400)
-
-            return JsonResponse({'reputation': comment.reputation})
+            return self.get_totals()
 
         is_upvote = action == 1
-        rep = action
 
         if not vote:
             vote = CommentVote(comment=comment, user=request.user, is_upvote=is_upvote)
         elif is_upvote:
             if vote.is_upvote:
-                return JsonResponse({'reputation': comment.reputation})
+                return JsonResponse({'nochange': True})
 
             vote.is_upvote = True
-
-            rep = 2
         else:
             if not vote.is_upvote:
-                return JsonResponse({'reputation': comment.reputation})
+                return JsonResponse({'nochange': True})
 
             vote.is_upvote = False
 
-            rep = -2
+        vote.save()
 
-        with transaction.atomic():
-            vote.save()
-
-            Comment.objects.filter(pk=comment.pk).update(reputation=F('reputation') + rep)
-
-        try:
-            comment.refresh_from_db()
-        except:
-            return JsonResponse({'error': 'unknown error'}, status=400)
-
-        return JsonResponse({'reputation': comment.reputation})
+        return self.get_totals()
