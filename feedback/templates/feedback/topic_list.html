@@ -6,22 +6,62 @@
         <p>Temas candentes en la Delegación</p>
     </header>
 
-    <div class="row">
+    <style type="text/css">
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+            .flex-cell {
+                display: flex;
+                flex: 1 0 33%;
+                max-width: 33%;
+                padding: 0 1em;
+            }
+
+                .flex-cell > a {
+                    display: flex;
+                    width: 100%;
+                    flex-direction: column;
+                    justify-content: space-between;
+                }
+
+		@media screen and (max-width: 980px) {
+            .flex-cell {
+                flex: 1 0 50%;
+                max-width: 50%;
+            }
+        }
+
+		@media screen and (max-width: 736px) {
+            .flex-row {
+                display: block;
+            }
+
+                .flex-cell {
+                    display: block;
+                    max-width: 100%;
+                }
+        }
+    </style>
+
+    <div class="flex-row">
         {% for topic in topic_list %}
-            <div class="4u 6u(large) 12u(small)">
+            <div class="flex-cell">
                 <a
                     href="{% url 'feedback:detail' topic.slug %}"
-                    class="box wrapper style3"
-                    style="display: block;">
+                    class="box wrapper style3">
 
                     <h3>{{ topic.title }}</h3>
 
-                    <p style="margin-bottom: 1em;">Creado: {{ topic.created | date:'j/m/Y H:i' }}</p>
-                    <p>Actualizado: {{ topic.updated | date:'j/m/Y H:i' }}</p>
+                    <div>
+                        <p style="margin-bottom: 1em;">Creado: {{ topic.created | date:'j/m/Y H:i' }}</p>
+                        <p>Actualizado: {{ topic.updated | date:'j/m/Y H:i' }}</p>
+                    </div>
                 </a>
             </div>
         {% empty %}
-            <div class="12u">
+            <div style="justify-self: center;">
                 <p>No hay temas disponibles.</p>
             </div>
         {% endfor %}
