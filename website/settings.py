@@ -18,7 +18,7 @@ from email.utils import getaddresses
 env = environ.Env(
     ADMINS=(str, ''),
     DEBUG=(bool, False),
-    DOMAIN=(str, None)
+    HOSTS=(list, [])
 )
 
 environ.Env.read_env('.env')
@@ -33,11 +33,7 @@ SECRET_KEY = env('SECRET_KEY')
 
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
-
-DOMAIN = env('DOMAIN')
-
-if DOMAIN: ALLOWED_HOSTS.append(DOMAIN)
+ALLOWED_HOSTS = env('HOSTS')
 
 
 # Application definition
