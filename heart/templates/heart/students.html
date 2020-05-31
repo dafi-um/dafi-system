@@ -44,9 +44,11 @@
                 {% endif %}
             </div>
 
+            {% comment 'Temporarily hidden' %}
             {% if group.telegram_group_link %}
                 <a href="{{ group.telegram_group_link }}" class="button alt" title="Unirse al Grupo de Telegram de {{ group.name }}">Grupo de Telegram</a>
             {% endif %}
+            {% endcomment %}
         </div>
     {% endfor %}
 {% endblock content %}
