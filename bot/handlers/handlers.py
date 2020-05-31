@@ -67,9 +67,6 @@ class BasicBotHandler():
         chat_id = self.update.effective_chat.id
         chat = self.context.bot.get_chat(chat_id)
 
-        if chat.invite_link:
-            return chat_id, chat.invite_link
-
         try:
             return chat_id, self.context.bot.export_chat_invite_link(chat_id)
         except BadRequest:
