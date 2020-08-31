@@ -1,0 +1,25 @@
+<table>
+    <thead>
+        <tr>
+            <th>Curso</th>
+            <th>Grupo de la Oferta</th>
+            <th>Grupo de la Respuesta</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for line, groups in lines %}
+            <tr>
+                <td>
+                    <p>{{ line.year }}</p>
+                </td>
+                <td>
+                    <p>{{ line.curr_group }}.{{ line.curr_subgroup }}</p>
+                </td>
+                <td>
+                    <p>{{ groups.group }}.{{ groups.subgroup }}</p>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

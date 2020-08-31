@@ -1,0 +1,197 @@
+{% extends 'generic.html' %}
+
+{% block title %}Crear Oferta de Permuta{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>{{ view.title }}</h1>
+
+            <div>
+                {% if view.is_creation %}
+                    <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
+                {% else %}
+                    <a class="button alt" href="{% url 'trading:offer_delete' offer.id %}" title="Eliminar">Eliminar</a>
+                    <a class="button alt" href="{% url 'trading:offer_detail' offer.id %}" title="Volver a la oferta">Volver a la oferta</a>
+                {% endif %}
+            </div>
+        </div>
+        <p>El uso de esta herramienta está sujeto a <a href="{% url 'trading:conditions' %}" title="Condiciones de uso del sistema de permutas">condiciones</a>. El periodo de permutas actual finaliza el {{ period.end | date:'j/m/Y H:i' }}</p>
+    </header>
+
+    <div id="get-started" class="box wrapper style3">
+        <h3>Instrucciones de uso</h3>
+        <ol>
+            {% if view.is_creation %}
+                <li>
+                    <span>Crea una oferta de intercambio. Para cada año realiza las siguientes acciones:</span>
+                    <ol>
+                        <li>Introduce el grupo y subgrupo que te han asignado.</li>
+                        <li>Selecciona las asignaturas en las que estás matriculado.</li>
+                        <li>Selecciona los grupos que te gustaría tener para cada bloque.</li>
+                    </ol>
+                </li>
+                <li>
+                    <span>Tu oferta recibirá respuestas, tú puedes responder a otras ofertas mientras tanto.</span>
+                    <ul>
+                        <li>Si aceptas una respuesta de tu oferta, tus respuestas se ocultarán y comenzarás el proceso con tu oferta.</li>
+                        <li>Si una de tus respuestas es aceptada, tu oferta se ocultará y continuarás el proceso en la oferta que respondiste.</li>
+                    </ul>
+                </li>
+                <li>
+                    <span>Durante el proceso de intercambio tendrás que utilizar la plataforma Praxis:</span>
+                    <ul>
+                        <li>Si la oferta es tuya: iniciarás la permuta de cada asignatura y el otro usuario las aceptará.</li>
+                        <li>Si la oferta no es tuya: aceptarás las permutas que te envíe el creador de la oferta.</li>
+                    </ul>
+                </li>
+            {% else %}
+                <li>Para eliminar un año de la oferta, desmarca todas las asignaturas de dicho año.</li>
+                <li>Para eliminar la oferta, desmarca todas las asignaturas de todos los años o haz click en <i>Eliminar</i> en la parte de arriba.</li>
+            {% endif %}
+        </ol>
+    </div>
+
+    {% if errors %}
+        <div id="errors" class="box wrapper style1">
+            <h3>Errores</h3>
+            <p>Se han encontrado los siguientes errores:</p>
+            <ul>
+                {% for year in errors %}
+                    <li>
+                        <span>Año {{ forloop.counter }}</span>
+                        <ul>
+                            {% for error in year %}
+                                <li>{{ error.1.0 }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form id="app" method="post">
+        <p>
+            <label for="offer_description">Descripción (opcional):</label>
+            <input type="text" name="description" id="offer_description" value="{{ offer.description }}" />
+        </p>
+
+        {% for line in lines %}
+            <div class="year-block">
+                <div class="split">
+                    <h4>Año {{ line.year.id }}</h4>
+                    <a v-on:click="block_{{ line.i }} = !block_{{ line.i }}">Mostrar/ocultar</a>
+                </div>
+
+                <div class="subjects" v-show="block_{{ line.i }}">
+                    <div class="field half first">
+                        <label for="{{ line.i }}-curr_group">Grupo actual:</label>
+                        <div class="select-wrapper">
+                            <select
+                                name="{{ line.i }}-curr_group"
+                                id="{{ line.i }}-curr_group"
+                                v-model="group[{{ line.i }}]"
+                                @change="uncheck_invalid({{ line.i }})">
+
+                                {% for i in line.year.groups_range %}
+                                    <option value="{{ i }}" {% if i == line.curr_group %}selected{% endif %}>Grupo {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field half">
+                        <label for="{{ line.i }}-curr_subgroup">Subgrupo actual:</label>
+                        <div class="select-wrapper">
+                            <select name="{{ line.i }}-curr_subgroup" id="{{ line.i }}-curr_subgroup">
+                                {% for i in line.year.subgroups_range %}
+                                    <option value="{{ i }}" {% if i == line.curr_subgroup %}selected{% endif %}>Subgrupo {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Grupos buscados:</label>
+
+                        {% for i in line.year.groups_range %}
+                            <input
+                                type="checkbox"
+                                name="{{ line.i }}-wanted_groups"
+                                id="{{ line.i }}-wanted_{{ i }}"
+                                value="{{ i }}"
+                                v-model="wanted[{{ line.i }}]"
+                                :disabled="group[{{ line.i }}] == {{ i }}"
+                                {% if i in line.get_wanted_groups %}checked{% endif %} />
+
+                            <label for="{{ line.i }}-wanted_{{ i }}">Grupo {{ i }}</label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="split">
+                        <label>Asignaturas:</label>
+                        <a v-on:click="mark_all({{ line.i }});">Marcar/desmarcar todos</a>
+                    </div>
+
+                    {% for subject in line.year.subjects.all %}
+                        <div>
+                            <input
+                                type="checkbox"
+                                name="{{ line.i }}-subjects"
+                                value="{{ subject.code }}"
+                                class="{{ line.i }}-subjects"
+                                id="{{ line.i }}-subject_{{ subject.code }}"
+                                {% if subject.code in line.get_subjects_list %}checked{% endif %} />
+
+                            <label for="{{ line.i }}-subject_{{ subject.code }}">[{{ subject.code }}] {{ subject.name }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        {% csrf_token %}
+
+        <input class="button alt" type="submit" value="{{ view.submit_btn }}" />
+    </form>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                'block_0': {% if lines.0.subjects or not lines.1.subjects and not lines.2.subjects %}true{% else %}false{% endif %},
+                'block_1': {% if lines.1.subjects %}true{% else %}false{% endif %},
+                'block_2': {% if lines.2.subjects %}true{% else %}false{% endif %},
+
+                group: [
+                    {{ lines.0.curr_group }}, {{ lines.1.curr_group }}, {{ lines.2.curr_group }},
+                ],
+
+                wanted: [
+                    [{{ lines.0.wanted_groups }}], [{{ lines.1.wanted_groups }}], [{{ lines.2.wanted_groups }}],
+                ],
+
+                toggle: [
+                    true, true, true,
+                ],
+            },
+            methods: {
+                uncheck_invalid: function(id) {
+                    this.wanted[id] = this.wanted[id].filter(i => i !== this.group[id]);
+                },
+
+                mark_all: function(id) {
+                    var checks = document.querySelectorAll('input[name="' + id + '-subjects"]');
+
+                    for (var i = 0; i < checks.length; i++) {
+                        checks[i].checked = this.toggle[id];
+                    }
+
+                    this.toggle[id] = !this.toggle[id];
+                },
+            }
+        });
+    </script>
+{% endblock content %}

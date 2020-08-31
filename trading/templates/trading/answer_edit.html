@@ -1,0 +1,68 @@
+{% extends 'generic.html' %}
+{% load users_tags %}
+
+{% block title %}Editar respuesta #{{ object.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Editar respuesta Nº {{ object.id }}</h1>
+
+            <div class="actions">
+                <a class="button alt" href="{% url 'trading:answer_delete' object.id %}" title="Eliminar respuesta">Eliminar respuesta</a>
+                <a class="button alt" href="{% url 'trading:answer_detail' object.id %}" title="Volver a la respuesta">Volver a la respuesta</a>
+            </div>
+        </div>
+
+        <p>Creada el {{ object.creation_date | date:'j M Y H:i' }} por {{ object.user | nice_name }}</p>
+    </header>
+
+    {% if messages %}
+        <div class="box wrapper style3">
+            <ul class="alt">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form id="app" method="post">
+        {% for line, groups in lines %}
+            <div class="box wrapper style3">
+                <h4>Año {{ line.year.id }}</h4>
+                <div class="field half first">
+                    <label for="{{ line.i }}-group">Grupo:</label>
+                    <div class="select-wrapper">
+                        <select name="{{ line.i }}-group" id="{{ line.i }}-group">
+                            {% for i in line.get_wanted_groups %}
+                                <option
+                                    value="{{ i }}"
+                                    {% if groups.group == i %}selected{% endif %}>Grupo {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field half">
+                    <label for="{{ line.i }}-subgroup">Subgrupo:</label>
+                    <div class="select-wrapper">
+                        <select name="{{ line.i }}-subgroup" id="{{ line.i }}-subgroup">
+                            {% for i in line.year.subgroups_range %}
+                                <option
+                                    value="{{ i }}"
+                                    {% if groups.subgroup == i %}selected{% endif %}>Subgrupo {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="clear: both;"></div>
+            </div><!-- .box -->
+        {% endfor %}
+
+        {% csrf_token %}
+
+        <input class="button alt" type="submit" value="Guardar" />
+    </form>
+{% endblock content %}

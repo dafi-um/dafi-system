@@ -1,0 +1,72 @@
+{% extends 'generic.html' %}
+{% load users_tags %}
+
+{% block title %}Responder a la Oferta #{{ object.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Responder a la Oferta Nº {{ object.id }}</h1>
+
+            <div class="actions">
+                <a class="button alt" href="{% url 'trading:offer_detail' object.id %}" title="Volver a la oferta">Volver a la oferta</a>
+                <a class="button alt" href="{% url 'trading:list' %}" title="Volver a la lista">Volver a la lista</a>
+            </div>
+        </div>
+
+        <p>Oferta publicada el {{ object.creation_date | date:'j M Y H:i' }} por {{ object.user | nice_name }}</p>
+    </header>
+
+    <form id="app" method="post">
+        {% for line in object.lines.all %}
+            <div class="year-block">
+                <h4>Año {{ line.year.id }}</h4>
+
+                <div class="row">
+                    <div class="6u 12u$(small)">
+                        <label>Asignaturas:</label>
+                        <ul class="alt">
+                            {% for subject in line.get_subjects %}
+                                <li>{{ subject.code }} {{ subject.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="6u 12u$(small)">
+                        <label for="{{ line.i }}-curr_group">Grupo ofertado:</label>
+                        <select id="{{ line.i }}-curr_group" disabled>
+                            <option selected>Grupo {{ line.curr_group }}</option>
+                        </select>
+
+                        <label for="{{ line.i }}-curr_subgroup">Subgrupo ofertado:</label>
+                        <select id="{{ line.i }}-curr_subgroup" disabled>
+                            <option selected>Subgrupo {{ line.curr_subgroup }}</option>
+                        </select>
+
+                        <label for="{{ line.i }}-group">Mi Grupo:</label>
+                        <div class="select-wrapper">
+                            <select name="{{ line.i }}-group" id="{{ line.i }}-group">
+                                {% for i in line.get_wanted_groups %}
+                                    <option value="{{ i }}">Grupo {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <label for="{{ line.i }}-subgroup">Mi Subgrupo:</label>
+                        <div class="select-wrapper">
+                            <select name="{{ line.i }}-subgroup" id="{{ line.i }}-subgroup">
+                                {% for i in line.year.subgroups_range %}
+                                    <option value="{{ i }}">Subgrupo {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div><!-- .row -->
+            </div><!-- .year-block -->
+        {% endfor %}
+
+        {% csrf_token %}
+
+        <input class="button alt" type="submit" value="Crear Respuesta" />
+    </form>
+{% endblock content %}

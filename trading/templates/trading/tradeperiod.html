@@ -1,0 +1,14 @@
+{% extends 'generic.html' %}
+
+{% block title %}Ofertas de Permutas{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Periodo de Permutas no activo</h1>
+            <a class="button alt" href="{% url 'main:index' %}" title="Volver al Inicio">Volver al Inicio</a>
+        </div>
+    </header>
+
+    <p>No hay ningún periodo de permuta activo en este momento. Prueba de nuevo más tarde.</p>
+{% endblock content %}

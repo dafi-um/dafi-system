@@ -1,0 +1,62 @@
+{% extends 'generic.html' %}
+{% load users_tags %}
+
+{% block title %}Respuesta #{{ object.id }} a Oferta #{{ object.offer.id }}{% endblock title %}
+
+{% block content %}
+    <header class="major special">
+        <div class="split">
+            <h1>Respuesta Nº {{ object.id }} a la Oferta Nº {{ object.offer.id }}</h1>
+
+            <div class="actions">
+                {% if not object.offer.answer %}
+                    {% if object.user == user %}
+                        <a class="button alt" href="{% url 'trading:answer_delete' object.id %}" title="Eliminar respuesta">Eliminar</a>
+                        <a class="button alt" href="{% url 'trading:answer_edit' object.id %}" title="Editar respuesta">Editar</a>
+                    {% elif object.offer.user == user %}
+                        <a class="button special" href="{% url 'trading:answer_accept' object.id %}" title="Aceptar respuesta">¡Me Interesa!</a>
+                    {% endif %}
+                {% endif %}
+
+                <a class="button alt" href="{% url 'trading:offer_detail' object.offer.id %}" title="Ver oferta">Ver oferta</a>
+            </div>
+        </div>
+
+        <p>Creada por {{ object.user | nice_name }} el {{ object.creation_date | date:'j M Y H:i' }}</p>
+    </header>
+
+    {% if object.offer.answer == object %}
+        <div class="box wrapper style1 split">
+            <h4 style="margin: 0;padding-top: 0.5em;">Esta respuesta ha sido seleccionada</h4>
+
+            <a class="button alt" href="{% url 'trading:change_process' object.offer.id %}" title="Comenzar proceso">Comenzar proceso</a>
+        </div>
+    {% endif %}
+
+    <div id="app" class="year-block" style="margin-bottom: 1.5em;">
+        <div class="split">
+            <h4>Oferta de {{ object.offer.user | nice_name }}</h4>
+            <a v-on:click="offer_block = !offer_block">Mostrar/ocultar</a>
+        </div>
+
+        <div class="subjects" v-show="offer_block">
+            <p>Creada el {{ object.offer.creation_date | date:'j M Y H:i' }}</p>
+
+            {% with object.offer as object %}
+                {% include 'trading/tradeoffer.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    {% include 'trading/answer.html' %}
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                offer_block: false,
+            },
+        });
+    </script>
+{% endblock content %}
