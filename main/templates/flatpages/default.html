@@ -1,7 +1,9 @@
 {% extends 'generic.html' %}
 {% load markdown_deux_tags %}
 
-{% block title %}{{ flatpage.title }} - DAFI{% endblock title %}
+{% block head %}
+    <title>{{ flatpage.title }} - DAFI</title>
+{% endblock head %}
 
 {% block content %}
     <header class="major special">
