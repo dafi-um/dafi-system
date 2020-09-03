@@ -9,11 +9,6 @@ class SubjectAdmin(admin.ModelAdmin):
     list_filter = ['year', 'quarter']
 
 
-@admin.register(models.Year)
-class YearAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'groups', 'subgroups')
-
-
 @admin.register(models.TradePeriod)
 class TradePeriodAdmin(admin.ModelAdmin):
     list_display = ('name', 'start', 'end')

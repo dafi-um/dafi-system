@@ -8,7 +8,7 @@ from django.template import Context, Template
 from django.test import Client, TestCase
 from django.utils import timezone
 
-from .models import Subject, TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod, Year
+from .models import Subject, TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod
 
 User = get_user_model()
 
@@ -17,11 +17,8 @@ class TradingModelsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='tester', email='test@test.com', password='1234')
 
-        self.year1 = Year.objects.create(id=1, groups=2, subgroups=2)
-        self.year2 = Year.objects.create(id=2, groups=3, subgroups=3)
-
-        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=self.year1)
-        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=self.year2)
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=1)
+        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=2)
 
         start = timezone.now() - timedelta(hours=2)
         end = timezone.now() + timedelta(hours=2)
@@ -56,7 +53,7 @@ class TradingModelsTests(TestCase):
     def test_tradeofferline_validate_subjects(self):
         '''TradeOfferLine validates subjects properly'''
 
-        line = TradeOfferLine(year=self.year1, curr_group=1, curr_subgroup=1, wanted_groups='2')
+        line = TradeOfferLine(year=1, curr_group=1, curr_subgroup=1, wanted_groups='2')
 
         with self.assertRaisesMessage(ValidationError, 'Valor de asignaturas inválido'):
             line.subjects = 'not_valid'
@@ -83,21 +80,21 @@ class TradingModelsTests(TestCase):
     def test_tradeofferline_validate_groups(self):
         '''TradeOfferLine validates groups properly'''
 
-        line = TradeOfferLine(year=self.year1, curr_group=1, curr_subgroup=1, subjects='1')
+        line = TradeOfferLine(year=1, curr_group=1, curr_subgroup=1, subjects='1')
 
         with self.assertRaisesMessage(ValidationError, 'Valor de grupos buscados inválido'):
             line.wanted_groups = 'not_valid'
             line.full_clean(['offer'])
 
-        with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
-            line.wanted_groups = '3'
+        with self.assertRaisesMessage(ValidationError, 'El grupo 5 no existe en Año 1'):
+            line.wanted_groups = '5'
             line.full_clean(['offer'])
 
-        with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
-            line.wanted_groups = '2,3'
+        with self.assertRaisesMessage(ValidationError, 'El grupo 5 no existe en Año 1'):
+            line.wanted_groups = '2,5'
             line.full_clean(['offer'])
 
-        self.assertEquals(line.get_wanted_groups(), [2, 3], 'Comma separated list not parsed properly')
+        self.assertEquals(line.get_wanted_groups(), [2, 5], 'Comma separated list not parsed properly')
 
         with self.assertRaisesMessage(ValidationError, 'El grupo actual no puede estar en los grupos buscados'):
             line.wanted_groups = '1'
@@ -109,8 +106,8 @@ class TradingModelsTests(TestCase):
         except ValidationError:
             self.fail('Wanted groups is valid but validation failed')
 
-        with self.assertRaisesMessage(ValidationError, 'El grupo 3 no existe en Año 1'):
-            line.curr_group = '3'
+        with self.assertRaisesMessage(ValidationError, 'El grupo 5 no existe en Año 1'):
+            line.curr_group = '5'
             line.full_clean(['offer'])
 
         try:
@@ -119,8 +116,8 @@ class TradingModelsTests(TestCase):
         except ValidationError:
             self.fail('Current group is valid but validation failed')
 
-        with self.assertRaisesMessage(ValidationError, 'El subgrupo 3 no existe en Año 1'):
-            line.curr_subgroup = '3'
+        with self.assertRaisesMessage(ValidationError, 'El subgrupo 1.5 no existe en Año 1'):
+            line.curr_subgroup = '5'
             line.full_clean(['offer'])
 
         try:
@@ -146,8 +143,8 @@ class TradingModelsTests(TestCase):
 
         offer = TradeOffer.objects.create(user=self.user, period=self.period)
 
-        TradeOfferLine.objects.create(offer=offer, year=self.year1, curr_group='1', curr_subgroup='1', wanted_groups='2', subjects='1')
-        TradeOfferLine.objects.create(offer=offer, year=self.year2, curr_group='1', curr_subgroup='1', wanted_groups='2,3', subjects='2')
+        TradeOfferLine.objects.create(offer=offer, year=1, curr_group='1', curr_subgroup='1', wanted_groups='2', subjects='1')
+        TradeOfferLine.objects.create(offer=offer, year=2, curr_group='1', curr_subgroup='1', wanted_groups='2,3', subjects='2')
 
         answer = TradeOfferAnswer(offer=offer)
 
@@ -174,9 +171,9 @@ class TradingModelsTests(TestCase):
             ({'1': [1, 1], '2': [2, 1]}, 'El grupo 1 no es un grupo buscado'),
             ({'1': [3, 1], '2': [2, 1]}, 'El grupo 3 no es un grupo buscado'),
             ({'1': [2, 1], '2': [4, 1]}, 'El grupo 4 no es un grupo buscado'),
-            ({'1': [2, 0], '2': [2, 1]}, 'El subgrupo 0 no existe en Año 1'),
-            ({'1': [2, 3], '2': [2, 1]}, 'El subgrupo 3 no existe en Año 1'),
-            ({'1': [2, 1], '2': [2, 4]}, 'El subgrupo 4 no existe en Año 2'),
+            ({'1': [2, 0], '2': [2, 1]}, 'El subgrupo 2.0 no existe en Año 1'),
+            ({'1': [2, 4], '2': [2, 1]}, 'El subgrupo 2.4 no existe en Año 1'),
+            ({'1': [2, 1], '2': [2, 4]}, 'El subgrupo 2.4 no existe en Año 2'),
         ]
 
         for case in cases:
@@ -196,9 +193,7 @@ class TradingViewsTests(TestCase):
 
         self.users = [self.user1, self.user2, self.user3, self.user_manager]
 
-        year = Year.objects.create(id=1, groups=3, subgroups=3)
-
-        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=2)
 
         start = timezone.now() - timedelta(hours=2)
         end = timezone.now() + timedelta(hours=1)
@@ -208,12 +203,12 @@ class TradingViewsTests(TestCase):
         self.offer2 = TradeOffer.objects.create(user=self.user4, period=self.period)
 
         TradeOfferLine.objects.create(
-            offer=self.offer, year=year, subjects='1',
+            offer=self.offer, year=1, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
         TradeOfferLine.objects.create(
-            offer=self.offer2, year=year, subjects='1',
+            offer=self.offer2, year=1, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
@@ -472,13 +467,10 @@ class TradingUpdateViewsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='tester_1', email='test@test.com', password='1234')
 
-        year1 = Year.objects.create(id=1, groups=3, subgroups=3)
-        year2 = Year.objects.create(id=2, groups=3, subgroups=3)
-
-        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year1)
-        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=year1)
-        Subject.objects.create(code=3, name='Subject 3', acronym='S3', quarter=1, year=year2)
-        Subject.objects.create(code=4, name='Subject 4', acronym='S4', quarter=1, year=year2)
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=1)
+        Subject.objects.create(code=2, name='Subject 2', acronym='S2', quarter=1, year=1)
+        Subject.objects.create(code=3, name='Subject 3', acronym='S3', quarter=1, year=2)
+        Subject.objects.create(code=4, name='Subject 4', acronym='S4', quarter=1, year=2)
 
         start = timezone.now() - timedelta(hours=1)
         end = timezone.now() + timedelta(hours=1)
@@ -487,7 +479,7 @@ class TradingUpdateViewsTests(TestCase):
         self.offer = TradeOffer.objects.create(user=self.user, period=self.period, description='initial')
 
         self.line = TradeOfferLine.objects.create(
-            offer=self.offer, year=year1, subjects='1',
+            offer=self.offer, year=1, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
@@ -581,9 +573,7 @@ class TradingProcessTests(TestCase):
         self.user3 = User.objects.create(username='tester_3', email='test3@test.com', password='1234')
         self.user4 = User.objects.create(username='tester_4', email='test4@test.com', password='1234')
 
-        year = Year.objects.create(id=1, groups=3, subgroups=3)
-
-        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=2)
 
         start = timezone.now() - timedelta(hours=2)
         end = timezone.now() + timedelta(hours=1)
@@ -592,14 +582,14 @@ class TradingProcessTests(TestCase):
         self.offer1 = TradeOffer.objects.create(user=self.user1, period=self.period)
 
         TradeOfferLine.objects.create(
-            offer=self.offer1, year=year, subjects='1',
+            offer=self.offer1, year=1, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
         self.offer2 = TradeOffer.objects.create(user=self.user4, period=self.period)
 
         TradeOfferLine.objects.create(
-            offer=self.offer2, year=year, subjects='1',
+            offer=self.offer2, year=2, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
@@ -673,9 +663,7 @@ class TradingAuxiliarToolsTests(TestCase):
         self.user1 = User.objects.create(username='tester_1', email='test@test.com', password='1234')
         self.user2 = User.objects.create(username='tester_2', email='test2@test.com', password='1234')
 
-        year = Year.objects.create(id=1, groups=2, subgroups=2)
-
-        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=year)
+        Subject.objects.create(code=1, name='Subject 1', acronym='S1', quarter=1, year=1)
 
         now = timezone.now()
         period = TradePeriod.objects.create(name='Period 1', start=now - timedelta(hours=2), end=now + timedelta(hours=1))
@@ -683,7 +671,7 @@ class TradingAuxiliarToolsTests(TestCase):
         self.offer = TradeOffer.objects.create(user=self.user1, period=period)
 
         TradeOfferLine.objects.create(
-            offer=self.offer, year=year, subjects='1',
+            offer=self.offer, year=1, subjects='1',
             curr_group=1, curr_subgroup=1, wanted_groups='2'
         )
 

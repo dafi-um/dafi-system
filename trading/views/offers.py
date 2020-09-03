@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -9,7 +11,7 @@ from meta.views import MetadataMixin
 
 from bot.notifications import telegram_notify
 
-from ..models import TradeOffer, TradeOfferAnswer, TradeOfferLine, Year
+from ..models import TradeOffer, TradeOfferAnswer, TradeOfferLine, YEARS
 
 from .common import TradingPeriodMixin
 
@@ -95,6 +97,7 @@ class TradeOfferEditMixin(MetadataMixin, TradingPeriodMixin):
         context['offer'] = self.get_offer()
         context['lines'] = self.get_lines()
         context['errors'] = self._errors
+        context['years'] = json.dumps({y - 1: YEARS[y].groups for y in YEARS})
         return context
 
     def post(self, request, **kwargs):
@@ -170,7 +173,7 @@ class TradeOfferAddView(LoginRequiredMixin, TradeOfferEditMixin, TemplateView):
         if not self._lines:
             self._lines = []
 
-            for year in Year.objects.all():
+            for year in YEARS:
                 self._lines.append(TradeOfferLine(offer=self.get_offer(), year=year))
 
         return self._lines
@@ -205,11 +208,11 @@ class TradeOfferEditView(UserPassesTestMixin, TradeOfferEditMixin, DetailView):
         if not self._lines:
             self._lines = []
 
-            lines = {x.year.id: x for x in self.get_offer().lines.all()}
+            lines = {x.year: x for x in self.get_offer().lines.all()}
 
-            for year in Year.objects.all():
-                if year.id in lines:
-                    self._lines.append(lines[year.id])
+            for year in YEARS:
+                if year in lines:
+                    self._lines.append(lines[year])
                 else:
                     self._lines.append(TradeOfferLine(offer=self.get_offer(), year=year))
 

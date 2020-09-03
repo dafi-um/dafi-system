@@ -1,7 +1,5 @@
 {% extends 'generic.html' %}
 
-{% block title %}Crear Oferta de Permuta{% endblock title %}
-
 {% block content %}
     <header class="major special">
         <div class="split">
@@ -80,7 +78,7 @@
         {% for line in lines %}
             <div class="year-block">
                 <div class="split">
-                    <h4>Año {{ line.year.id }}</h4>
+                    <h4>Año {{ line.year }}</h4>
                     <a v-on:click="block_{{ line.i }} = !block_{{ line.i }}">Mostrar/ocultar</a>
                 </div>
 
@@ -92,9 +90,9 @@
                                 name="{{ line.i }}-curr_group"
                                 id="{{ line.i }}-curr_group"
                                 v-model="group[{{ line.i }}]"
-                                @change="uncheck_invalid({{ line.i }})">
+                                @change="onDataChanged({{ line.i }})">
 
-                                {% for i in line.year.groups_range %}
+                                {% for i in line.year_obj.groups_range %}
                                     <option value="{{ i }}" {% if i == line.curr_group %}selected{% endif %}>Grupo {{ i }}</option>
                                 {% endfor %}
                             </select>
@@ -104,10 +102,24 @@
                     <div class="field half">
                         <label for="{{ line.i }}-curr_subgroup">Subgrupo actual:</label>
                         <div class="select-wrapper">
-                            <select name="{{ line.i }}-curr_subgroup" id="{{ line.i }}-curr_subgroup">
-                                {% for i in line.year.subgroups_range %}
+                            <select
+                                name="{{ line.i }}-curr_subgroup"
+                                id="{{ line.i }}-curr_subgroup"
+                                v-model="subgroups[{{ line.i }}]"
+                                @change="onDataChanged({{ line.i }})">
+
+                                <option
+                                    v-for="option in subgroupsOptions({{ line.i }})"
+                                    v-bind:value="option">
+
+                                    {% verbatim %}Subgrupo {{ option }}{% endverbatim %}
+                                </option>
+
+                                {% comment %}
+                                {% for i in line.year_obj.subgroups_range %}
                                     <option value="{{ i }}" {% if i == line.curr_subgroup %}selected{% endif %}>Subgrupo {{ i }}</option>
                                 {% endfor %}
+                                {% endcomment %}
                             </select>
                         </div>
                     </div>
@@ -115,7 +127,7 @@
                     <div>
                         <label>Grupos buscados:</label>
 
-                        {% for i in line.year.groups_range %}
+                        {% for i in line.year_obj.groups_range %}
                             <input
                                 type="checkbox"
                                 name="{{ line.i }}-wanted_groups"
@@ -131,10 +143,10 @@
 
                     <div class="split">
                         <label>Asignaturas:</label>
-                        <a v-on:click="mark_all({{ line.i }});">Marcar/desmarcar todos</a>
+                        <a v-on:click="markAllSubjects({{ line.i }});">Marcar/desmarcar todos</a>
                     </div>
 
-                    {% for subject in line.year.subjects.all %}
+                    {% for subject in line.year_obj.subjects.all %}
                         <div>
                             <input
                                 type="checkbox"
@@ -165,8 +177,14 @@
                 'block_1': {% if lines.1.subjects %}true{% else %}false{% endif %},
                 'block_2': {% if lines.2.subjects %}true{% else %}false{% endif %},
 
+                years: {{ years | safe }},
+
                 group: [
                     {{ lines.0.curr_group }}, {{ lines.1.curr_group }}, {{ lines.2.curr_group }},
+                ],
+
+                subgroups: [
+                    {{ lines.0.curr_subgroup }}, {{ lines.1.curr_subgroup }}, {{ lines.2.curr_subgroup }},
                 ],
 
                 wanted: [
@@ -178,11 +196,25 @@
                 ],
             },
             methods: {
-                uncheck_invalid: function(id) {
-                    this.wanted[id] = this.wanted[id].filter(i => i !== this.group[id]);
+                onDataChanged: function(year) {
+                    this.wanted[year] = this.wanted[year].filter(i => i !== this.group[year]);
+
+                    if (this.subgroups[year] > this.years[year][this.group[year]]) {
+                        this.subgroups[year] = 1;
+                    }
                 },
 
-                mark_all: function(id) {
+                subgroupsOptions: function(year) {
+                    var arr = [];
+
+                    for (var i = 1; i <= this.years[year][this.group[year]]; i++) {
+                        arr.push(i);
+                    }
+
+                    return arr;
+                },
+
+                markAllSubjects: function(id) {
                     var checks = document.querySelectorAll('input[name="' + id + '-subjects"]');
 
                     for (var i = 0; i < checks.length; i++) {

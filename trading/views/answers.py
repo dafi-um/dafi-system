@@ -1,3 +1,5 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
@@ -9,7 +11,7 @@ from django.views.generic.base import ContextMixin
 
 from bot.notifications import telegram_notify
 
-from ..models import TradeOffer, TradeOfferAnswer
+from ..models import TradeOffer, TradeOfferAnswer, YEARS
 
 from .common import TradingPeriodMixin
 
@@ -22,7 +24,7 @@ class TradeOfferAnswerLinesMixin(ContextMixin):
         groups = answer.get_groups()
 
         for line in answer.offer.lines.all():
-            group, subgroup = groups[str(line.year.id)]
+            group, subgroup = groups[str(line.year)]
 
             lines.append((line, {'group': group, 'subgroup': subgroup}))
 
@@ -51,6 +53,15 @@ class TradeOfferAnswerDetailView(UserPassesTestMixin, TradeOfferAnswerLinesMixin
 
 
 class TradeOfferAnswerEditMixin(TradingPeriodMixin):
+    def get_context_data(self, **kwargs):
+        lines = self.get_offer().lines.all()
+
+        context = super().get_context_data(**kwargs)
+        context['years'] = json.dumps({y - 1: YEARS[y].groups for y in YEARS})
+        context['lines_range'] = range(len(lines))
+        context['initial_groups'] = [line.get_wanted_groups()[0] for line in lines]
+        return context
+
     def post(self, request, **kwargs):
         offer = self.get_offer()
         answer = self.get_answer()
@@ -59,7 +70,7 @@ class TradeOfferAnswerEditMixin(TradingPeriodMixin):
 
         for line in offer.lines.all():
             try:
-                data[line.year.id] = [
+                data[line.year] = [
                     int(request.POST.get('{}-group'.format(line.i))),
                     int(request.POST.get('{}-subgroup'.format(line.i))),
                 ]

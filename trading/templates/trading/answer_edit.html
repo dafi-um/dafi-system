@@ -30,15 +30,18 @@
     <form id="app" method="post">
         {% for line, groups in lines %}
             <div class="box wrapper style3">
-                <h4>Año {{ line.year.id }}</h4>
+                <h4>Año {{ line.year }}</h4>
                 <div class="field half first">
                     <label for="{{ line.i }}-group">Grupo:</label>
                     <div class="select-wrapper">
-                        <select name="{{ line.i }}-group" id="{{ line.i }}-group">
+                        <select
+                            name="{{ line.i }}-group"
+                            id="{{ line.i }}-group"
+                            v-model="groups[{{ forloop.counter0 }}]"
+                            @change="onDataChanged({{ line.i }}, {{ forloop.counter0 }})">
+
                             {% for i in line.get_wanted_groups %}
-                                <option
-                                    value="{{ i }}"
-                                    {% if groups.group == i %}selected{% endif %}>Grupo {{ i }}</option>
+                                <option value="{{ i }}">Grupo {{ i }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -47,12 +50,18 @@
                 <div class="field half">
                     <label for="{{ line.i }}-subgroup">Subgrupo:</label>
                     <div class="select-wrapper">
-                        <select name="{{ line.i }}-subgroup" id="{{ line.i }}-subgroup">
-                            {% for i in line.year.subgroups_range %}
-                                <option
-                                    value="{{ i }}"
-                                    {% if groups.subgroup == i %}selected{% endif %}>Subgrupo {{ i }}</option>
-                            {% endfor %}
+                        <select
+                            name="{{ line.i }}-subgroup"
+                            id="{{ line.i }}-subgroup"
+                            v-model="subgroups[{{ forloop.counter0 }}]"
+                            @change="onDataChanged({{ line.i }}, {{ forloop.counter0 }})">
+
+                            <option
+                                v-for="option in subgroupsOptions({{ line.i }}, {{ forloop.counter0 }})"
+                                v-bind:value="option">
+
+                                {% verbatim %}Subgrupo {{ option }}{% endverbatim %}
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -65,4 +74,43 @@
 
         <input class="button alt" type="submit" value="Guardar" />
     </form>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                years: {{ years | safe }},
+
+                groups: [
+                    {% for line, groups in lines %}
+                        {{ groups.group }},
+                    {% endfor %}
+                ],
+
+                subgroups: [
+                    {% for line, groups in lines %}
+                        {{ groups.subgroup }},
+                    {% endfor %}
+                ],
+            },
+            methods: {
+                onDataChanged: function(year, line) {
+                    if (this.subgroups[line] > this.years[year][this.groups[line]]) {
+                        this.subgroups[line] = 1;
+                    }
+                },
+
+                subgroupsOptions: function(year, line) {
+                    var arr = [];
+
+                    for (var i = 1; i <= this.years[year][this.groups[line]]; i++) {
+                        arr.push(i);
+                    }
+
+                    return arr;
+                },
+            }
+        });
+    </script>
 {% endblock content %}
