@@ -56,6 +56,8 @@ class GroupsLink(BasicBotHandler):
     bot_admin_required = True
     user_required = True
 
+    disable_web_page_preview = True
+
     def command(self, update, context):
         try:
             group_year, group_num = [int(x) for x in context.args[0].split('.')]

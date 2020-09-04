@@ -36,6 +36,8 @@ class BasicBotHandler():
 
     keep_original_message = False
 
+    disable_web_page_preview = None
+
     def __init__(self, update, context, cmd=None):
         self.update = update
         self.context = context
@@ -118,7 +120,8 @@ class BasicBotHandler():
 
     def answer_private(self, msg, reply_markup=None):
         return self.context.bot.send_message(
-            self.update.effective_user.id, msg, reply_markup=reply_markup
+            self.update.effective_user.id, msg, reply_markup=reply_markup,
+            disable_web_page_preview=self.disable_web_page_preview
         )
 
     def notify_group(self, msg, reply_markup=None, parse_mode=None, config_key=None):
@@ -131,7 +134,8 @@ class BasicBotHandler():
             return False
 
         self.context.bot.send_message(
-            group_id, msg, parse_mode, reply_markup=reply_markup
+            group_id, msg, parse_mode, reply_markup=reply_markup,
+            disable_web_page_preview=self.disable_web_page_preview
         )
 
         return True
