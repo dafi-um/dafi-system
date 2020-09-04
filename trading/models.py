@@ -119,6 +119,10 @@ class TradePeriod(models.Model):
         now = timezone.now()
         return cls.objects.filter(start__lt=now, end__gt=now).first()
 
+    @classmethod
+    def get_next(cls):
+        return cls.objects.order_by('start').first()
+
 
 class TradeOffer(models.Model):
     '''

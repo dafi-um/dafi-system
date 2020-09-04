@@ -10,5 +10,11 @@
         </div>
     </header>
 
-    <p>No hay ningún periodo de permuta activo en este momento. Prueba de nuevo más tarde.</p>
+    <p>No hay ningún periodo de permutas activo en este momento.</p>
+
+    {% if next_period %}
+        <div class="box wrapper style1">
+            <p>El próximo periodo de permutas ({{ next_period.name }}) comienza el día {{ next_period.start | date:'j/m/Y \a \l\a\s H:i' }}.</p>
+        </div>
+    {% endif %}
 {% endblock content %}

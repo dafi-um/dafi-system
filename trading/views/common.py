@@ -17,6 +17,10 @@ class TradingPeriodMixin(ContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['period'] = self.get_current_period()
+
+        if not context['period']:
+            context['next_period'] = TradePeriod.get_next()
+
         return context
 
     def get_template_names(self):
