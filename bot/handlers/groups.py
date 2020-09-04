@@ -4,6 +4,7 @@ from telegram.error import BadRequest
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from main.models import Config
 from heart.models import Group
 from clubs.models import Club
 
@@ -26,7 +27,11 @@ class GroupsList(BasicBotHandler):
             .order_by('course', 'year', 'number')
         )
 
-        msg = '*~~Grupos de Telegram~~*\n'
+        current_school_year = Config.get('current_school_year')
+
+        msg = '*~~Grupos de Telegram{}~~*\n'.format(
+            (' ' + current_school_year) if current_school_year else ''
+        )
 
         y = None
 
