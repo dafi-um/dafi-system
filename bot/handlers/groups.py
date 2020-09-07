@@ -19,6 +19,8 @@ class GroupsList(BasicBotHandler):
 
     cmd = 'grupos'
 
+    disable_web_page_preview = True
+
     def command(self, update, context):
         groups = (
             Group
@@ -67,8 +69,6 @@ class GroupsLink(BasicBotHandler):
 
     bot_admin_required = True
     user_required = True
-
-    disable_web_page_preview = True
 
     def command(self, update, context):
         try:
