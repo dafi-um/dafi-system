@@ -60,7 +60,7 @@ class BasicBotHandler():
         return self.user
 
     def get_bot_link(self):
-        return 'tg://user?id={}'.format(self.context.get_me().id)
+        return 'tg://user?id={}'.format(self.context.bot.get_me().id)
 
     def user_filter(self, user):
         return True
