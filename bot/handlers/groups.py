@@ -47,7 +47,14 @@ class GroupsList(BasicBotHandler):
 
             msg += '[{}]({})\n'.format(name, group.telegram_group_link)
 
-        return msg
+        if not self.is_group():
+            return msg
+
+        self.answer_private(msg)
+
+        return 'Te he enviado la lista de grupos a [nuestro chat privado]({}).'.format(
+            self.get_bot_link()
+        )
 
 
 @add_handlers

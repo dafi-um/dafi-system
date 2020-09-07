@@ -59,6 +59,9 @@ class BasicBotHandler():
 
         return self.user
 
+    def get_bot_link(self):
+        return 'tg://user?id={}'.format(self.context.get_me().id)
+
     def user_filter(self, user):
         return True
 
@@ -81,6 +84,9 @@ class BasicBotHandler():
         except BadRequest:
             return None, None
 
+    def is_group(self):
+        return 'group' in self.update.effective_chat.type
+
     def run_checks(self):
         chat = self.update.effective_chat
 
@@ -90,7 +96,7 @@ class BasicBotHandler():
             )
             return False
 
-        if self.bot_admin_required and 'group' in chat.type:
+        if self.bot_admin_required and self.is_group():
             bot_id = self.context.bot.get_me().id
 
             if chat.get_member(bot_id).status != 'administrator':
@@ -120,7 +126,9 @@ class BasicBotHandler():
 
     def answer_private(self, msg, reply_markup=None):
         return self.context.bot.send_message(
-            self.update.effective_user.id, msg, reply_markup=reply_markup,
+            self.update.effective_user.id, msg,
+            reply_markup=reply_markup,
+            parse_mode=_ParseMode.MARKDOWN,
             disable_web_page_preview=self.disable_web_page_preview
         )
 
@@ -150,7 +158,8 @@ class BasicBotHandler():
         if not self.is_callback or self.keep_original_message:
             self.update.effective_message.reply_text(
                 self.msg, reply_markup=self.reply_markup,
-                parse_mode=_ParseMode.MARKDOWN
+                parse_mode=_ParseMode.MARKDOWN,
+                disable_web_page_preview=self.disable_web_page_preview
             )
         else:
             self.update.callback_query.edit_message_text(
