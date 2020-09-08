@@ -1,3 +1,5 @@
+import itertools
+
 from telegram import ParseMode
 from telegram.error import BadRequest
 
@@ -5,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from main.models import Config
-from heart.models import Group
+from heart.models import COURSES, Group, Year
 from clubs.models import Club
 
 from .handlers import add_handlers, BasicBotHandler
@@ -22,12 +24,21 @@ class GroupsList(BasicBotHandler):
     disable_web_page_preview = True
 
     def command(self, update, context):
-        groups = (
+        years = {course: list(years) for course, years in itertools.groupby(
+            Year
+                .objects
+                .all()
+                .order_by('course', 'year'),
+            key=lambda y: y.course
+        )}
+
+        groups = {course: list(groups) for course, groups in itertools.groupby(
             Group
-            .objects
-            .filter(~Q(telegram_group_link=''))
-            .order_by('course', 'year', 'number')
-        )
+                .objects
+                .filter(~Q(telegram_group_link=''))
+                .order_by('course', 'year', 'number'),
+            key=lambda g: g.course
+        )}
 
         current_school_year = Config.get('current_school_year')
 
@@ -35,19 +46,36 @@ class GroupsList(BasicBotHandler):
             (' ' + current_school_year) if current_school_year else ''
         )
 
-        y = None
+        for course, course_title in COURSES:
+            if course not in groups:
+                continue
 
-        for group in groups:
-            if group.year != y:
-                y = group.year
+            msg += '{}\n'.format(course_title)
+
+            if course != 'GII':
+                for group in groups[course]:
+                    msg += ' - [{}]({})\n'.format(group.name, group.telegram_group_link)
+
+                continue
+
+            year_groups = {
+                year: list(groups) for year, groups in
+                itertools.groupby(groups[course], lambda g: g.year)
+            }
+
+            for year in years[course]:
+                if year.telegram_group_link:
+                    msg += ' - [{}º Dudas]({})\n'.format(
+                        year.year, year.telegram_group_link
+                    )
+
+                if year.year in year_groups:
+                    for group in year_groups[year.year]:
+                        msg += ' - [{}º {}]({})\n'.format(
+                            group.year, group.name, group.telegram_group_link
+                        )
+
                 msg += '\n'
-
-            if group.course == group.GII:
-                name = '{} {}º {}'.format(group.course, group.year, group.name)
-            else:
-                name = group.name
-
-            msg += '[{}]({})\n'.format(name, group.telegram_group_link)
 
         if not self.is_group():
             return msg

@@ -24,6 +24,11 @@ class DocumentMediaAdmin(admin.ModelAdmin):
     actions = (make_hidden, make_not_hidden)
 
 
+@admin.register(models.Year)
+class YearAdmin(admin.ModelAdmin):
+    list_display = ('year', 'course', 'telegram_group_link')
+
+
 @admin.register(models.Group)
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('year', 'name', 'course', 'delegate', 'subdelegate', 'telegram_group_link')

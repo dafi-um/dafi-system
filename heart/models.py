@@ -11,6 +11,16 @@ from meta.models import ModelMeta
 
 User = get_user_model()
 
+GII = 'GII'
+MNTI = 'MNTI'
+MBD = 'MBD'
+
+COURSES = (
+    (GII, 'Grado en Ingeniería Informática'),
+    (MNTI, 'Máster en Nuevas Tecnologías de la Informática'),
+    (MBD, 'Máster en Big Data'),
+)
+
 
 class Committee(models.Model):
     '''Internal committee'''
@@ -64,18 +74,34 @@ class DocumentMedia(models.Model):
         return basename(self.file.name)
 
 
+class Year(models.Model):
+    '''Academic Year'''
+
+    year = models.IntegerField('año', primary_key=True)
+
+    course = models.CharField(
+        'estudios', max_length=6, choices=COURSES, default=GII
+    )
+
+    telegram_group = models.CharField(
+        'grupo de telegram', max_length=64, blank=True, default=''
+    )
+
+    telegram_group_link = models.CharField(
+        'enlace al grupo de telegram', max_length=64, blank=True, default=''
+    )
+
+    class Meta:
+        verbose_name = 'año'
+
+        ordering = ('year',)
+
+    def __str__(self):
+        return 'Año {}'.format(self.year)
+
+
 class Group(models.Model):
     '''Group of Students'''
-
-    GII = 'GII'
-    MNTI = 'MNTI'
-    MBD = 'MBD'
-
-    COURSES = (
-        (GII, 'Grado en Ingeniería Informática'),
-        (MNTI, 'Máster en Nuevas Tecnologías de la Informática'),
-        (MBD, 'Máster en Big Data'),
-    )
 
     name = models.CharField(
         'nombre', max_length=64
