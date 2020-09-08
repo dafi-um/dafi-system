@@ -14,16 +14,17 @@ class TradePeriodAdmin(admin.ModelAdmin):
     list_display = ('name', 'start', 'end')
 
 
+class TradeOfferLineInline(admin.TabularInline):
+    model = models.TradeOfferLine
+
+
 @admin.register(models.TradeOffer)
 class TradeOfferAdmin(admin.ModelAdmin):
     list_display = ('user', 'creation_date', 'is_visible', 'is_completed')
-    list_filter = ['user', 'creation_date', 'is_visible', 'is_completed']
+    list_filter = ['creation_date', 'is_visible', 'is_completed']
 
+    inlines = (TradeOfferLineInline,)
 
-@admin.register(models.TradeOfferLine)
-class TradeOfferLineAdmin(admin.ModelAdmin):
-    list_display = ('offer', 'year', 'curr_group', 'wanted_groups')
-    list_filter = ['offer', 'year', 'curr_group', 'wanted_groups']
 
 @admin.register(models.TradeOfferAnswer)
 class TradeOfferAnswerAdmin(admin.ModelAdmin):
