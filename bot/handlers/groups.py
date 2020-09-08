@@ -1,7 +1,7 @@
 import itertools
 
 from telegram import ParseMode
-from telegram.error import BadRequest
+from telegram.error import BadRequest, Unauthorized
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
@@ -80,11 +80,14 @@ class GroupsList(BasicBotHandler):
         if not self.is_group():
             return msg
 
-        self.answer_private(msg)
+        res = 'Te he enviado la lista de grupos a [nuestro chat privado]({}).'
 
-        return 'Te he enviado la lista de grupos a [nuestro chat privado]({}).'.format(
-            self.get_bot_link()
-        )
+        try:
+            self.answer_private(msg)
+        except Unauthorized:
+            res = 'Necesito que inicies un [chat conmigo]({}) para poder enviarte la lista de grupos.'
+
+        return res.format(self.get_bot_link())
 
 
 @add_handlers
