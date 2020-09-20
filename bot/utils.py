@@ -1,6 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-def create_reply_markup(*lines):
+def create_reply_markup(*lines, prefix=None):
     buttons = []
 
     for items in lines:
@@ -8,6 +8,9 @@ def create_reply_markup(*lines):
 
         for text, data, *extra in items:
             url = extra[0] if extra else None
+
+            if prefix:
+                data = prefix + ':' + data
 
             line.append(
                 InlineKeyboardButton(text, callback_data=data, url=url)
