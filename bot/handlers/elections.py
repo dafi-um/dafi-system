@@ -51,7 +51,7 @@ class ElectionsToggleHandler(BasicBotHandler):
 
         return msg, reply_markup
 
-    def callback(self, update, action, *args):
+    def callback(self, update, context, action, *args):
         if action == 'on':
             if self.elections_active():
                 return 'El periodo de elecciones ya está activo.'
@@ -139,7 +139,7 @@ class ElectionRequestMixin(BasicBotHandler):
     def callback_user_filter(self, user):
         return user.has_perm('bot.can_manage_elections')
 
-    def callback(self, update, action, *args):
+    def callback(self, update, context, action, *args):
         if action != 'deny' and action != 'request':
             return
 

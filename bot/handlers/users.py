@@ -227,7 +227,7 @@ class UsersCallbackHandler(BasicBotHandler):
 
     query_prefix = 'users'
 
-    def callback(self, update, action, *args):
+    def callback(self, update, context, action, *args):
         if action == 'link':
             telegram_user = update.effective_user
 

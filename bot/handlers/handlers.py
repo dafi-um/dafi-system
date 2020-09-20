@@ -151,7 +151,7 @@ class BasicBotHandler():
     def command(self, update, context):
         raise NotImplementedError("Must create a `command' method in the class")
 
-    def callback(self, update, action, *args):
+    def callback(self, update, context, action, *args):
         raise NotImplementedError("Must create a `callback' method in the class")
 
     def send_answer(self):
@@ -180,7 +180,7 @@ class BasicBotHandler():
             if prefix != self.query_prefix:
                 return
 
-            answer = self.callback(self.update, action, *args)
+            answer = self.callback(self.update, self.context, action, *args)
 
             if not answer:
                 answer = 'Parece que ha ocurrido un error inesperado...'

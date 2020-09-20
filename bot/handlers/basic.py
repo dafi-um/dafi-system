@@ -39,7 +39,7 @@ class MainHandler(BasicBotHandler):
 
             return msg, reply_markup
 
-    def callback(self, update, action, *args):
+    def callback(self, update, context, action, *args):
         if action == 'abort':
             return 'Operación cancelada.'
         elif action == 'okey':

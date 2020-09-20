@@ -147,7 +147,7 @@ class DafiRoom(BasicBotHandler):
 
             return msg
 
-    def callback(self, update, action, *args):
+    def callback(self, update, context, action, *args):
         members = persistence.get_item(self.members_list_key, [])
         queue = persistence.get_item(self.queue_list_key, [])
 
