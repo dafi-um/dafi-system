@@ -36,7 +36,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.Meeting)
 class MeetingAdmin(admin.ModelAdmin):
-    list_display = ('date',)
+    list_display = ('date', 'is_ordinary', 'minutes_approved')
 
 
 class PeopleGroupMemberInline(admin.TabularInline):

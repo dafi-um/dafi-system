@@ -29,6 +29,20 @@
             <span class="helptext">Formato: DD/MM/YYYY HH:mm</span>
         </p>
 
+        <div class="row">
+            <div class="6u 12u$(small)">
+                {{ form.is_ordinary.errors }}
+                {{ form.is_ordinary }}
+                {{ form.is_ordinary.label_tag | cut:':' }}
+            </div>
+
+            <div class="6u 12u$(small)">
+                {{ form.minutes_approved.errors }}
+                {{ form.minutes_approved }}
+                {{ form.minutes_approved.label_tag | cut:':' }}
+            </div>
+        </div>
+
         <h3>Archivos</h3>
 
         <div class="row">

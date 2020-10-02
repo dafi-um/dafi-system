@@ -3,7 +3,7 @@
 {% block content %}
     <header class="major special split">
         <div>
-            <h1>Asamblea de Alumnos</h1>
+            <h1>Asamblea de Alumnos {% if not meeting.is_ordinary %}Extraordinaria{% endif %}</h1>
             <p>Fecha: {{ object.date | date:'j \d\e F \d\e Y H:i' }}</p>
         </div>
 
@@ -22,7 +22,7 @@
         <li>Convocatoria: <a href="{{ object.call.url }}" target="_blank" title="Ver Convocatoria">{{ object.call.name }}</a></li>
 
         {% if object.minutes %}
-            <li>Acta: <a href="{{ object.minutes.url }}" target="_blank" title="Ver Acta">{{ object.minutes.name }}</a></li>
+            <li>Acta {% if not meeting.minutes_approved %}(Pendiente de aprobar){% endif %}: <a href="{{ object.minutes.url }}" target="_blank" title="Ver Acta">{{ object.minutes.name }}</a></li>
         {% endif %}
 
         {% for doc in object.documents.all %}

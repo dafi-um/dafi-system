@@ -14,7 +14,11 @@
             <li class="split">
                 <div>
                     <h4 style="margin-bottom: 0;">
-                        <a href="{% url 'heart:meetings_detail' meeting.id %}" title="Ver {{ meeting }}">{{ meeting.date | date:'j \d\e F \d\e Y H:i' }}</a>
+                        <a href="{% url 'heart:meetings_detail' meeting.id %}"
+                           title="Ver {{ meeting }}">
+                            {{ meeting.date | date:'j \d\e F \d\e Y H:i' }}
+                            <span>{% if not meeting.is_ordinary %}(Extraordinaria){% endif %}</span>
+                        </a>
                     </h4>
 
                     {% if meeting.call %}
@@ -22,7 +26,7 @@
                     {% endif %}
 
                     {% if meeting.minutes %}
-                        <span>- <a href="{{ meeting.minutes.url }}" title="Acta {{ meeting }}">Acta</a></span>
+                        <span>- <a href="{{ meeting.minutes.url }}" title="Acta {{ meeting }}">Acta {% if not meeting.minutes_approved %}(Pendiente de aprobar){% endif %}</a></span>
                     {% endif %}
 
                     {% if meeting.documents__count %}

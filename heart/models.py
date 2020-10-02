@@ -164,12 +164,20 @@ class Meeting(ModelMeta, models.Model):
 
     date = models.DateTimeField('fecha')
 
+    is_ordinary = models.BooleanField(
+        'es una asamblea ordinaria', default=True
+    )
+
     call = models.FileField(
         'convocatoria', upload_to='meetings/'
     )
 
     minutes = models.FileField(
         'acta', upload_to='meetings/', blank=True
+    )
+
+    minutes_approved = models.BooleanField(
+        'el acta se ha aprobado', default=False
     )
 
     documents = models.ManyToManyField(
