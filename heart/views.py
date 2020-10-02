@@ -6,7 +6,7 @@ from django.views.generic.base import ContextMixin
 
 from meta.views import MetadataMixin
 
-from .models import Committee, DocumentMedia, Group, Meeting, PeopleGroup
+from .models import Committee, DocumentMedia, GII, Group, Meeting, PeopleGroup
 
 
 class AboutUsView(MetadataMixin, TemplateView):
@@ -117,7 +117,7 @@ class MeetingMixin(ContextMixin):
                 users_ids.add(user.id)
 
         for group in groups:
-            if group.course == Group.GII:
+            if group.course == GII:
                 title = 'Año {}'.format(group.year)
             else:
                 title = group.get_course_display()
