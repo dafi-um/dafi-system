@@ -11,7 +11,10 @@ class Event(models.Model):
     Groups entities related to a specific year.
     '''
 
-    date = models.DateTimeField('fecha')
+    date = models.DateField('fecha')
+
+    def __str__(self):
+        return 'San Alberto de {}'.format(self.date.year)
 
     class Meta:
         verbose_name = 'evento'
