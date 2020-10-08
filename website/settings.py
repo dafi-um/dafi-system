@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'clubs.apps.ClubsConfig',
     'trading.apps.TradingConfig',
     'feedback.apps.FeedbackConfig',
+    'sanalberto.apps.SanAlbertoConfig',
     'bot.apps.BotConfig',
     'django_cleanup.apps.CleanupConfig',
     'pagedown',
