@@ -13,6 +13,27 @@ class Event(models.Model):
 
     date = models.DateField('fecha')
 
+    design_register_start = models.DateTimeField(
+        'inicio de registro de diseños'
+    )
+
+    design_register_end = models.DateTimeField(
+        'fin de registro de diseños'
+    )
+
+    selling_start = models.DateTimeField(
+        'inicio de venta de productos'
+    )
+
+    selling_end = models.DateTimeField(
+        'fin de venta de productos'
+    )
+
+    winner_design = models.ForeignKey(
+        'Design', models.CASCADE, 'events_won',
+        blank=True, null=True, verbose_name='diseño ganador'
+    )
+
     def __str__(self):
         return 'San Alberto de {}'.format(self.date.year)
 
@@ -51,3 +72,43 @@ class Activity(models.Model):
     class Meta:
         verbose_name = 'actividad'
         verbose_name_plural = 'actividades'
+
+
+class Design(models.Model):
+    '''T-shirt design'''
+
+    event = models.ForeignKey(
+        Event, models.CASCADE,
+        verbose_name='evento'
+    )
+
+    user = models.ForeignKey(
+        get_user_model(), models.PROTECT,
+        verbose_name='creador'
+    )
+
+    title = models.CharField('título', max_length=128)
+
+    image = models.ImageField(
+        'imagen pública', upload_to='designs/'
+    )
+
+    source_file = models.FileField(
+        'fichero fuente', upload_to='designs-sources/'
+    )
+
+    is_approved = models.BooleanField(
+        'diseño aprobado', default=False
+    )
+
+    created = models.DateTimeField(
+        'fecha de creación', auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = 'diseño'
+
+        ordering = ('-created', 'title')
+
+    def __str__(self):
+        return 'Diseño #{} `{}` de {}'.format(self.pk, self.title, self.user)
