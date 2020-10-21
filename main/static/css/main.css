@@ -4195,6 +4195,24 @@
 			color: #fff;
 		}
 
+	@media screen and (max-width: 480px) {
+
+		.sa-nav .inner {
+			flex-direction: column;
+		}
+
+		.sa-nav .links {
+			justify-content: center;
+			flex-wrap: wrap;
+			margin-top: 1em;
+		}
+
+		.sa-nav a + a {
+			margin-left: 0;
+		}
+
+	}
+
 /* Students */
 
 	.students-groups header {
