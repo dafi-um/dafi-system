@@ -7,7 +7,7 @@ from . import models
 class EventAdmin(admin.ModelAdmin):
     list_display = (
         '__str__', 'date', 'design_register_start',
-        'selling_start', 'winner_design'
+        'design_poll_start', 'selling_start'
     )
 
 

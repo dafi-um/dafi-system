@@ -14,6 +14,7 @@ urlpatterns = [
     path('clubs/', include('clubs.urls')),
     path('feedback/', include('feedback.urls')),
     path('permutas/', include('trading.urls')),
+    path('san-alberto/', include('sanalberto.urls')),
     path('cuenta/', include('users.urls')),
     path('admin/', admin.site.urls),
     path('p/<path:url>', views.flatpage),

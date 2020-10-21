@@ -1,0 +1,11 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    {% for activity in activity_list %}
+        <p>{{ activity }}</p>
+    {% empty %}
+        <div class="box wrapper style1">
+            <p><b>Aún no se han registrado actividades.</b></p>
+        </div>
+    {% endfor %}
+{% endblock content %}

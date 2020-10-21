@@ -1,0 +1,11 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    {% for design in design_list %}
+        <p>{{ design }}</p>
+    {% empty %}
+        <div class="box wrapper style1">
+            <p><b>Aún no se han registrado diseños.</b></p>
+        </div>
+    {% endfor %}
+{% endblock content %}

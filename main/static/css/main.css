@@ -4153,6 +4153,44 @@
 			margin-bottom: 0;
 		}
 
+/* San Alberto */
+
+.sa-nav {
+	padding-top: 1em;
+}
+
+	.sa-nav .inner {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.sa-nav .links {
+		display: flex;
+	}
+
+	.sa-nav h2 {
+		margin: 0;
+	}
+
+	.sa-nav a {
+		display: block;
+		padding: 0.5em;
+		font-weight: bold;
+		transition: none;
+	}
+
+		.sa-nav a + a {
+			margin-left: 0.5em;
+		}
+
+		.sa-nav a:hover,
+		.sa-nav a.active {
+			text-decoration: none;
+			background-color: #e5474b;
+			color: #fff;
+		}
+
 /* Students */
 
 	.students-groups header {

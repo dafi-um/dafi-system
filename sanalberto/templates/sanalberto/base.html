@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <section class="sa-nav">
+        <div class="inner">
+            <div class="title">
+                <h2>San Alberto {{ event.date.year }}</h2>
+            </div>
+
+            <div class="links">
+                <a class="{% if 'sanalberto:index' == request.resolver_match.view_name %}active{% endif %}"
+                   href="{% url 'sanalberto:index' %}">Inicio</a>
+
+                <a class="{% if 'activities' in request.resolver_match.view_name %}active{% endif %}"
+                   href="{% url 'sanalberto:activities_index' %}">Actividades</a>
+
+                <a class="{% if 'designs' in request.resolver_match.view_name %}active{% endif %}"
+                   href="{% url 'sanalberto:designs_index' %}">Diseños</a>
+
+                <a class="{% if 'shop' in request.resolver_match.view_name %}active{% endif %}"
+                   href="{% url 'sanalberto:shop' %}">Tienda</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="main">
+        <div class="inner">
+            {% block content %}{% endblock %}
+        </div>
+    </section>
+{% endblock main %}

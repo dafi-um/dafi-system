@@ -1,0 +1,11 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    <div class="box wrapper style1" style="font-weight: bold;">
+        {% if soon %}
+            <p>La tienda se abrirá el {{ event.selling_start | date:'j M Y \a \l\a\s H:i' }}.</p>
+        {% else %}
+            <p>La venta de artículos de San Alberto ha finalizado.</p>
+        {% endif %}
+    </div>
+{% endblock content %}
