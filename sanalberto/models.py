@@ -1,7 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
 
 from clubs.models import Club
+
+def date_in_range(start, end):
+    now = timezone.now()
+
+    return start <= now and now < end
 
 
 class Event(models.Model):
@@ -19,6 +25,14 @@ class Event(models.Model):
 
     design_register_end = models.DateTimeField(
         'fin de registro de diseños'
+    )
+
+    design_poll_start = models.DateTimeField(
+        'inicio de elección de diseños'
+    )
+
+    design_poll_end = models.DateTimeField(
+        'fin de elección de diseños'
     )
 
     selling_start = models.DateTimeField(
@@ -39,6 +53,15 @@ class Event(models.Model):
 
     class Meta:
         verbose_name = 'evento'
+
+    def design_register_enabled(self):
+        return date_in_range(self.design_register_start, self.design_register_end)
+
+    def design_poll_enabled(self):
+        return date_in_range(self.design_poll_start, self.design_poll_end)
+
+    def shop_enabled(self):
+        return date_in_range(self.selling_start, self.selling_end)
 
 
 class Activity(models.Model):
