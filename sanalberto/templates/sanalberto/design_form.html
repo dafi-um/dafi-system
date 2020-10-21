@@ -1,0 +1,46 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    <style type="text/css">
+        .split {
+            align-items: center;
+            margin-bottom: 1em;
+        }
+
+            .split h3 {
+                margin: 0;
+            }
+
+        .box.style1 {
+            margin-bottom: 1em;
+        }
+
+        .box.style3 {
+            border-width: 2px;
+        }
+
+        label {
+            margin-bottom: 0.25em;
+        }
+    </style>
+
+    <div class="split">
+        <h3>Presentar diseño</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:designs_index' %}">Volver atrás</a>
+    </div>
+
+    <div class="box wrapper style1">
+        <p><b>Recuerda:</b> al presentar un diseño estás aceptando las bases establecidas por la comisión de organización de San Alberto.</p>
+    </div>
+
+    <div class="box wrapper style3">
+        <form method="post" enctype="multipart/form-data">
+            {{ form.as_p }}
+
+            {% csrf_token %}
+
+            <button class="button alt" type="submit">Enviar</button>
+        </form>
+    </div>
+{% endblock content %}

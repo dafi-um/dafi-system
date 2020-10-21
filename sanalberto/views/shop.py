@@ -14,7 +14,7 @@ class ShopMixin(EventMixin):
     check_event_redirect = 'sanalberto:shop_closed'
 
     def check_event(self, event):
-        return event.shop_enabled()
+        return event.shop_enabled
 
 
 class ShopIndexView(ShopMixin, MetadataMixin, ListView):

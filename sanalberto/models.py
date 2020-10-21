@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from clubs.models import Club
 
@@ -54,12 +55,15 @@ class Event(models.Model):
     class Meta:
         verbose_name = 'evento'
 
+    @cached_property
     def design_register_enabled(self):
         return date_in_range(self.design_register_start, self.design_register_end)
 
+    @cached_property
     def design_poll_enabled(self):
         return date_in_range(self.design_poll_start, self.design_poll_end)
 
+    @cached_property
     def shop_enabled(self):
         return date_in_range(self.selling_start, self.selling_end)
 
