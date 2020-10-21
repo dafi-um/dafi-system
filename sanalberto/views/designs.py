@@ -28,6 +28,21 @@ class DesignsIndexView(EventMixin, MetadataMixin, ListView):
 
     title = 'Diseños'
 
+    def get_queryset(self):
+        return super().get_queryset().filter(is_approved=True)
+
+    def get_my_designs(self):
+        if not self.request.user:
+            return None
+
+        return Design.objects.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        context['my_designs'] = self.get_my_designs()
+        return context
+
 
 class DesignCreateView(RegisterMixin, MetadataMixin, LoginRequiredMixin, CreateView):
     '''Design create view'''

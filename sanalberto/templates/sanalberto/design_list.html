@@ -1,11 +1,89 @@
 {% extends 'sanalberto/base.html' %}
 
 {% block content %}
-    {% for design in design_list %}
-        <p>{{ design }}</p>
-    {% empty %}
-        <div class="box wrapper style1">
-            <p><b>Aún no se han registrado diseños.</b></p>
+    <style type="text/css">
+        .alert {
+            align-items: center;
+        }
+
+            .alert p {
+                margin: 0;
+            }
+
+        .design {
+            padding: 1em;
+            border: 1px solid #e5474b;
+            text-align: center;
+        }
+
+            .design .image {
+                margin-bottom: 1em;
+            }
+
+            .design h4 {
+                margin: 0;
+            }
+
+            .design p {
+                margin: 0;
+            }
+    </style>
+
+    {% if event.design_register_enabled %}
+        <div class="box wrapper style3 split alert">
+            <p>¡El registro de diseños está abierto hasta el {{ event.design_register_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+
+            <a class="button special" href="{% url 'sanalberto:design_create' %}">Presentar diseño</a>
         </div>
-    {% endfor %}
+    {% elif event.design_register_start > now %}
+        <div class="box wrapper style3 alert">
+            <p>El registro de diseños se abrirá el {{ event.design_register_start | date:'j M Y \a \l\a\s H:i' }}.</p>
+        </div>
+    {% endif %}
+
+    {% if my_designs %}
+        <h3 style="margin: 0;">Mis diseños</h3>
+
+        <p style="margin-bottom: 1em;"><b>Recuerda:</b> Los diseños nuevos aparecerán en la lista una vez sean revisados y aprobados por la comisión.</p>
+
+        <div class="row">
+            {% for design in my_designs %}
+                <div class="4u 6u(small)">
+                    <div class="design">
+                        <div class="image square" style="background-image: url('{{ design.image.url }}');"></div>
+
+                        <h4>{{ design.title }}</h4>
+
+                        {% if not design.is_approved %}
+                            <p>(Pendiente de aprobación)</p>
+                        {% else %}
+                            <p>(Aprobado)</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <hr />
+    {% endif %}
+
+    <h3>Diseños</h3>
+
+    <div class="row">
+        {% for design in design_list %}
+            <div class="4u 6u(small)">
+                <div class="design">
+                    <div class="image square" style="background-image: url('{{ design.image.url }}');"></div>
+
+                    <h4>{{ design.title }}</h4>
+                </div>
+            </div>
+        {% empty %}
+            <div class="12u$">
+                <div class="box wrapper style1">
+                    <p><b>Aún no se han registrado diseños.</b></p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock content %}
