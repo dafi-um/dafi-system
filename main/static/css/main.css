@@ -4156,8 +4156,13 @@
 /* San Alberto */
 
 .sa-nav {
-	padding-top: 1em;
+	padding: 1em;
+	background: #f3f3f3;
 }
+
+	.sa-nav + #main {
+		padding-top: 3em;
+	}
 
 	.sa-nav .inner {
 		display: flex;

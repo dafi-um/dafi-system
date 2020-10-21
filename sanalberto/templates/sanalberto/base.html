@@ -11,10 +11,10 @@
                 <a class="{% if 'sanalberto:index' == request.resolver_match.view_name %}active{% endif %}"
                    href="{% url 'sanalberto:index' %}">Inicio</a>
 
-                <a class="{% if 'activities' in request.resolver_match.view_name %}active{% endif %}"
+                <a class="{% if 'activit' in request.resolver_match.view_name %}active{% endif %}"
                    href="{% url 'sanalberto:activities_index' %}">Actividades</a>
 
-                <a class="{% if 'designs' in request.resolver_match.view_name %}active{% endif %}"
+                <a class="{% if 'design' in request.resolver_match.view_name %}active{% endif %}"
                    href="{% url 'sanalberto:designs_index' %}">Diseños</a>
 
                 <a class="{% if 'shop' in request.resolver_match.view_name %}active{% endif %}"
