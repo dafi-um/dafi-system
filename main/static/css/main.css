@@ -2391,18 +2391,17 @@
 				width: 100%;
 			}
 
-	.image-square-container {
-		padding: 1em;
-	}
-
-		.image-square {
+		.image.square {
 			width: 100%;
 			padding-top: 100%;
-			border-radius: 100%;
 			background-position: center center;
-			background-size: 100% 100%;
+			background-size: contain;
 			background-repeat: no-repeat;
 		}
+
+			.image.square.round {
+				border-radius: 100%;
+			}
 
 /* List */
 
