@@ -130,6 +130,10 @@ class PollDesign(models.Model):
         'fichero fuente', upload_to='designs-sources/'
     )
 
+    vector_file = models.FileField(
+        'fichero del vectorizado', upload_to='designs-vectors/'
+    )
+
     is_approved = models.BooleanField(
         'diseño aprobado', default=False
     )

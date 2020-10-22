@@ -74,7 +74,7 @@ class DesignCreateView(PollMixin, MetadataMixin, LoginRequiredMixin, CreateView)
     '''Design create view'''
 
     model = PollDesign
-    fields = ['title', 'image', 'source_file']
+    fields = ['title', 'image', 'source_file', 'vector_file']
 
     def dispatch(self, request, *args, **kwargs):
         poll = self.get_poll()
