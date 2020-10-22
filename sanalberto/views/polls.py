@@ -58,7 +58,7 @@ class PollIndexView(EventMixin, MetadataMixin, DetailView):
         return obj
 
     def get_my_designs(self):
-        if not self.request.user:
+        if not self.request.user.is_authenticated:
             return None
 
         return self.get_object().designs.filter(user=self.request.user)
