@@ -29,15 +29,17 @@
             }
     </style>
 
-    {% if event.design_register_enabled %}
-        <div class="box wrapper style3 split alert">
-            <p>¡El registro de diseños está abierto hasta el {{ event.design_register_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+    <h2>{{ poll.title }}</h2>
 
-            <a class="button special" href="{% url 'sanalberto:design_create' %}">Presentar diseño</a>
+    {% if poll.register_enabled %}
+        <div class="box wrapper style3 split alert">
+            <p>¡El registro de diseños está abierto hasta el {{ poll.register_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+
+            <a class="button special" href="{% url 'sanalberto:design_create' poll.slug %}">Presentar diseño</a>
         </div>
-    {% elif event.design_register_start > now %}
+    {% elif poll.register_start > now %}
         <div class="box wrapper style3 alert">
-            <p>El registro de diseños se abrirá el {{ event.design_register_start | date:'j M Y \a \l\a\s H:i' }}.</p>
+            <p>El registro de diseños se abrirá el {{ poll.register_start | date:'j M Y \a \l\a\s H:i' }}.</p>
         </div>
     {% endif %}
 

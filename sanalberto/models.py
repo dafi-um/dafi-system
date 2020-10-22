@@ -20,22 +20,6 @@ class Event(models.Model):
 
     date = models.DateField('fecha')
 
-    design_register_start = models.DateTimeField(
-        'inicio de registro de diseños'
-    )
-
-    design_register_end = models.DateTimeField(
-        'fin de registro de diseños'
-    )
-
-    design_poll_start = models.DateTimeField(
-        'inicio de elección de diseños'
-    )
-
-    design_poll_end = models.DateTimeField(
-        'fin de elección de diseños'
-    )
-
     selling_start = models.DateTimeField(
         'inicio de venta de productos'
     )
@@ -44,24 +28,11 @@ class Event(models.Model):
         'fin de venta de productos'
     )
 
-    winner_design = models.ForeignKey(
-        'Design', models.CASCADE, 'events_won',
-        blank=True, null=True, verbose_name='diseño ganador'
-    )
-
     def __str__(self):
         return 'San Alberto de {}'.format(self.date.year)
 
     class Meta:
         verbose_name = 'evento'
-
-    @cached_property
-    def design_register_enabled(self):
-        return date_in_range(self.design_register_start, self.design_register_end)
-
-    @cached_property
-    def design_poll_enabled(self):
-        return date_in_range(self.design_poll_start, self.design_poll_end)
 
     @cached_property
     def shop_enabled(self):
@@ -101,12 +72,47 @@ class Activity(models.Model):
         verbose_name_plural = 'actividades'
 
 
-class Design(models.Model):
-    '''T-shirt design'''
+class Poll(models.Model):
+    '''Designs poll'''
 
     event = models.ForeignKey(
-        Event, models.CASCADE,
+        Event, models.CASCADE, 'polls',
         verbose_name='evento'
+    )
+
+    title = models.CharField('título', max_length=140)
+
+    slug = models.SlugField(max_length=140)
+
+    register_start = models.DateTimeField('inicio de registro')
+
+    register_end = models.DateTimeField('fin de registro')
+
+    voting_start = models.DateTimeField('inicio de votación')
+
+    voting_end = models.DateTimeField('fin de votación')
+
+    class Meta:
+        verbose_name = 'encuesta'
+
+    def __str__(self):
+        return '{} ({})'.format(self.title, self.slug)
+
+    @cached_property
+    def register_enabled(self):
+        return date_in_range(self.register_start, self.register_end)
+
+    @cached_property
+    def voting_enabled(self):
+        return date_in_range(self.voting_start, self.voting_end)
+
+
+class PollDesign(models.Model):
+    '''Poll design option'''
+
+    poll = models.ForeignKey(
+        Poll, models.CASCADE, 'designs',
+        verbose_name='encuesta'
     )
 
     user = models.ForeignKey(
@@ -117,7 +123,7 @@ class Design(models.Model):
     title = models.CharField('título', max_length=128)
 
     image = models.ImageField(
-        'imagen pública', upload_to='designs/'
+        'imagen', upload_to='designs/'
     )
 
     source_file = models.FileField(
@@ -139,3 +145,16 @@ class Design(models.Model):
 
     def __str__(self):
         return 'Diseño #{} `{}` de {}'.format(self.pk, self.title, self.user)
+
+
+class Product(models.Model):
+    '''Shop product'''
+
+    cost = models.DecimalField('coste', max_digits=4, decimal_places=2)
+
+    price = models.DecimalField('precio', max_digits=4, decimal_places=2)
+
+    stock = models.IntegerField('stock')
+
+    class Meta:
+        verbose_name = 'producto'

@@ -1,4 +1,4 @@
 from .activities import *
-from .designs import *
 from .main import *
+from .polls import *
 from .shop import *

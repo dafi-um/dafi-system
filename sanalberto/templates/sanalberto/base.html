@@ -14,8 +14,12 @@
                 <a class="{% if 'activit' in request.resolver_match.view_name %}active{% endif %}"
                    href="{% url 'sanalberto:activities_index' %}">Actividades</a>
 
-                <a class="{% if 'design' in request.resolver_match.view_name %}active{% endif %}"
-                   href="{% url 'sanalberto:designs_index' %}">Diseños</a>
+                {% for poll in event.polls.all %}
+                    {% url 'sanalberto:poll_index' poll.slug as url %}
+
+                    <a class="{% if url in request.path_info %}active{% endif %}"
+                       href="{{ url }}">{{ poll.title }}</a>
+                {% endfor %}
 
                 <a class="{% if 'shop' in request.resolver_match.view_name %}active{% endif %}"
                    href="{% url 'sanalberto:shop' %}">Tienda</a>

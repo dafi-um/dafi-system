@@ -22,19 +22,27 @@ class EventMixin(ContextMixin):
 
     def get_current_event(self):
         if self._current_event is False:
-            self._current_event = Event.objects.order_by('-date').first()
-
-            if self._current_event:
-                self.title = '{} - San Alberto {} - DAFI'.format(
-                    self.title,
-                    self._current_event.date.year
+            self._current_event = (
+                Event.objects
+                    .order_by('-date')
+                    .prefetch_related('polls')
+                    .first()
                 )
+
 
         return self._current_event
 
     def get_context_data(self, **kwargs):
+        ev = self.get_current_event()
+
+        if ev:
+            self.title = '{} - San Alberto {} - DAFI'.format(
+                self.title,
+                self._current_event.date.year
+            )
+
         context = super().get_context_data(**kwargs)
-        context['event'] = self.get_current_event()
+        context['event'] = ev
         return context
 
     def check_event(self, event):
