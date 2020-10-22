@@ -105,6 +105,29 @@ DATABASES = {
     'default': env.db('DB_URL', default='sqlite:///db.sqlite3'),
 }
 
+# Logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'propagate': True,
+        }
+    }
+}
+
 
 # Communication
 
