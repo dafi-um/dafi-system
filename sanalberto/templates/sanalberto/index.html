@@ -1,7 +1,37 @@
 {% extends 'sanalberto/base.html' %}
 
 {% block content %}
-    <div class="box wrapper style1">
-        <p><b>Esta zona está en construcción, vuelve más adelante.</b></p>
-    </div>
+    <style type="text/css">
+        .alert {
+            align-items: center;
+        }
+
+            .alert p {
+                margin: 0;
+            }
+    </style>
+
+    {% if event.shop_enabled %}
+        <div class="box wrapper style3 split alert">
+            <p>¡Ya está abierta la tienda de productos de San Alberto! Se cerrará el {{ event.selling_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+
+            <a class="button special" href="{% url 'sanalberto:shop' %}">Ir a la tienda</a>
+        </div>
+    {% endif %}
+
+    {% for poll in polls %}
+        {% if poll.register_enabled %}
+            <div class="box wrapper style3 split alert">
+                <p>¡El registro de diseños de {{ poll.title }} está abierto hasta el {{ poll.register_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+
+                <a class="button special" href="{% url 'sanalberto:design_create' poll.slug %}">Presentar diseño</a>
+            </div>
+        {% elif poll.voting_enabled %}
+            <div class="box wrapper style3 split alert">
+                <p>¡Ya puedes votar tu diseño favorito de {{ poll.title }}, se admiten votos hasta el {{ poll.voting_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+
+                <a class="button special" href="{% url 'sanalberto:poll_index' poll.slug %}">Ver diseños</a>
+            </div>
+        {% endif %}
+    {% endfor %}
 {% endblock content %}
