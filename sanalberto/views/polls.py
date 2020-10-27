@@ -63,9 +63,13 @@ class PollIndexView(EventMixin, MetadataMixin, DetailView):
 
         return self.get_object().designs.filter(user=self.request.user)
 
+    def get_approved_designs(self):
+        return self.get_object().designs.filter(is_approved=True)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['now'] = timezone.now()
+        context['approved_designs'] = self.get_approved_designs()
         context['my_designs'] = self.get_my_designs()
         return context
 
