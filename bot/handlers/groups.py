@@ -1,13 +1,12 @@
 import itertools
 
-from telegram import ParseMode
-from telegram.error import BadRequest, Unauthorized
+from telegram.error import Unauthorized
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from main.models import Config
-from heart.models import COURSES, Group, Year
+from heart.models import Degree, Group, Year
 from clubs.models import Club
 
 from .handlers import add_handlers, BasicBotHandler
@@ -24,20 +23,22 @@ class GroupsList(BasicBotHandler):
     disable_web_page_preview = True
 
     def command(self, update, context):
-        years = {course: list(years) for course, years in itertools.groupby(
+        years = {degree: list(years) for degree, years in itertools.groupby(
             Year
                 .objects
                 .all()
-                .order_by('course', 'year'),
-            key=lambda y: y.course
+                .prefetch_related('degree')
+                .order_by('degree', 'year'),
+            key=lambda y: y.degree.id
         )}
 
-        groups = {course: list(groups) for course, groups in itertools.groupby(
+        groups = {degree: list(groups) for degree, groups in itertools.groupby(
             Group
                 .objects
                 .filter(~Q(telegram_group_link=''))
-                .order_by('course', 'year', 'number'),
-            key=lambda g: g.course
+                .prefetch_related('year__degree')
+                .order_by('year__degree', 'year', 'number'),
+            key=lambda g: g.degree().id
         )}
 
         current_school_year = Config.get('current_school_year')
@@ -46,24 +47,24 @@ class GroupsList(BasicBotHandler):
             (' ' + current_school_year) if current_school_year else ''
         )
 
-        for course, course_title in COURSES:
-            if course not in groups:
+        for degree in Degree.objects.all():
+            if degree.id not in groups:
                 continue
 
-            msg += '{}\n'.format(course_title)
+            msg += '{}\n'.format(degree.name)
 
-            if course != 'GII':
-                for group in groups[course]:
+            if degree.is_master:
+                for group in groups[degree.id]:
                     msg += ' - [{}]({})\n'.format(group.name, group.telegram_group_link)
 
                 continue
 
             year_groups = {
                 year: list(groups) for year, groups in
-                itertools.groupby(groups[course], lambda g: g.year)
+                itertools.groupby(groups[degree.id], lambda g: g.year.year)
             }
 
-            for year in years[course]:
+            for year in years[degree.id]:
                 if year.telegram_group_link:
                     msg += ' - [{}º Dudas]({})\n'.format(
                         year.year, year.telegram_group_link
@@ -72,7 +73,7 @@ class GroupsList(BasicBotHandler):
                 if year.year in year_groups:
                     for group in year_groups[year.year]:
                         msg += ' - [{}º {}]({})\n'.format(
-                            group.year, group.name, group.telegram_group_link
+                            group.year.year, group.name, group.telegram_group_link
                         )
 
                 msg += '\n'
@@ -103,23 +104,20 @@ class GroupsLink(BasicBotHandler):
 
     def command(self, update, context):
         try:
-            group_year, group_num = [int(x) for x in context.args[0].split('.')]
+            group_id = int(context.args[0])
         except (ValueError, IndexError):
-            return (
-                '**Uso**: _/vinculargrupo <curso>.<grupo>_\n\n'
-                '**Ej**: para el grupo 1 de tercero usa `/vinculargrupo 3.1`'
-            )
+            return '**Uso**: _/vinculargrupo <ID>_\n\n'
 
         group = Group.objects.filter(telegram_group=update.effective_chat.id).first()
 
         if group:
             return (
-                'Este chat de Telegram ya está vinculado al grupo {}.{} ⚠️'
-            ).format(group.year, group.number)
+                'Este chat de Telegram ya está vinculado al grupo {} ⚠️'
+            ).format(group)
 
         user = self.get_user()
 
-        query = Q(year=group_year, number=group_num)
+        query = Q(id=group_id)
 
         if not user.has_perm('heart.can_link_group'):
             query &= Q(delegate=user) | Q(subdelegate=user)
@@ -128,8 +126,6 @@ class GroupsLink(BasicBotHandler):
 
         if not group:
             return 'No se ha encontrado el grupo indicado o el usuario no es un delegado'
-        elif group.telegram_group:
-            return 'El grupo {}.{} ya está vinculado a otro chat ⚠️'.format(group_year, group_num)
 
         chat_id, invite_link = self.get_invite_link()
 

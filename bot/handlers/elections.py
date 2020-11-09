@@ -93,28 +93,24 @@ class ElectionRequestMixin(BasicBotHandler):
         prefix = '' if is_delegate else 'sub'
 
         try:
-            group_year, group_num = [int(x) for x in context.args[0].split('.')]
+            group_id = int(context.args[0])
         except (ValueError, IndexError):
-            return (
-                '**Uso**: _/soy{0}delegado <curso>.<grupo>_\n\n'
-                '**Ej**: para el grupo 1 de tercero usa `/soy{0}delegado 3.1`'
-            ).format(prefix)
+            return '**Uso**: _/soy{0}delegado <ID>_\n\n'.format(prefix)
 
         telegram_user = update.effective_user
         user = self.get_user()
 
-        group = Group.objects.filter(year=group_year, number=group_num).first()
+        group = Group.objects.filter(id=group_id).first()
 
         if not group:
             return 'El grupo especificado no existe'
 
         msg = (
             '*Petición para ser {}delegado*\n\n'
-            'Estudios: {}\nAño: {}\nGrupo: {}\n'
-            'Nombre: {}\nEmail: {}\nTelegram: @{}'
+            'Grupo: {}\nNombre: {}\nEmail: {}\nTelegram: @{}'
         ).format(
-            prefix, group.course, group.year, group.number,
-            user.get_full_name(), user.email, telegram_user.username.replace('_', '\\_')
+            prefix, group, user.get_full_name(), user.email,
+            telegram_user.username.replace('_', '\\_')
         )
 
         current = group.delegate if is_delegate else group.subdelegate
@@ -122,8 +118,8 @@ class ElectionRequestMixin(BasicBotHandler):
         if current:
             msg += '\n\nActual {}delegado: {}'.format(prefix, current.get_full_name())
 
-        query = '{}:{}.{}:{}'.format(
-            telegram_user.id, group.year, group.number, int(is_delegate)
+        query = '{}:{}:{}'.format(
+            telegram_user.id, group.id, int(is_delegate)
         )
 
         reply_markup = create_reply_markup([
@@ -145,7 +141,7 @@ class ElectionRequestMixin(BasicBotHandler):
 
         try:
             user_id = args[0]
-            group_year, group_num = args[1].split('.')
+            group_id = int(args[1])
             is_delegate = bool(int(args[2]))
         except (IndexError, ValueError):
             return 'Formato de petición incorrecto'
@@ -159,7 +155,7 @@ class ElectionRequestMixin(BasicBotHandler):
         accepted = action == 'request'
         prefix = '' if is_delegate else 'sub'
 
-        group = Group.objects.filter(year=group_year, number=group_num).first()
+        group = Group.objects.filter(id=group_id).first()
 
         if not group:
             return 'El grupo indicado no existe'
@@ -187,9 +183,8 @@ class ElectionRequestMixin(BasicBotHandler):
 
         if accepted:
             msg = (
-                'Tu petición ha sido aceptada, ahora eres {}delegado '
-                'del grupo {} del año {} 🎓'
-            ).format(prefix, group_num, group_year)
+                'Tu petición ha sido aceptada, ahora eres {}delegado del {} 🎓'
+            ).format(prefix, group)
         else:
             msg = 'Tu petición para ser {}delegado ha sido denegada ❌'.format(prefix)
 
@@ -201,8 +196,8 @@ class ElectionRequestMixin(BasicBotHandler):
         )
 
         if accepted:
-            msg += ' ✅\n\nAhora es {}delegado del {}.{} del {}'.format(
-                prefix, group.year, group.number, group.course
+            msg += ' ✅\n\nAhora es {}delegado del {}'.format(
+                prefix, group
             )
         else:
             msg += ' ❌'

@@ -11,16 +11,6 @@ from meta.models import ModelMeta
 
 User = get_user_model()
 
-GII = 'GII'
-MNTI = 'MNTI'
-MBD = 'MBD'
-
-COURSES = (
-    (GII, 'Grado en Ingeniería Informática'),
-    (MNTI, 'Máster en Nuevas Tecnologías de la Informática'),
-    (MBD, 'Máster en Big Data'),
-)
-
 
 class Committee(models.Model):
     '''Internal committee'''
@@ -74,13 +64,38 @@ class DocumentMedia(models.Model):
         return basename(self.file.name)
 
 
+class Degree(models.Model):
+    '''Degree'''
+
+    id = models.CharField('identificador', max_length=16, primary_key=True)
+
+    name = models.CharField('nombre', max_length=120)
+
+    is_master = models.BooleanField('es un máster', default=False)
+
+    order = models.IntegerField(
+        'orden', default=0,
+        help_text='Las titulaciones con mayor orden salen antes'
+    )
+
+    class Meta:
+        verbose_name = 'titulación'
+        verbose_name_plural = 'titulaciones'
+
+        ordering = ('-order', 'id')
+
+    def __str__(self):
+        return self.name
+
+
 class Year(models.Model):
     '''Academic Year'''
 
-    year = models.IntegerField('año', primary_key=True)
+    year = models.IntegerField('año')
 
-    course = models.CharField(
-        'estudios', max_length=6, choices=COURSES, default=GII
+    degree = models.ForeignKey(
+        Degree, models.PROTECT, 'years',
+        verbose_name='titulación'
     )
 
     telegram_group = models.CharField(
@@ -94,10 +109,10 @@ class Year(models.Model):
     class Meta:
         verbose_name = 'año'
 
-        ordering = ('year',)
+        ordering = ('-degree__order', 'degree', 'year',)
 
     def __str__(self):
-        return 'Año {}'.format(self.year)
+        return '{} Año {}'.format(self.degree.id, self.year)
 
 
 class Group(models.Model):
@@ -111,12 +126,9 @@ class Group(models.Model):
         'número de grupo', blank=True, null=True
     )
 
-    year = models.IntegerField(
-        'año'
-    )
-
-    course = models.CharField(
-        'estudios', max_length=6, choices=COURSES, default=GII
+    year = models.ForeignKey(
+        Year, models.PROTECT, 'groups',
+        verbose_name='año'
     )
 
     subgroups = models.IntegerField(
@@ -146,17 +158,22 @@ class Group(models.Model):
     class Meta():
         verbose_name = 'grupo'
 
-        ordering = ('course', 'year', 'number')
+        ordering = ('-year__degree__order', 'year__degree', 'year', 'number')
 
         permissions = [
             ('can_link_group', 'Puede vincular un grupo de Telegram con un grupo de alumnos')
         ]
 
     def __str__(self):
-        return 'Año {} {}'.format(self.year, self.name)
+        return '{} {}'.format(
+            self.year, self.name
+        )
 
     def subgroups_range(self):
         return range(1, self.subgroups + 1)
+
+    def degree(self):
+        return self.year.degree
 
 
 class Meeting(ModelMeta, models.Model):

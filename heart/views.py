@@ -6,7 +6,7 @@ from django.views.generic.base import ContextMixin
 
 from meta.views import MetadataMixin
 
-from .models import Committee, DocumentMedia, GII, Group, Meeting, PeopleGroup
+from .models import Committee, DocumentMedia, Group, Meeting, PeopleGroup
 
 
 class AboutUsView(MetadataMixin, TemplateView):
@@ -117,23 +117,18 @@ class MeetingMixin(ContextMixin):
                 users_ids.add(user.id)
 
         for group in groups:
-            if group.course == GII:
-                title = 'Año {}'.format(group.year)
-            else:
-                title = group.get_course_display()
-
             if group.delegate and group.delegate.id not in users_ids:
                 users_ids.add(group.delegate.id)
 
                 users_list.append(
-                    (title, group.name, group.delegate)
+                    (str(group.year), group.name, group.delegate)
                 )
 
             if group.subdelegate and group.subdelegate.id not in users_ids:
                 users_ids.add(group.subdelegate.id)
 
                 users_list.append(
-                    (title, group.name, group.subdelegate)
+                    (str(group.year), group.name, group.subdelegate)
                 )
 
         context = super().get_context_data(**kwargs)
@@ -207,3 +202,6 @@ class StudentsView(MetadataMixin, ListView):
     title = 'Los Estudiantes - DAFI'
     description = 'Grupos de Estudiantes y Asambleas de Alumnos de la Facultad de Informática'
     image = 'images/favicon.png'
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('year__degree')

@@ -24,14 +24,27 @@ class DocumentMediaAdmin(admin.ModelAdmin):
     actions = (make_hidden, make_not_hidden)
 
 
+@admin.register(models.Degree)
+class DegreeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id', 'order', 'is_master')
+
+
 @admin.register(models.Year)
 class YearAdmin(admin.ModelAdmin):
-    list_display = ('year', 'course', 'telegram_group_link')
+    list_display = ('year', 'degree', 'telegram_group_link')
 
 
 @admin.register(models.Group)
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ('year', 'name', 'course', 'delegate', 'subdelegate', 'telegram_group_link')
+    list_display = (
+        'name', 'get_degree', 'year',
+        'delegate', 'subdelegate', 'telegram_group_link'
+    )
+
+    def get_degree(self, obj):
+        return obj.year.degree
+    get_degree.short_description = 'Titulación'
+    get_degree.admin_order_field = 'year__degree'
 
 
 @admin.register(models.Meeting)

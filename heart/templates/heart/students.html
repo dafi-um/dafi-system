@@ -4,22 +4,22 @@
 
 {% block content %}
     {% for group in group_list %}
-        {% ifchanged group.course %}
+        {% ifchanged group.degree %}
             <header class="major special">
-                <h1>{{ group.get_course_display }}</h1>
+                <h1>{{ group.degree.name }}</h1>
             </header>
         {% endifchanged %}
 
-        {% if group.course == 'GII' %}
+        {% if not group.degree.is_master %}
             {% ifchanged group.year %}
-                <h3>Año {{ group.year }}</h3>
+                <h3>Año {{ group.year.year }}</h3>
             {% endifchanged %}
         {% endif %}
 
         <div class="box wrapper style3 students-groups">
             <header class="special">
                 <h4>{{ group.name }}</h4>
-                <p>ID: {{ group.year }}.{{ group.number }}</p>
+                <p>ID: {{ group.id }}</p>
             </header>
 
             <div class="delegates">
@@ -44,11 +44,9 @@
                 {% endif %}
             </div>
 
-            {% comment 'Temporarily hidden' %}
-            {% if group.telegram_group_link %}
+            {% if user.is_authenticated and group.telegram_group_link %}
                 <a href="{{ group.telegram_group_link }}" class="button alt" title="Unirse al Grupo de Telegram de {{ group.name }}">Grupo de Telegram</a>
             {% endif %}
-            {% endcomment %}
         </div>
     {% endfor %}
 {% endblock content %}
