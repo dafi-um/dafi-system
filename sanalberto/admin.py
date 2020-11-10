@@ -1,5 +1,7 @@
 from django.contrib import admin
+from django.db.models import TextField
 
+from pagedown.widgets import AdminPagedownWidget
 from . import models
 
 
@@ -11,6 +13,17 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(models.Activity)
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('title', 'start', 'end', 'club', 'organiser')
+
+    formfield_overrides = {
+        TextField: {
+            'widget': AdminPagedownWidget
+        }
+    }
+
+
+@admin.register(models.ActivityRegistration)
+class ActivityRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('activity', 'user', 'paid', 'present')
 
 
 @admin.register(models.Poll)

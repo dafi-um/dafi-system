@@ -1,9 +1,11 @@
+import re
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 
 from clubs.models import Club
+from heart.models import DocumentMedia
 
 def date_in_range(start, end):
     now = timezone.now()
@@ -67,9 +69,56 @@ class Activity(models.Model):
 
     end = models.DateTimeField('fin')
 
+    image_1 = models.ImageField(
+        'imagen 1', upload_to='activities/', null=True, blank=True
+    )
+
+    image_2 = models.ImageField(
+        'imagen 2', upload_to='activities/', null=True, blank=True
+    )
+
+    documents = models.ManyToManyField(
+        DocumentMedia, verbose_name='documentos'
+    )
+
     class Meta:
         verbose_name = 'actividad'
         verbose_name_plural = 'actividades'
+
+    def __str__(self):
+        return 'Actividad {}'.format(self.title)
+
+    def get_organisers(self):
+        return [self.organiser] if self.organiser else self.club.managers.all()
+
+
+class ActivityRegistration(models.Model):
+    '''Activity registration'''
+
+    activity = models.ForeignKey(
+        Activity, models.CASCADE, 'registrations',
+        verbose_name='actividad'
+    )
+
+    user = models.ForeignKey(
+        get_user_model(), models.CASCADE,
+        verbose_name='usuario'
+    )
+
+    paid = models.BooleanField('pagado', default=False)
+
+    present = models.BooleanField('presentado', default=False)
+
+    created = models.DateTimeField(
+        'fecha de creación', auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = 'inscripción'
+        verbose_name_plural = 'inscripciones'
+
+    def __str__(self):
+        return '{} en {}'.format(self.user, self.activity)
 
 
 class Poll(models.Model):

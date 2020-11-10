@@ -1,8 +1,20 @@
 {% extends 'sanalberto/base.html' %}
+{% load users_tags %}
 
 {% block content %}
-    {% for activity in activity_list %}
-        <p>{{ activity }}</p>
+    {% for activity in activities %}
+        <div class="box wrapper style3">
+            <div class="split">
+                <div>
+                    <h3><a href="{% url 'sanalberto:activity_detail' activity.id %}">{{ activity.title }}</a></h3>
+                    <h4>{{ activity.start | date:'j M Y H:i' }} a {{ activity.end | date:'j M Y H:i' }}</h4>
+                </div>
+
+                <a class="button small alt" href="{% url 'sanalberto:activity_detail' activity.id %}">Ver actividad</a>
+            </div>
+
+            <p>Organiza: <b>{% if activity.club %}{{ activity.club.name }}{% else %}{{ activity.organiser | nice_name }}{% endif %}</b></p>
+        </div>
     {% empty %}
         <div class="box wrapper style1">
             <p><b>Estamos terminando de preparar las actividades. En breves tendrás aquí disponibles los horarios.</b></p>
