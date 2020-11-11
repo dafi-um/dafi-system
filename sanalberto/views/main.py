@@ -51,7 +51,7 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
                 'obj': activity,
                 'top': str(start_pos),
                 'height': str(100.0 - start_pos),
-                'classes': 'day-extend-to'
+                'classes': 'day-no-end'
             })
 
             if end_key not in days:
@@ -61,7 +61,7 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
                 'obj': activity,
                 'top': '0',
                 'height': str(end_pos),
-                'classes': 'day-extend-from'
+                'classes': 'day-no-start'
             })
 
             d = start + datetime.timedelta(days=1)
@@ -76,12 +76,13 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
                     'obj': activity,
                     'top': '0',
                     'height': '100',
-                    'classes': 'day-extend-from day-extend-to'
+                    'classes': 'day-no-start day-no-end'
                 })
 
                 d += datetime.timedelta(days=1)
 
         days = [(value, datetime.date.fromordinal(key)) for key, value in days.items()]
+        days = sorted(days, key=lambda x: x[1])
 
         context = super().get_context_data(**kwargs)
         context['days'] = days
