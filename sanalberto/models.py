@@ -94,6 +94,9 @@ class Activity(models.Model):
         return 'Actividad {}'.format(self.title)
 
     def get_organisers(self):
+        if not self.organiser and not self.club:
+            return []
+
         return [self.organiser] if self.organiser else self.club.managers.all()
 
 

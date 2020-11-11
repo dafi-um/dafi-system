@@ -44,12 +44,14 @@
                             {% if organiser.telegram_id %}
                                 <span>- <span class="icon fa-send"></span> @{{ organiser.telegram_user }}</span>
                             {% endif %}</li>
+                    {% empty %}
+                        <li>No hay organizadores registrados.</li>
                     {% endfor %}
                 </ul>
 
                 <h4>Documentos</h4>
 
-                <ul class="alt">
+                <ul class="alt" style="margin: 0;">
                     {% for doc in object.documents.all %}
                         <li>{{ doc.name }}: <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name }}</a></li>
                     {% empty %}
@@ -60,7 +62,7 @@
         </div>
 
         {% if object.image_1 or object.image_2 %}
-            <div class="row">
+            <div class="row" style="margin-top: 1.5rem;">
                 {% if object.image_1 %}
                     <div class="12u{% if object.image_2 %}(small) 6u{% endif %}">
                         <img src="{{ object.image_1.url }}" alt="{{ object.title }}" />
