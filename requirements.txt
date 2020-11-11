@@ -10,4 +10,5 @@ psycopg2-binary~=2.8.3
 python-telegram-bot~=12.5.1
 pytz~=2018.9
 schedule>=0.6.0
+stripe==2.55.0
 uWSGI~=2.0.18

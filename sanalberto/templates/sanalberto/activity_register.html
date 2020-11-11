@@ -1,0 +1,27 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    <div class="split">
+        <h3>Realizar inscripción para {{ object.title }}</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.id %}">Volver a la actividad</a>
+    </div>
+
+    <div class="box wrapper style1">
+        <ul class="alt">
+            <li>Las inscripciones tienen un importe de 1&euro;</li>
+            <li>La actividad podría requerir que aportes datos específicos, indica estos datos en el campo de comentarios.</li>
+        </ul>
+    </div>
+
+    <form method="post">
+        <div class="field">
+            <label for="message">Comentarios (opcional)</label>
+            <textarea name="comments" rows="3"></textarea>
+        </div>
+
+        {% csrf_token %}
+
+        <button type="submit" class="button alt">Realizar inscripción</button>
+    </form>
+{% endblock content %}

@@ -1,4 +1,5 @@
-import re
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -73,6 +74,10 @@ class Activity(models.Model):
         'mostrar públicamente', default=True
     )
 
+    has_registration = models.BooleanField(
+        'necesaria inscripción', default=True
+    )
+
     image_1 = models.ImageField(
         'imagen 1', upload_to='activities/', null=True, blank=True
     )
@@ -99,6 +104,16 @@ class Activity(models.Model):
 
         return [self.organiser] if self.organiser else self.club.managers.all()
 
+    @cached_property
+    def accepts_registration(self):
+        return (
+            self.has_registration and
+            timezone.now() < self.start + timedelta(minutes=10)
+        )
+
+    def get_user_registration(self, user):
+        return self.registrations.filter(user=user).first()
+
 
 class ActivityRegistration(models.Model):
     '''Activity registration'''
@@ -113,12 +128,22 @@ class ActivityRegistration(models.Model):
         verbose_name='usuario'
     )
 
-    paid = models.BooleanField('pagado', default=False)
-
-    present = models.BooleanField('presentado', default=False)
+    is_paid = models.BooleanField('pagado', default=False)
 
     created = models.DateTimeField(
         'fecha de creación', auto_now_add=True
+    )
+
+    comments = models.TextField(
+        'comentarios', max_length=500, null=True, blank=True
+    )
+
+    payment_id = models.CharField(
+        'ID de pago', max_length=128, null=True, blank=True
+    )
+
+    payment_error = models.CharField(
+        'error del proceso de pago', max_length=256, null=True, blank=True
     )
 
     class Meta:

@@ -2,6 +2,14 @@
 {% load users_tags %}
 
 {% block content %}
+    <div class="box wrapper style3 split" style="align-items: center;">
+        <p style="margin: 0;">¿Te has inscrito en alguna actividad ya?</p>
+
+        <a href="{% url 'sanalberto:registration_list' %}" class="button alt">Ver mis inscripciones</a>
+    </div>
+
+    <hr />
+
     {% for activity in activities %}
         <div class="box wrapper style3">
             <div class="split">
@@ -13,7 +21,9 @@
                 <a class="button small alt" href="{% url 'sanalberto:activity_detail' activity.id %}">Ver actividad</a>
             </div>
 
-            <p>Organiza: <b>{% if activity.club %}{{ activity.club.name }}{% else %}{{ activity.organiser | nice_name }}{% endif %}</b></p>
+            {% if activity.club or activity.organiser %}
+                <p>Organiza: <b>{% if activity.club %}{{ activity.club.name }}{% else %}{{ activity.organiser | nice_name }}{% endif %}</b></p>
+            {% endif %}
         </div>
     {% empty %}
         <div class="box wrapper style1">

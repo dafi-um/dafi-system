@@ -23,7 +23,7 @@ class ActivityAdmin(admin.ModelAdmin):
 
 @admin.register(models.ActivityRegistration)
 class ActivityRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('activity', 'user', 'paid', 'present')
+    list_display = ('activity', 'user', 'is_paid')
 
 
 @admin.register(models.Poll)

@@ -1,0 +1,68 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    <div class="split">
+        <h3>Inscripción para {{ object.activity.title }}</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.activity.id %}">Volver a la actividad</a>
+    </div>
+
+    {% if object.payment_error %}
+        <div class="box wrapper style1">
+            <h4>Ha ocurrido un error con esta inscripción:</h4>
+
+            <p>{{ object.payment_error }}</p>
+        </div>
+    {% endif %}
+
+    {% if object.comments %}
+        <div class="box wrapper style3">
+            <h5>Tus comentarios</h5>
+
+            <pre>{{ object.comments }}</pre>
+        </div>
+    {% endif %}
+
+    {% if not object.is_paid %}
+        {% if object.payment_id %}
+            <p>Para finalizar la inscripción debes abonar 1€ mediante la plataforma segurda de pagos Stripe:</p>
+
+            <button class="button special" id="gotostripe">Pagar en Stripe</button>
+        {% else %}
+            <p>No se pudo obtener una sesión en la plataforma de pagos. Solicite ayuda a la administración de este sitio web.</p>
+        {% endif %}
+    {% else %}
+        <div class="box wrapper style3">
+            <h4>¡Inscripción completada!</h4>
+
+            <p>Se ha confirmado el pago de tu inscripción. No olvides que la actividad comienza el {{ object.activity.start | date:'j M Y H:i' }}.</p>
+        </div>
+    {% endif %}
+
+    {% if not object.is_paid %}
+    <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
+    <script type="text/javascript">
+        var stripe = Stripe('{{ STRIPE_PK }}');
+
+        var button = document.getElementById('gotostripe');
+
+        button.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            button.disabled = 'disabled';
+
+            stripe
+                .redirectToCheckout({ sessionId: '{{ object.payment_id }}' })
+                .then(function(result) {
+                    if (result.error) {
+                        window.alert('Ha ocurrido un error inesperado: ' + result.error.message);
+                    }
+                })
+                .catch(function(error) {
+                    window.alert('Ha ocurrido un error inesperado: ' + error);
+                });
+        });
+    </script>
+    {% endif %}
+{% endblock content %}
