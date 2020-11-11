@@ -79,6 +79,8 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
                     'classes': 'day-extend-from day-extend-to'
                 })
 
+                d += datetime.timedelta(days=1)
+
         days = [(value, datetime.date.fromordinal(key)) for key, value in days.items()]
 
         context = super().get_context_data(**kwargs)
