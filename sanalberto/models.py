@@ -51,7 +51,7 @@ class Activity(models.Model):
     description = models.TextField('descripción')
 
     event = models.ForeignKey(
-        Event, models.CASCADE,
+        Event, models.CASCADE, 'activities',
         verbose_name='evento'
     )
 
@@ -69,6 +69,10 @@ class Activity(models.Model):
 
     end = models.DateTimeField('fin')
 
+    is_public = models.BooleanField(
+        'mostrar públicamente', default=True
+    )
+
     image_1 = models.ImageField(
         'imagen 1', upload_to='activities/', null=True, blank=True
     )
@@ -78,7 +82,8 @@ class Activity(models.Model):
     )
 
     documents = models.ManyToManyField(
-        DocumentMedia, verbose_name='documentos'
+        DocumentMedia, blank=True,
+        verbose_name='documentos'
     )
 
     class Meta:
