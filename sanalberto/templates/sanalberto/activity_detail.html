@@ -3,6 +3,20 @@
 {% load users_tags %}
 
 {% block content %}
+    <style type="text/css">
+        .row img {
+            display: block;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        @media screen and (max-width: 736px) {
+            .row img {
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+
     <div class="split">
         <div>
             <h3>{{ object.title }}</h3>
@@ -45,9 +59,19 @@
             </div>
         </div>
 
-        {% if club.telegram_group_link %}
-            <div style="text-align: center;">
-                <a class="button alt" href="{{ club.telegram_group_link }}" title="Unirse al Grupo de Telegram">Unirse al Grupo de Telegram</a>
+        {% if object.image_1 or object.image_2 %}
+            <div class="row">
+                {% if object.image_1 %}
+                    <div class="12u{% if object.image_2 %}(small) 6u{% endif %}">
+                        <img src="{{ object.image_1.url }}" alt="{{ object.title }}" />
+                    </div>
+                {% endif %}
+
+                {% if object.image_2 %}
+                    <div class="12u{% if object.image_1 %}$(small) 6u{% endif %}$">
+                        <img src="{{ object.image_2.url }}" alt="{{ object.title }}" />
+                    </div>
+                {% endif %}
             </div>
         {% endif %}
     </div>

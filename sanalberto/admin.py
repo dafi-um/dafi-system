@@ -12,7 +12,7 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(models.Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ('title', 'start', 'end', 'club', 'organiser')
+    list_display = ('title', 'start', 'end', 'club', 'organiser', 'is_public')
 
     formfield_overrides = {
         TextField: {
