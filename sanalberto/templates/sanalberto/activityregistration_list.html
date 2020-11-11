@@ -1,0 +1,29 @@
+{% extends 'sanalberto/base.html' %}
+{% load users_tags %}
+
+{% block content %}
+    <div class="split">
+        <h3>Mis inscripciones</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:activities_index' %}">Volver a Actividades</a>
+    </div>
+
+    {% for object in activityregistration_list %}
+        <div class="box wrapper style3">
+            <div class="split">
+                <div>
+                    <h3><a href="{% url 'sanalberto:activity_detail' object.activity.id %}">{{object.activity.title }}</a></h3>
+                    <h4>{{ object.activity.start | date:'j M Y H:i' }} a {{ object.activity.end | date:'j M Y H:i' }}</h4>
+                </div>
+
+                <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.activity.id %}">Ver actividad</a>
+            </div>
+
+            <p>Estado: <b>{{ object.is_paid | yesno:'Pagado,Pendiente de pago' }}</b></p>
+        </div>
+    {% empty %}
+        <div class="box wrapper style1">
+            <p>No te has inscrito en ninguna actividad todavía.</p>
+        </div>
+    {% endfor %}
+{% endblock content %}

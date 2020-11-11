@@ -105,6 +105,7 @@ DATABASES = {
     'default': env.db('DB_URL', default='sqlite:///db.sqlite3'),
 }
 
+
 # Logging
 
 LOGGING = {
@@ -169,6 +170,13 @@ LOGIN_REDIRECT_URL = 'profile'
 CSRF_COOKIE_SECURE = not DEBUG
 
 SESSION_COOKIE_SECURE = not DEBUG
+
+
+# Payments
+
+STRIPE_PK = env('STRIPE_PK')
+
+STRIPE_SK = env('STRIPE_SK')
 
 
 # Internationalization
