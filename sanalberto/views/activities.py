@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.base import View
@@ -52,6 +52,27 @@ class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['user_registration'] = registration
         return context
+
+
+class ActivityRegistrationsView(EventMixin, MetadataMixin, UserPassesTestMixin, DetailView):
+    '''Activity registrations view'''
+
+    model = Activity
+
+    template_name = 'sanalberto/activity_registrations.html'
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset=queryset)
+
+        if obj:
+            self.title = 'Inscripciones para ' + obj.title
+
+        return obj
+
+    def test_func(self):
+        user = self.request.user
+
+        return user.is_authenticated and user in self.get_object().get_organisers
 
 
 class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):

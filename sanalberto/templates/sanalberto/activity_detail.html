@@ -26,6 +26,14 @@
         <a class="button small alt" href="{% url 'sanalberto:activities_index' %}">Volver a la lista</a>
     </div>
 
+    {% if user.is_authenticated and user in object.get_organisers %}
+        <div class="box wrapper style3 split" style="align-items: center;">
+            <p style="margin: 0;">Estás registrado como organizador de esta actividad.</p>
+
+            <a href="{% url 'sanalberto:activity_registrations' object.id %}" class="button alt">Ver inscripciones</a>
+        </div>
+    {% endif %}
+
     <div class="box wrapper style3">
         <div class="row">
             <div class="6u 12u(small)">

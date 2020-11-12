@@ -1,0 +1,36 @@
+{% extends 'sanalberto/base.html' %}
+{% load users_tags %}
+
+{% block content %}
+    <div class="split">
+        <h3>Inscripciones para {{ object.title }}</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.id %}">Volver a la actividad</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Telegram</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for reg in object.registrations.all %}
+                <tr>
+                    <td>{{ reg.user | nice_name }}</td>
+                    <td>{{ reg.user.email }}</td>
+                    <td>{% if reg.user.telegram_id %}@{{ reg.user.telegram_user }}{% else %}-{% endif %}</td>
+                    <td>{{ reg.is_paid | yesno:'Pagado,Pendiente de pago' }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4"><p>No hay inscripciones</p></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

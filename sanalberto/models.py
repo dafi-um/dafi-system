@@ -98,6 +98,7 @@ class Activity(models.Model):
     def __str__(self):
         return 'Actividad {}'.format(self.title)
 
+    @cached_property
     def get_organisers(self):
         if not self.organiser and not self.club:
             return []
