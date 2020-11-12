@@ -16,10 +16,18 @@
                     <h4>{{ object.activity.start | date:'j M Y H:i' }} a {{ object.activity.end | date:'j M Y H:i' }}</h4>
                 </div>
 
-                <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.activity.id %}">Ver actividad</a>
+                <div>
+                    <a class="button small alt" href="{% url 'sanalberto:registration_detail' object.id %}">Ver inscripción</a>
+
+                    <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.activity.id %}">Ver actividad</a>
+                </div>
             </div>
 
             <p>Estado: <b>{{ object.is_paid | yesno:'Pagado,Pendiente de pago' }}</b></p>
+
+            <h5>Comentarios</h5>
+
+            <pre>{{ object.comments }}</pre>
         </div>
     {% empty %}
         <div class="box wrapper style1">
