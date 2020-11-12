@@ -15,17 +15,19 @@
         </div>
     {% endif %}
 
-    {% if object.comments %}
-        <div class="box wrapper style3">
-            <div class="split">
-                <h5>Tus comentarios</h5>
+    <div class="box wrapper style3">
+        <div class="split">
+            <h5>Tus comentarios</h5>
 
-                <a href="{% url 'sanalberto:registration_edit' object.id %}">Editar</a>
-            </div>
-
-            <pre>{{ object.comments }}</pre>
+            <a href="{% url 'sanalberto:registration_edit' object.id %}">Editar</a>
         </div>
-    {% endif %}
+
+        {% if object.comments %}
+            <pre>{{ object.comments }}</pre>
+        {% else %}
+            <p>Sin commentarios</p>
+        {% endif %}
+    </div>
 
     {% if not object.is_paid %}
         {% if object.payment_id %}

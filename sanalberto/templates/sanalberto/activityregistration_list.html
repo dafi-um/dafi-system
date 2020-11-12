@@ -27,7 +27,11 @@
 
             <h5>Comentarios</h5>
 
-            <pre>{{ object.comments }}</pre>
+            {% if object.comments %}
+                <pre>{{ object.comments }}</pre>
+            {% else %}
+                <p>Sin commentarios</p>
+            {% endif %}
         </div>
     {% empty %}
         <div class="box wrapper style1">
