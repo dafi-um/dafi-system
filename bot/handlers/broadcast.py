@@ -53,9 +53,6 @@ class BroadcastHandler(BasicBotHandler):
         message = update.effective_message
         reply = message.reply_to_message
 
-        message.reply_markdown('*El comando broadcast se ha desactivado temporalmente*')
-        return
-
         if not reply:
             message.reply_markdown(
                 '*Ayuda de Broadcast*\n'
@@ -105,6 +102,8 @@ class BroadcastHandler(BasicBotHandler):
             ids = None if len(args) == 1 else args[1]
 
             if target_type == TARGET_GROUPS:
+                continue
+
                 query = Q()
 
                 if ids:
