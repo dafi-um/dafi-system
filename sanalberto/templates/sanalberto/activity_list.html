@@ -2,13 +2,15 @@
 {% load users_tags %}
 
 {% block content %}
-    <div class="box wrapper style3 split" style="align-items: center;">
-        <p style="margin: 0;">¿Te has inscrito en alguna actividad ya?</p>
+    {% if user.is_authenticated %}
+        <div class="box wrapper style3 split" style="align-items: center;">
+            <p style="margin: 0;">¿Te has inscrito en alguna actividad ya?</p>
 
-        <a href="{% url 'sanalberto:registration_list' %}" class="button alt">Ver mis inscripciones</a>
-    </div>
+            <a href="{% url 'sanalberto:registration_list' %}" class="button alt">Ver mis inscripciones</a>
+        </div>
 
-    <hr />
+        <hr />
+    {% endif %}
 
     {% for activity in activities %}
         <div class="box wrapper style3">

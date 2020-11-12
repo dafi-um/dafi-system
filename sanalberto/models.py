@@ -112,6 +112,9 @@ class Activity(models.Model):
         )
 
     def get_user_registration(self, user):
+        if not user.is_authenticated:
+            return None
+
         return self.registrations.filter(user=user).first()
 
 
