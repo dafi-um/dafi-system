@@ -24,7 +24,7 @@ def create_registration_checkout(registration):
         'product_data': {
           'name': 'San Alberto - Inscripción para ' + registration.activity.title,
         },
-        'unit_amount': 100,
+        'unit_amount': registration.activity.registration_price,
       },
       'quantity': 1,
     }]

@@ -1,0 +1,20 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    <div class="split">
+        <h3>Editar mi inscripción para {{ object.title }}</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:registration_detail' object.id %}">Volver a la inscripción</a>
+    </div>
+
+    <form method="post">
+        <div class="field">
+            <label for="message">Comentarios (opcional)</label>
+            <textarea name="comments" rows="3">{{ object.comments }}</textarea>
+        </div>
+
+        {% csrf_token %}
+
+        <button type="submit" class="button alt">Guardar cambios</button>
+    </form>
+{% endblock content %}

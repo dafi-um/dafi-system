@@ -2,13 +2,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.base import View
+from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 
 from meta.views import MetadataMixin
 
 from website.settings import STRIPE_PK
 
-from ..models import Activity, ActivityRegistration
+from ..models import Activity, ActivityRegistration, Event
 from ..payments import create_registration_checkout, is_checkout_paid
 
 from .common import EventMixin
@@ -93,6 +94,9 @@ class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, Detail
     def get(self, request, *args, **kwargs):
         activity = self.get_object()
 
+        if not activity.accepts_registration:
+            return redirect('sanalberto:activity_detail', activity.id)
+
         already = activity.get_user_registration(self.request.user)
 
         if already:
@@ -165,6 +169,25 @@ class RegistrationDetailView(EventMixin, MetadataMixin, LoginRequiredMixin, Deta
         context = super().get_context_data(**kwargs)
         context['STRIPE_PK'] = STRIPE_PK
         return context
+
+
+class RegistrationUpdateView(EventMixin, MetadataMixin, LoginRequiredMixin, UpdateView):
+    '''Activity registration update view'''
+
+    model = ActivityRegistration
+
+    fields = ('comments',)
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset=queryset)
+
+        if obj:
+            self.title = 'Editar mi inscripción para ' + obj.activity.title
+
+        return obj
 
 
 class RegistrationPaidView(EventMixin, LoginRequiredMixin, View):

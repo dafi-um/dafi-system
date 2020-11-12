@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 
@@ -76,6 +77,11 @@ class Activity(models.Model):
 
     has_registration = models.BooleanField(
         'necesaria inscripción', default=True
+    )
+
+    registration_price = models.IntegerField(
+        'precio de la inscripción', default=100,
+        help_text='El precio se debe indicar en céntimos de euro (100 para 1€)'
     )
 
     image_1 = models.ImageField(
@@ -156,6 +162,9 @@ class ActivityRegistration(models.Model):
 
     def __str__(self):
         return '{} en {}'.format(self.user, self.activity)
+
+    def get_absolute_url(self):
+        return reverse('sanalberto:registration_detail', args=[self.id])
 
 
 class Poll(models.Model):

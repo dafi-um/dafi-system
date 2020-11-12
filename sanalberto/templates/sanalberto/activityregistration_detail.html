@@ -17,7 +17,11 @@
 
     {% if object.comments %}
         <div class="box wrapper style3">
-            <h5>Tus comentarios</h5>
+            <div class="split">
+                <h5>Tus comentarios</h5>
+
+                <a href="{% url 'sanalberto:registration_edit' object.id %}">Editar</a>
+            </div>
 
             <pre>{{ object.comments }}</pre>
         </div>
@@ -25,7 +29,7 @@
 
     {% if not object.is_paid %}
         {% if object.payment_id %}
-            <p>Para finalizar la inscripción debes abonar 1€ mediante la plataforma segura de pagos Stripe:</p>
+            <p>Para finalizar la inscripción debes abonar {% widthratio object.activity.registration_price 100 1 %}€ mediante la plataforma segura de pagos Stripe:</p>
 
             <button class="button special" id="gotostripe">Pagar en Stripe</button>
         {% else %}

@@ -3,7 +3,10 @@
 
 {% block content %}
     <div class="split">
-        <h3>Inscripciones para {{ object.title }}</h3>
+        <div>
+            <h3 style="margin: 0;">Inscripciones para {{ object.title }}</h3>
+            <p>Organización: <b>{% if activity.club %}{{ activity.club.name }}{% else %}{{ activity.organiser | nice_name }}{% endif %}</b></p>
+        </div>
 
         <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.id %}">Volver a la actividad</a>
     </div>
@@ -15,6 +18,7 @@
                 <th>Email</th>
                 <th>Telegram</th>
                 <th>Estado</th>
+                <th>Comentarios</th>
             </tr>
         </thead>
 
@@ -25,6 +29,7 @@
                     <td>{{ reg.user.email }}</td>
                     <td>{% if reg.user.telegram_id %}@{{ reg.user.telegram_user }}{% else %}-{% endif %}</td>
                     <td>{{ reg.is_paid | yesno:'Pagado,Pendiente de pago' }}</td>
+                    <td>{% if reg.comments %}<pre>{{ reg.comments }}</pre>{% else %}-{% endif %}</td>
                 </tr>
             {% empty %}
                 <tr>
