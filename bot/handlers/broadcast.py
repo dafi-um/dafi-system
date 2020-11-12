@@ -14,7 +14,7 @@ from .handlers import add_handlers, BasicBotHandler
 TARGET_GROUPS = 'groups'
 TARGET_CLUBS = 'clubs'
 
-BROACDAST_TARGETS = [
+BROADCAST_TARGETS = [
     TARGET_GROUPS,
     TARGET_CLUBS
 ]
@@ -66,14 +66,15 @@ class BroadcastHandler(BasicBotHandler):
                 '`target:id1,id2;target2:id1;target3`\n'
                 '\n'
                 ' - Por defecto un mensaje se enviará a todos los grupos conocidos\n'
-                ' - `target` disponibles: `' + ' '.join(BROACDAST_TARGETS) + '`\n'
+                ' - `target` disponibles: `' + ' '.join(BROADCAST_TARGETS) + '`\n'
                 ' - Separa los `target` con `;`\n'
                 ' - Separa los IDs con `,`\n'
-                ' - El ID para un grupo es: `año` ó `año.grupo` (ej: `groups:1.2` para 1º G2)\n'
+                ' - El ID para un grupo es: `grado.año.grupo` (ej: `groups:GII.1.2` para GII 1º G2)\n'
+                ' - Las dos últimas partes del ID de un grupo son opcionales\n'
                 ' - Un `target` sin IDs indica todos los grupos de ese tipo\n'
                 '\n'
-                'Ejemplo para todos los grupos de primer y segundo curso, y el club _test_:\n'
-                '`/broadcast groups:1,2;clubs:test`'
+                'Ejemplo para todos los grupos de primer y segundo curso de GII, y el club _test_:\n'
+                '`/broadcast groups:GII.1,GII.2;clubs:test`'
             )
             return
 
@@ -87,58 +88,45 @@ class BroadcastHandler(BasicBotHandler):
 
         msg = 'El mensaje se enviará a los siguientes grupos:\n\n'
 
-        targets = BROACDAST_TARGETS
-
-        if len(context.args):
-            targets = set()
-
-            for target in context.args[0].split(';'):
-                targets.add(target)
+        targets = context.args[0].split(';') if len(context.args) else BROADCAST_TARGETS
 
         for target in targets:
-            args = target.split(':')
+            target_type, _, filters = target.partition(':')
 
-            target_type = args[0]
-            ids = None if len(args) == 1 else args[1]
+            query = Q()
 
             if target_type == TARGET_GROUPS:
-                continue
+                if filters:
+                    for filter in filters.split(','):
+                        items = filter.split('.')
 
-                query = Q()
+                        subquery = Q(year__degree=items[0])
 
-                if ids:
-                    for pair in ids.split(','):
-                        if '.' in pair:
-                            year, group = pair.split('.')
+                        if len(items) > 1:
+                            subquery &= Q(year__year=items[1])
 
-                            query |= Q(year=year, number=group)
-                        else:
-                            query |= Q(year=pair)
+                        if len(items) > 2:
+                            subquery &= Q(number=items[2])
+
+                        query |= subquery
 
                 groups = Group.objects.filter(~Q(telegram_group='') & query)
 
                 for group in groups:
-                    title = '[{} {}º {}]'.format(group.course, group.year, group.name)
+                    title = str(group)
 
                     bcast_obj.add_chat(title, group.telegram_group)
                     msg += ' - {}\n'.format(title)
             elif target_type == TARGET_CLUBS:
-                query = Q()
-
-                if ids:
-                    for club in ids.split(','):
-                        query |= Q(slug=club)
+                if filters:
+                    for slug in filters.split(','):
+                        query |= Q(slug=slug)
 
                 clubs = Club.objects.filter(~Q(telegram_group='') & query)
 
                 for club in clubs:
                     bcast_obj.add_chat(club.name, club.telegram_group)
                     msg += ' - {}\n'.format(club.name)
-            else:
-                message.reply_markdown(
-                    '¡`{}` no es un _target_ válido!'.format(target_type)
-                )
-                return
 
         pending_broadcasts[str(message.message_id)] = bcast_obj
 
