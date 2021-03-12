@@ -1,0 +1,171 @@
+{% extends 'generic.html' %}
+{% load markdown_deux_tags %}
+
+{% block head %}
+    <title>{{ flatpage.title }} - DAFI</title>
+{% endblock head %}
+
+{% block content %}
+    <header class="major special">
+        <h1>{{ flatpage.title }}</h1>
+    </header>
+
+    <p>Desde DAFI queremos presentar el Super Ciclo de Charlas 1ª edición: un conjunto de charlas y talleres orientados al mundo del software desde el punto de vista más práctico posible; además de alguna sorpresa.</p>
+
+    <style type="text/css">
+        .table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            text-align: center;
+        }
+
+        .table td {
+            border: 1px solid #000;
+            padding: 10px 5px;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: 400;
+        }
+
+            .table td:nth-child(1) {
+                width: 15%;
+                text-align: center;
+            }
+
+            .table td:nth-child(2) {
+                width: 42.5%;
+            }
+
+            .table td:nth-child(3) {
+                width: 42.5%;
+            }
+
+        .table th {
+            padding: 10px 5px;
+            font-size: 120%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .table .cell-ides {
+            background-color: #D9EAD3;
+        }
+
+        .table .cell-tucharla {
+            background-color: #FFF2CC;
+        }
+
+        .table .cell-kahoot {
+            background-color: #FFE599;
+        }
+
+        .table .cell-django-1 {
+            background-color: #C9DAF8;
+        }
+
+        .table .cell-django-2 {
+            background-color: #A4C2F4;
+        }
+
+        .table .cell-debug {
+            background-color: #B6D7A8;
+        }
+
+        .table .cell-break {
+            background-color: #EA9999;
+            font-weight: bold;
+        }
+
+        .table .cell-magic {
+            background-color: #D9D2E9;
+        }
+
+        .table .cell-proyectoganador {
+            background-color: #FCE5CD;
+        }
+    </style>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Sábado</th>
+                <th>Domingo</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>10:00</td>
+                <td class="cell-django-1">
+                    <span><b>Django</b>, ¿cómo pude vivir sin tí?</span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+                <td class="cell-ides">
+                    <span><b>IDEs</b> o cómo evitar CodeBlocks</span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+            </tr>
+            <tr>
+                <td>11:00</td>
+                <td class="cell-django-2" rowspan="2">
+                    <span>Taller <b>Django</b></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+                <td class="cell-debug" rowspan="2">
+                    <span><b>Debug</b>: la alternativa al printf()</span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+            </tr>
+            <tr>
+                <td>12:00</td>
+            </tr>
+            <tr>
+                <td>13:00</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>14:00</td>
+                <td class="cell-break" colspan="2" rowspan="2">BREAK</td>
+            </tr>
+            <tr>
+                <td>15:00</td>
+            </tr>
+            <tr>
+                <td>16:00</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>17:00</td>
+                <td class="cell-magic">
+                    <span><b>Máquinas de Turing</b> contra cartas <b>Magic</b></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+                <td class="cell-proyectoganador">
+                    <span>Charla <b>proyecto elegido</b></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+            </tr>
+            <tr>
+                <td>18:00</td>
+                <td class="cell-tucharla">
+                    <span>¿<b>Tu</b> Charla?</span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+                <td class="cell-kahoot">
+                    <span>Super <b>Kahoot</b></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+            </tr>
+            <tr>
+                <td>19:00</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    {{ flatpage.content | markdown }}
+{% endblock content %}
