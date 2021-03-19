@@ -28,16 +28,20 @@
         }
 
             .table td:nth-child(1) {
-                width: 15%;
+                width: 13%;
                 text-align: center;
             }
 
             .table td:nth-child(2) {
-                width: 42.5%;
+                width: 29%;
             }
 
             .table td:nth-child(3) {
-                width: 42.5%;
+                width: 29%;
+            }
+
+            .table td:nth-child(3) {
+                width: 29%;
             }
 
         .table th {
@@ -51,7 +55,7 @@
             background-color: #D9EAD3;
         }
 
-        .table .cell-tucharla {
+        .table .cell-git {
             background-color: #FFF2CC;
         }
 
@@ -80,8 +84,8 @@
             background-color: #D9D2E9;
         }
 
-        .table .cell-proyectoganador {
-            background-color: #FCE5CD;
+        .table .cell-videojuegos {
+            background-color: #ffdcf6;
         }
     </style>
 
@@ -91,12 +95,13 @@
                 <th></th>
                 <th>Sábado 27</th>
                 <th>Domingo 28</th>
+                <th>Lunes 29</th>
             </tr>
         </thead>
 
         <tbody>
             <tr>
-                <td>10:00</td>
+                <td>10:00 - 11:00</td>
                 <td class="cell-django-1">
                     <span><b>Django</b>, ¿cómo pude vivir sin tí?</span>
                     <!--<span>(<a href="#">Zoom</a>)</span>-->
@@ -105,10 +110,14 @@
                     <span><b>IDEs</b> o cómo evitar CodeBlocks</span>
                     <!--<span>(<a href="#">Zoom</a>)</span>-->
                 </td>
+                <td class="cell-videojuegos", rowspan="3">
+                    <span>Charla <b>videojuegos</b>  <i>(título por confirmar)</i></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
             </tr>
             <tr>
-                <td>11:00</td>
-                <td class="cell-django-2" rowspan="2">
+                <td>11:00 - 12:00</td>
+                <td class="cell-django-2" rowspan="3">
                     <span>Taller <b>Django</b></span>
                     <!--<span>(<a href="#">Zoom</a>)</span>-->
                 </td>
@@ -118,51 +127,59 @@
                 </td>
             </tr>
             <tr>
-                <td>12:00</td>
+                <td>12:00 - 13:00</td>
             </tr>
             <tr>
-                <td>13:00</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>14:00</td>
-                <td class="cell-break" colspan="2" rowspan="2">BREAK</td>
-            </tr>
-            <tr>
-                <td>15:00</td>
-            </tr>
-            <tr>
-                <td>16:00</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>17:00</td>
-                <td class="cell-magic">
-                    <span><b>Máquinas de Turing</b> contra cartas <b>Magic</b></span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
-                </td>
-                <td class="cell-proyectoganador">
-                    <span>Charla <b>proyecto elegido</b></span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
-                </td>
-            </tr>
-            <tr>
-                <td>18:00</td>
-                <td class="cell-tucharla">
-                    <span>¿<b>Tu</b> Charla?</span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
-                </td>
+                <td>13:00 - 14:00</td>
                 <td class="cell-kahoot">
                     <span>Super <b>Kahoot</b></span>
                     <!--<span>(<a href="#">Zoom</a>)</span>-->
                 </td>
+                <td>
+                </td>
             </tr>
             <tr>
-                <td>19:00</td>
+                <td>14:00 - 15:00</td>
+                <td class="cell-break" colspan="3" rowspan="2">BREAK</td>
+            </tr>
+            <tr>
+                <td>15:00 - 16:00</td>
+            </tr>
+            <tr>
+                <td>16:00 - 17:00</td>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+            </tr>
+            <tr>
+                <td>17:00 - 18:00</td>
+                <td class="cell-magic", rowspan="2">
+                    <span><b>Máquinas de Turing</b> contra cartas <b>Magic</b></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+            </tr>
+            <tr>
+                <td>18:00 - 19:00</td>
                 <td></td>
                 <td></td>
+            </tr>
+            <tr>
+                <td>19:00 - 20:00</td>
+                <td class="cell-git">
+                    <span><b>Git:</b> di adiós a <i>copia de copia proyecto final final</i></span>
+                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
             </tr>
         </tbody>
     </table>
