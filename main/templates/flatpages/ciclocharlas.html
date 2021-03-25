@@ -1,5 +1,6 @@
 {% extends 'generic.html' %}
 {% load markdown_deux_tags %}
+{% load users_tags %}
 
 {% block head %}
     <title>{{ flatpage.title }} - DAFI</title>
@@ -51,42 +52,88 @@
             font-weight: bold;
         }
 
-        .table .cell-ides {
+        .bg-ides {
             background-color: #D9EAD3;
         }
 
-        .table .cell-git {
+        .bg-git {
             background-color: #FFF2CC;
         }
 
-        .table .cell-kahoot {
+        .bg-kahoot {
             background-color: #FFE599;
         }
 
-        .table .cell-django-1 {
+        .bg-django {
             background-color: #C9DAF8;
         }
 
-        .table .cell-django-2 {
+        .bg-django-2 {
             background-color: #A4C2F4;
         }
 
-        .table .cell-debug {
+        .bg-debug {
             background-color: #B6D7A8;
         }
 
-        .table .cell-break {
+        .bg-break {
             background-color: #EA9999;
             font-weight: bold;
         }
 
-        .table .cell-magic {
+        .bg-magic {
             background-color: #D9D2E9;
         }
 
-        .table .cell-videojuegos {
+        .bg-videojuegos {
             background-color: #ffdcf6;
         }
+
+        .charlas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            grid-gap: 2rem 2rem;
+        }
+
+            .charla {
+                display: flex;
+                flex-direction: column;
+                place-self: stretch;
+                margin-bottom: 2rem;
+            }
+
+                .charla .info {
+                    flex: 1;
+                }
+
+                .charla h5 {
+                    margin-bottom: 0.25rem;
+                }
+
+                .charla p {
+                    margin-bottom: 0.5rem;
+                }
+
+                .charla .button {
+                    place-self: start;
+                }
+
+        .ponentes {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+            .ponentes div {
+                margin: 0.5rem 0;
+            }
+
+            .ponentes img {
+                display: block;
+                margin: 0 auto 0.5rem;
+                border-radius: 100%;
+            }
     </style>
 
     <table class="table">
@@ -95,35 +142,30 @@
                 <th></th>
                 <th>Sábado 27</th>
                 <th>Domingo 28</th>
-                <th>Lunes 29</th>
             </tr>
         </thead>
 
         <tbody>
             <tr>
                 <td>10:00 - 11:00</td>
-                <td class="cell-django-1">
+                <td class="bg-django">
                     <span><b>Django</b>, ¿cómo pude vivir sin tí?</span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                    <span>(<a href="https://umurcia.zoom.us/j/95289259587?pwd=OUJiNVRLcFYzaFJLUk1JcHBnZVgxdz09">Zoom</a>)</span>
                 </td>
-                <td class="cell-ides">
+                <td class="bg-ides">
                     <span><b>IDEs</b> o cómo evitar CodeBlocks</span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
-                </td>
-                <td class="cell-videojuegos", rowspan="3">
-                    <span>Charla <b>videojuegos</b>  <i>(título por confirmar)</i></span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                    <span>(<a href="https://umurcia.zoom.us/j/95344427542?pwd=WFBjTC81K1lvU2xrOTZ2K1RXbStzQT09">Zoom</a>)</span>
                 </td>
             </tr>
             <tr>
                 <td>11:00 - 12:00</td>
-                <td class="cell-django-2" rowspan="3">
+                <td class="bg-django-2" rowspan="3">
                     <span>Taller <b>Django</b></span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                    <span>(<a href="https://umurcia.zoom.us/j/95289259587?pwd=OUJiNVRLcFYzaFJLUk1JcHBnZVgxdz09">Zoom</a>)</span>
                 </td>
-                <td class="cell-debug" rowspan="2">
+                <td class="bg-debug" rowspan="2">
                     <span><b>Debug</b>: la alternativa al printf()</span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                    <span>(<a href="https://umurcia.zoom.us/j/91883673811?pwd=VHc5M25PeVVBTFhnSHNObk95Rm1JZz09">Zoom</a>)</span>
                 </td>
             </tr>
             <tr>
@@ -131,58 +173,178 @@
             </tr>
             <tr>
                 <td>13:00 - 14:00</td>
-                <td class="cell-kahoot">
+                <td class="bg-kahoot">
                     <span>Super <b>Kahoot</b></span>
                     <!--<span>(<a href="#">Zoom</a>)</span>-->
-                </td>
-                <td>
                 </td>
             </tr>
             <tr>
                 <td>14:00 - 15:00</td>
-                <td class="cell-break" colspan="3" rowspan="2">BREAK</td>
+                <td class="bg-break" colspan="2" rowspan="2">BREAK</td>
             </tr>
             <tr>
                 <td>15:00 - 16:00</td>
             </tr>
             <tr>
                 <td>16:00 - 17:00</td>
-                <td>
-                </td>
-                <td>
-                </td>
-                <td>
-                </td>
+                <td></td>
+                <td></td>
             </tr>
             <tr>
                 <td>17:00 - 18:00</td>
-                <td class="cell-magic", rowspan="2">
+                <td class="bg-magic", rowspan="2">
                     <span><b>Máquinas de Turing</b> contra cartas <b>Magic</b></span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                    <span>(<a href="https://umurcia.zoom.us/j/92450184708?pwd=MmlOSDVVRVZ5UnJGY2Z1ZXZpc0FTdz09">Zoom</a>)</span>
                 </td>
-                <td>
-                </td>
-                <td>
-                </td>
+                <td></td>
             </tr>
             <tr>
                 <td>18:00 - 19:00</td>
                 <td></td>
-                <td></td>
             </tr>
             <tr>
                 <td>19:00 - 20:00</td>
-                <td class="cell-git">
+                <td class="bg-git">
                     <span><b>Git:</b> di adiós a <i>copia de copia proyecto final final</i></span>
-                    <!--<span>(<a href="#">Zoom</a>)</span>-->
+                    <span>(<a href="https://umurcia.zoom.us/j/94575210924?pwd=MTQ0QnptOTFLN2hxRE1mQzVmRjZVZz09">Zoom</a>)</span>
                 </td>
-                <td>
-                </td>
-                <td>
-                </td>
+                <td></td>
             </tr>
         </tbody>
     </table>
 
-    {{ flatpage.content | markdown }}
+    <hr />
+
+    <div class="charlas">
+        <div class="charla">
+            <h3><b>Django</b>, ¿cómo he podido vivir sin tí?</h3>
+
+            <div class="info">
+                <p>Todos hemos oído hablar de WordPress, Spring y similares, pero, ¿realmente hay frameworks web en condiciones ahí fuera? Sí, y además en nuestro lenguje favorito, ¿se puede pedir más?</p>
+
+                <p>Acompáñanos en este maravilloso viaje en el que presentaremos uno de los mejores frameworks web que existen hoy en día, utilizado por empresas tan grandes como Instagram, Pinterest o National Geographic; u organizaciones tan pequeñas como nuestro queridísimo DAFI (sí, esta web está <a href="https://github.com/dafi-um/dafi-system/" title="DAFI en GitHub" target="_blank">hecha con Django</a>).</p>
+
+                <p>En este formato de charla + taller, presentaremos el framework y su filosofía de diseño, y posteriormente realizaremos una demostración práctica de lo fácil que es desarrollar con Django.</p>
+
+                <h5>¿A quién va dirigida?</h5>
+
+                <p>A estudiantes de tercer y cuarto curso con ganas de aprender tecnologías distintas a las vistas en el grado. Es necesario tener conocimientos mínimos de orientación a objetos, aunque se repasarán brevemente todos los conceptos necesarios.</p>
+            </div>
+
+            <a class="button alt" href="https://umurcia.zoom.us/j/95289259587?pwd=OUJiNVRLcFYzaFJLUk1JcHBnZVgxdz09">Nos vemos en Zoom</a>
+        </div>
+
+        <div class="charla">
+            <h3><b>IDEs</b> o cómo evitar CodeBlocks</h3>
+
+            <div class="info">
+                <p>Seguro que a estas alturas ya has utilizado CodeBlocks, ¿me equivoco? Y salvo que seas un poco psicópata, es bastante probable que ya estés hasta las narices de semejante IDE. ¿Y si te dijera que hay alternativas muchísimo mejores?</p>
+
+                <p>En esta charla vamos a hablar de entornos de desarrollo multipropósito y multilenguaje, de forma que, llegado el momento, puedas escoger la mejor herramienta para tu proyecto.</p>
+
+                <h5>¿A quién va dirigida?</h5>
+
+                <p>A cualquier estudiante de la FIUM con ganas de utilizar herramientas del mundo real.</p>
+
+                <h5>Disclaimer</h5>
+
+                <p>Todos los IDEs presentados se han utilizado por estudiantes de la FIUM durante sus prácticas, pero esto no evitará que en determinadas asignaturas sea obligatorio utilizar entornos desactualizados como CodeBlocks, desde DAFI estamos luchando para conseguir que esto cambie.</p>
+            </div>
+
+            <a class="button alt" href="https://umurcia.zoom.us/j/95344427542?pwd=WFBjTC81K1lvU2xrOTZ2K1RXbStzQT09">Nos vemos en Zoom</a>
+        </div>
+
+        <div class="charla">
+            <h3><b>Máquinas de Turing</b> contra cartas <b>Magic</b></h3>
+
+            <div class="info">
+                <p>¿Son las cartas Magic el juego de cartas más complejo? Esa es la respuesta que buscamos en esta charla, en la que hablaremos sobre Magic, máquinas de Turing y las mecánicas que permiten que un inofensivo juego de mesa se convierta en un ordenador capaz de procesar cualquier programa imaginable.</p>
+
+                <p>Haremos una <u>pequeña</u> demostración práctica, porque computar manualmente operaciones sencillas podría llevarnos un tiempo mayor que el desarrollo del universo hasta ahora...</p>
+
+                <h5>¿A quién va dirigida?</h5>
+
+                <p>A cualquier amante de la informática y/o las cartas Magic, es una charla diferente y sobre todo muy entretenida.</p>
+            </div>
+
+            <div>
+                <a class="button alt" href="https://umurcia.zoom.us/j/92450184708?pwd=MmlOSDVVRVZ5UnJGY2Z1ZXZpc0FTdz09">Nos vemos en Zoom</a>
+
+                <a class="button alt" href="{% url 'clubs:detail' 'club-de-magic' %}">Club de Magic</a>
+            </div>
+        </div>
+
+        <div class="charla">
+            <h3><b>Debug</b>: la alternativa al printf()</h3>
+
+            <div class="info">
+                <p>La tarea de un desarrollador de software se facilita mucho gracias a herramientas de detección de errores debido a que estas hacen más rápido su corrección. En este taller os enseñaremos las tecnologías GDB, Valgrind, Eclipse y Visual Studio Code en su aplicación para depurar. Este taller es práctico y se divide en:</p>
+
+                <ul>
+                    <li>Explicación de conceptos básicos en depuración</li>
+                    <li>Presentación del depurador GDB</li>
+                    <li>Presentación del depurador Valgrind</li>
+                    <li>Presentación del entorno de depuración de Eclipse</li>
+                    <li>Presentación del entorno de depuración de Visual Studio Code</li>
+                    <li>Ejemplos prácticos de cada tecnología</li>
+                </ul>
+
+                <h5>¿A quién va dirigida?</h5>
+
+                <p>Principalmente a estudiantes de primer y segundo curso, que podrán aprovechar estos conocimientos para el desarrollo de sus prácticas.</p>
+            </div>
+
+            <a class="button alt" href="https://umurcia.zoom.us/j/91883673811?pwd=VHc5M25PeVVBTFhnSHNObk95Rm1JZz09">Nos vemos en Zoom</a>
+        </div>
+
+        <div class="charla">
+            <h3><b>Git:</b> di adiós a <i>copia de copia proyecto final final</i></h3>
+
+            <div class="info">
+                <p>Los proyectos y documentos están sujetos a cambios durante su desarrollo. En ocasiones nos gustaría volver atrás y haber guardado una parte que borramos porque vimos inútil, o compartir el trabajo actual con otro compañero. Esto es posible y se llama Control de Versiones.</p>
+
+                <p>En esta charla veremos la herramienta de control de versiones más utilizada: Git, así como su uso y aplicación en el mundo real.</p>
+
+                <h5>¿A quién va dirigida?</h5>
+
+                <p>A cualquier estudiante de la FIUM, pero especialmente a los de primeros cursos, que podrán aprovechar estos conocimentos para el desarrollo de sus prácticas.</p>
+            </div>
+
+            <a class="button alt" href="https://umurcia.zoom.us/j/94575210924?pwd=MTQ0QnptOTFLN2hxRE1mQzVmRjZVZz09">Nos vemos en Zoom</a>
+        </div>
+    </div>
+
+    <h4 style="text-align: center;margin-top: 1rem;">Organizado por DAFI con ayuda de nuestros maravillosos DAFIERS &lt;3</h4>
+
+    <div class="ponentes">
+        <div>
+            <img src="{{ 'pablo.sempere.frutos@gmail.com' | gravatar }}"
+                alt="Pablo Sempere" />
+            <h5>Pablo Sempere</h5>
+        </div>
+
+        <div>
+            <img src="{{ 'adrian.canovas1@um.es' | gravatar }}"
+                alt="Adrián Cánovas" />
+            <h5>Adrián Cánovas</h5>
+        </div>
+
+        <div>
+            <img src="{{ 'roberto.pitarch@um.es' | gravatar }}"
+                alt="Roberto Pitarch" />
+            <h5>Roberto Pitarch</h5>
+        </div>
+
+        <div>
+            <img src="{{ 'eduardo.perezm@um.es' | gravatar }}"
+                alt="Eduardo Pérez" />
+            <h5>Eduardo Pérez</h5>
+        </div>
+
+        <div>
+            <img src="{{ 'joseantonio.parrae@um.es' | gravatar }}"
+                alt="José Antonio Parra" />
+            <h5>José Antonio Parra</h5>
+        </div>
+    </div>
 {% endblock content %}
