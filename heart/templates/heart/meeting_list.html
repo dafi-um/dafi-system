@@ -25,7 +25,7 @@
                         <span><a href="{{ meeting.call.url }}" title="Convocatoria {{ meeting }}">Convocatoria</a></span>
                     {% endif %}
 
-                    {% if meeting.minutes %}
+                    {% if user.is_authenticated and meeting.minutes %}
                         <span>- <a href="{{ meeting.minutes.url }}" title="Acta {{ meeting }}">Acta {% if not meeting.minutes_approved %}(Pendiente de aprobar){% endif %}</a></span>
                     {% endif %}
 
