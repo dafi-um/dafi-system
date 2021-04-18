@@ -1,9 +1,9 @@
-Django~=2.1.7
-django-cleanup==4.0.0
+Django~=3.2
+django-cleanup==5.1.0
 django-environ~=0.4.5
 django-markdown-deux~=1.0.5
-django-meta~=1.5.2
-django-pagedown~=1.0.6
+django-meta~=2.0.0
+django-pagedown~=2.2.0
 markdown2~=2.3.7
 Pillow~=6.2.0
 psycopg2-binary~=2.8.3
