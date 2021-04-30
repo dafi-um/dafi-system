@@ -1,12 +1,21 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView, FormView)
 from django.views.generic.base import ContextMixin
 
 from meta.views import MetadataMixin
 
 from .models import Committee, DocumentMedia, Group, Meeting, PeopleGroup
+from .forms import FiumcraftWhitelistForm
+
+import environ
+import requests
+
+env = environ.Env()
+
+environ.Env.read_env('.env')
 
 
 class AboutUsView(MetadataMixin, TemplateView):
@@ -205,3 +214,46 @@ class StudentsView(MetadataMixin, ListView):
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('year__degree')
+
+
+class FiumcraftWhitelistView(FormView):
+    template_name = 'heart/whitelist_form.html'
+    form_class = FiumcraftWhitelistForm
+    success_url = '/whitelist_fiumcraft_thanks/'
+
+    title = 'FIUMCRAFT - WhiteList'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def form_valid(self, form):
+        nickname = form.cleaned_data['nickname']
+        faculty = form.cleaned_data['faculty']
+        source = form.cleaned_data['source']
+        endpoint = 'https://hanzoweb.herokuapp.com/fiumcraft/api/whitelist'
+        access_token = env('HANZOWEB_AUTH')
+        headers = {
+            'Authorization': f'Token {access_token}'}
+        params = {
+            'nickname': nickname,
+            'source': source,
+        }
+        if faculty:
+            params['faculty'] = faculty
+        try:
+            r = requests.post(endpoint, headers=headers, json=params, timeout=10)
+        except requests.exceptions.Timeout:
+            raise Exception('timeout')
+        if r.status_code == 200:
+            return super(FiumcraftWhitelistView, self).form_valid(form)
+
+
+class FiumcraftWhitelistThanksView(TemplateView):
+    template_name = "heart/whitelist_form_thanks.html"
+
+    title = 'Gracias por tu solicitud'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
