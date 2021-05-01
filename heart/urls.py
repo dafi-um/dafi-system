@@ -13,6 +13,6 @@ urlpatterns = [
     path('documentos/', views.DocumentsView.as_view(), name='docs'),
     path('estudiantes/', views.StudentsView.as_view(), name='students'),
     path('delegacion/', views.AboutUsView.as_view(), name='about_us'),
-    path('whitelist_fiumcraft/', views.FiumcraftWhitelistView.as_view(), name='whitelist_fiumcraft'),
-    path('whitelist_fiumcraft_thanks/', views.FiumcraftWhitelistThanksView.as_view(), name='whitelist_fiumcraft_thanks'),
+    path('whitelist-fiumcraft/', views.FiumcraftWhitelistView.as_view(), name='whitelist_fiumcraft'),
+    path('whitelist-fiumcraft-thanks/', views.FiumcraftWhitelistThanksView.as_view(), name='whitelist_fiumcraft_thanks'),
 ]
