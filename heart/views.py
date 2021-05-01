@@ -215,20 +215,18 @@ class StudentsView(MetadataMixin, ListView):
         return super().get_queryset().prefetch_related('year__degree')
 
 
-class FiumcraftWhitelistView(FormView, MeetingMixin):
+class FiumcraftWhitelistView(FormView, MetadataMixin):
     template_name = 'heart/whitelist_form.html'
     form_class = FiumcraftWhitelistForm
-    success_url = '/whitelist_fiumcraft_thanks/'
+    success_url = reverse_lazy('heart:whitelist_fiumcraft_thanks')
 
     title = 'FIUMCRAFT - WhiteList'
     description = 'Formulario para solicitar acceso al servidor de Minecraft FIUMCRAFT'
     image = 'images/favicon.png'
 
     def get_context_data(self, **kwargs):
-        obj = self.get_object()
         context = super().get_context_data(**kwargs)
-        context['meta'] = obj.as_meta(self.request)
-        context['fiumcraft_url'] = group_id = Config.get('fiumcraft_url')
+        context['fiumcraft_url'] = Config.get('fiumcraft_url')
         return context
 
     def form_valid(self, form):
@@ -238,7 +236,8 @@ class FiumcraftWhitelistView(FormView, MeetingMixin):
         endpoint = FIUMCRAFT_WHITELIST_ENDPOINT
         access_token = FIUMCRAFT_WHITELIST_TOKEN
         headers = {
-            'Authorization': f'Token {access_token}'}
+            'Authorization': f'Token {access_token}'
+        }
         params = {
             'nickname': nickname,
             'source': source,
@@ -255,13 +254,9 @@ class FiumcraftWhitelistView(FormView, MeetingMixin):
             '<h1>No hemos podido procesar tu solicitud, inténtalo de nuevo más tarde</h1>')
 
 
-class FiumcraftWhitelistThanksView(TemplateView, MeetingMixin):
+class FiumcraftWhitelistThanksView(TemplateView, MetadataMixin):
     template_name = "heart/whitelist_form_thanks.html"
 
     title = 'Gracias por tu solicitud'
     description = 'Gracias por solicitar acceso al servidor de Minecraft FIUMCRAFT'
     image = 'images/favicon.png'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
