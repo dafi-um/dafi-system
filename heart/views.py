@@ -1,12 +1,20 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Count, Q
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+from django.http import HttpResponseBadRequest
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView, FormView)
 from django.views.generic.base import ContextMixin
+
+import requests
 
 from meta.views import MetadataMixin
 
+from main.models import Config
+from website.settings import FIUMCRAFT_WHITELIST_ENDPOINT, FIUMCRAFT_WHITELIST_TOKEN
+
 from .models import Committee, DocumentMedia, Group, Meeting, PeopleGroup
+from .forms import FiumcraftWhitelistForm
 
 
 class AboutUsView(MetadataMixin, TemplateView):
@@ -205,3 +213,50 @@ class StudentsView(MetadataMixin, ListView):
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('year__degree')
+
+
+class FiumcraftWhitelistView(FormView, MetadataMixin):
+    template_name = 'heart/whitelist_form.html'
+    form_class = FiumcraftWhitelistForm
+    success_url = reverse_lazy('heart:whitelist_fiumcraft_thanks')
+
+    title = 'FIUMCRAFT - WhiteList'
+    description = 'Formulario para solicitar acceso al servidor de Minecraft FIUMCRAFT'
+    image = 'images/favicon.png'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['fiumcraft_url'] = Config.get('fiumcraft_url')
+        return context
+
+    def form_valid(self, form):
+        nickname = form.cleaned_data['nickname']
+        faculty = form.cleaned_data['faculty']
+        source = form.cleaned_data['source']
+        endpoint = FIUMCRAFT_WHITELIST_ENDPOINT
+        access_token = FIUMCRAFT_WHITELIST_TOKEN
+        headers = {
+            'Authorization': f'Token {access_token}'
+        }
+        params = {
+            'nickname': nickname,
+            'source': source,
+        }
+        if faculty:
+            params['faculty'] = faculty
+        try:
+            r = requests.post(endpoint, headers=headers, json=params, timeout=10)
+        except requests.exceptions.Timeout:
+            return HttpResponseBadRequest('<h1>No he obtenido respuesta del servidor</h1>')
+        if r.status_code == 200:
+            return super(FiumcraftWhitelistView, self).form_valid(form)
+        return HttpResponseBadRequest(
+            '<h1>No hemos podido procesar tu solicitud, inténtalo de nuevo más tarde</h1>')
+
+
+class FiumcraftWhitelistThanksView(TemplateView, MetadataMixin):
+    template_name = "heart/whitelist_form_thanks.html"
+
+    title = 'Gracias por tu solicitud'
+    description = 'Gracias por solicitar acceso al servidor de Minecraft FIUMCRAFT'
+    image = 'images/favicon.png'

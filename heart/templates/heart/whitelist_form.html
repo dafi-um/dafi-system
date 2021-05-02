@@ -1,0 +1,17 @@
+{% extends 'generic.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+    <header class="major special split" style="margin-bottom: 2em;">
+        <h1>Solicitud para acceder a la Whitelist de FIUMCRAFT</h1>
+    </header>
+    <section class="alt">
+        <p>Introduce tus datos y en cuanto los revisemos te añadiremos a la Whitelist del servidor</p>
+        <form method="POST">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <button type="submit">Enviar</button>
+        </form>
+    </section>
+{% endblock content %}

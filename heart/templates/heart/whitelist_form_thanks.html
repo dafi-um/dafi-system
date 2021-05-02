@@ -1,0 +1,12 @@
+{% extends 'generic.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+    <header class="major special split" style="margin-bottom: 2em;">
+        <h1>Solicitud para acceder a la Whitelist de FIUMCRAFT</h1>
+    </header>
+    <section class="alt">
+        <p>Hemos recibido tu solicitud correctamente, en cuanto la revisemos podrás acceder a nuestro servidor a través de la IP: <i>{{ fiumcraft_url }}</i></p>
+    </section>
+{% endblock content %}
