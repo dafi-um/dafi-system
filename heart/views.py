@@ -233,10 +233,8 @@ class FiumcraftWhitelistView(FormView, MetadataMixin):
         nickname = form.cleaned_data['nickname']
         faculty = form.cleaned_data['faculty']
         source = form.cleaned_data['source']
-        endpoint = FIUMCRAFT_WHITELIST_ENDPOINT
-        access_token = FIUMCRAFT_WHITELIST_TOKEN
         headers = {
-            'Authorization': f'Token {access_token}'
+            'Authorization': 'Token ' + FIUMCRAFT_WHITELIST_TOKEN
         }
         params = {
             'nickname': nickname,
@@ -244,14 +242,23 @@ class FiumcraftWhitelistView(FormView, MetadataMixin):
         }
         if faculty:
             params['faculty'] = faculty
+
         try:
-            r = requests.post(endpoint, headers=headers, json=params, timeout=10)
+            r = requests.post(
+                FIUMCRAFT_WHITELIST_ENDPOINT,
+                headers=headers,
+                json=params,
+                timeout=10
+            )
         except requests.exceptions.Timeout:
-            return HttpResponseBadRequest('<h1>No he obtenido respuesta del servidor</h1>')
+            return HttpResponseBadRequest('<h1>No se ha obtenido respuesta del servidor.</h1>')
+
         if r.status_code == 200:
             return super(FiumcraftWhitelistView, self).form_valid(form)
+
         return HttpResponseBadRequest(
-            '<h1>No hemos podido procesar tu solicitud, inténtalo de nuevo más tarde</h1>')
+            '<h1>No se ha podido procesar tu solicitud, inténtalo de nuevo más tarde.</h1>'
+        )
 
 
 class FiumcraftWhitelistThanksView(TemplateView, MetadataMixin):
