@@ -215,19 +215,16 @@ class StudentsView(MetadataMixin, ListView):
         return super().get_queryset().prefetch_related('year__degree')
 
 
-class FiumcraftWhitelistView(FormView, MetadataMixin):
-    template_name = 'heart/whitelist_form.html'
+class FiumcraftWhitelistView(MetadataMixin, FormView):
+
     form_class = FiumcraftWhitelistForm
+
+    template_name = 'heart/whitelist_form.html'
     success_url = reverse_lazy('heart:whitelist_fiumcraft_thanks')
 
-    title = 'FIUMCRAFT - WhiteList'
+    title = 'WhiteList - FIUMCRAFT'
     description = 'Formulario para solicitar acceso al servidor de Minecraft FIUMCRAFT'
     image = 'images/favicon.png'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['fiumcraft_url'] = Config.get('fiumcraft_url')
-        return context
 
     def form_valid(self, form):
         nickname = form.cleaned_data['nickname']
@@ -261,9 +258,15 @@ class FiumcraftWhitelistView(FormView, MetadataMixin):
         )
 
 
-class FiumcraftWhitelistThanksView(TemplateView, MetadataMixin):
-    template_name = "heart/whitelist_form_thanks.html"
+class FiumcraftWhitelistThanksView(MetadataMixin, TemplateView):
 
-    title = 'Gracias por tu solicitud'
+    template_name = 'heart/whitelist_form_thanks.html'
+
+    title = 'Gracias por tu solicitud - WhiteList - FIUMCRAFT'
     description = 'Gracias por solicitar acceso al servidor de Minecraft FIUMCRAFT'
     image = 'images/favicon.png'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['fiumcraft_url'] = Config.get('fiumcraft_url')
+        return context
