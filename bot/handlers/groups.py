@@ -66,7 +66,7 @@ class GroupsList(BasicBotHandler):
 
             for year in years[degree.id]:
                 if year.telegram_group_link:
-                    msg += ' - [{}º Dudas]({})\n'.format(
+                    msg += ' - [{}º General]({})\n'.format(
                         year.year, year.telegram_group_link
                     )
 
