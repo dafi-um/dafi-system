@@ -1,0 +1,278 @@
+{% extends 'generic.html' %}
+{% load markdown_deux_tags %}
+{% load users_tags %}
+
+{% block head %}
+    <title>{{ flatpage.title }} - DAFI</title>
+{% endblock head %}
+
+{% block content %}
+    <header class="major special">
+        <h1>{{ flatpage.title }}</h1>
+    </header>
+
+    <p>Desde DAFI queremos presentar las primeras Jornadas de Puertas Abiertas de los <a href="{% url 'clubs:list' %}">Clubes de DAFI</a>: un conjunto de <b>charlas y talleres</b> orientados a los <b>estudiantes de nuevo ingreso</b> de la FIUM.</p>
+
+    <p>El objetivo de estas jornadas es dar a conocer los clubes de la Delegación a los nuevos estudiantes de la FIUM, ¡aunque cualquier miembro de la FIUM será siempre recibido con los brazos abiertos!</p>
+
+    <p>Tanto las charlas como los talleres se han orientado a un <b>nivel muy bajo</b> de conocimientos para hacerlos <b>accesibles</b> a cualquier estudiante.</p>
+
+    <h3>Formato de las jornadas</h3>
+
+    <p>Cada club realizará una charla de presentación por la mañana, en la cual se explicará el objetivo del club y las actividades que suelen realizarse durante el curso. Tras esto, se asistirá a talleres de introducción y posteriormente talleres de profundización.</p>
+
+    <p>Con el fin de que se pueda acudir al mayor número de talleres posibles, los talleres introductorios se realizarán dos veces: una primera ronda por la mañana (12:30 a 14:00) y exactamente los mismo talleres por la tarde (16:00 a 17:30).</p>
+
+    <h4>¿Qué tengo que llevar?</h4>
+
+    <p>Nosotros proporcionaremos todo el material necesario para el desarrollo de las actividades.</p>
+
+    <p>Para los talleres podéis vuestro propio material sin problema alguno: mazos de Magic, dados para D&amp;D, portátil para Hacking o desarrollo de videojuegos...</p>
+
+    <h4>¿Tengo que apuntarme?</h4>
+
+    <p style="margin-bottom: 0.25rem;">¡Sí! Por temas de aforo necesitamos que aquellos interesados en asistir se registren previamente en este formulario:</p>
+    <p><a href="https://forms.gle/7iATgrTuyPqdZvBr8" title="Formulario de Registro de las jornadas">https://forms.gle/7iATgrTuyPqdZvBr8</a></p>
+
+    <h3>Horario</h3>
+
+    <style type="text/css">
+        .table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            text-align: center;
+        }
+
+        .table td {
+            border: 1px solid #000;
+            padding: 10px 5px;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: 400;
+        }
+
+            .table td:nth-child(1) {
+                width: 13%;
+                text-align: center;
+            }
+
+            .table td:nth-child(2) {
+                width: 29%;
+            }
+
+            .table td:nth-child(3) {
+                width: 29%;
+            }
+
+            .table td:nth-child(3) {
+                width: 29%;
+            }
+
+        .table th {
+            padding: 10px 5px;
+            font-size: 120%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .bg-1 {
+            background-color: #D9EAD3;
+        }
+
+        .bg-2 {
+            background-color: #FFF2CC;
+        }
+
+        .bg-3 {
+            background-color: #FFE599;
+        }
+
+        .bg-4 {
+            background-color: #C9DAF8;
+        }
+
+        .bg-5 {
+            background-color: #A4C2F4;
+        }
+
+        .bg-6 {
+            background-color: #B6D7A8;
+        }
+
+        .bg-7 {
+            background-color: #D9D2E9;
+        }
+
+        .bg-8 {
+            background-color: #ffdcf6;
+        }
+
+        .bg-break {
+            background-color: #EA9999;
+        }
+
+        .charlas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            grid-gap: 2rem 2rem;
+        }
+
+            .charla {
+                display: flex;
+                flex-direction: column;
+                place-self: stretch;
+                margin-bottom: 2rem;
+            }
+
+                .charla .info {
+                    flex: 1;
+                }
+
+                .charla h5 {
+                    margin-bottom: 0.25rem;
+                }
+
+                .charla p {
+                    margin-bottom: 0.5rem;
+                }
+
+                .charla .button {
+                    place-self: start;
+                }
+
+        .ponentes {
+            text-align: center;
+        }
+
+            .ponentes div {
+                margin: 0.5rem 0;
+            }
+
+            .ponentes img {
+                display: block;
+                margin: 0 auto 0.5rem;
+                border-radius: 100%;
+            }
+    </style>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Viernes 17 de Septiembre</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>10:00 - 10:30</td>
+                <td class="bg-8">
+                    <span>Apertura de las Jornadas y presentación de los Clubes</span>
+                </td>
+            </tr>
+            <tr>
+                <td>10:30 - 11:00</td>
+                <td class="bg-6">
+                    <span>Presentación del <b>Club de Ciberseguridad</b></span>
+                </td>
+            </tr>
+            <tr>
+                <td>11:00 - 11:30</td>
+                <td class="bg-3">
+                    <span>Presentación del <b>Club de Magic</b></span>
+                </td>
+            </tr>
+            <tr>
+                <td>11:30 - 12:00</td>
+                <td class="bg-1">
+                    <span>Presentación del <b>Club de Rol</b></span>
+                </td>
+            </tr>
+            <tr>
+                <td>12:00 - 12:30</td>
+                <td class="bg-2">
+                    <span>Presentación del <b>Club de Videojuegos</b></span>
+                </td>
+            </tr>
+            <tr>
+                <td>12:30 - 13:00</td>
+                <td class="bg-break">Coffee Break</td>
+            </tr>
+            <tr style="height: calc(3.5rem * 3)">
+                <td>13:00 - 14:30</td>
+                <td class="bg-4">
+                    <span>Talleres introducción: Ronda 1</span>
+                </td>
+            </tr>
+            <tr style="height: calc(3.5rem * 3)">
+                <td>14:30 - 16:00</td>
+                <td class="bg-break">Comida</td>
+            </tr>
+            <tr style="height: calc(3.5rem * 3)">
+                <td>16:00 - 17:30</td>
+                <td class="bg-4">
+                    <span>Talleres introducción: Ronda 2</span>
+                </td>
+            </tr>
+            <tr>
+                <td>17:30 - 18:00</td>
+                <td class="bg-break">Coffee Break</td>
+            </tr>
+            <tr style="height: calc(3.5rem * 4)">
+                <td>18:00 - 20:00</td>
+                <td class="bg-7">
+                    <span>Talleres intensivos</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4 style="text-align: center;margin-top: 4rem;">Organizado por DAFI con ayuda de nuestros maravillosos DAFIERS &lt;3</h4>
+
+    <div class="ponentes row">
+        <div class="4u">
+            <img src="{{ 'pablo.sempere.frutos@gmail.com' | gravatar }}"
+                alt="Pablo Sempere" />
+            <h5>Pablo Sempere</h5>
+            <p>Coordinación y Club de Ciberseguridad</p>
+        </div>
+
+        <div class="4u">
+            <img src="{{ 'acanober1@gmail.com' | gravatar }}"
+                alt="Alejandro Cano" />
+            <h5>Alejandro Cano</h5>
+            <p>Club de Ciberseguridad</p>
+        </div>
+
+        <div class="4u">
+            <img src="{{ 'joseantonio.parrae@um.es' | gravatar }}"
+                alt="José Antonio Parra" />
+            <h5>José Antonio Parra</h5>
+            <p>Club de Magic</p>
+        </div>
+    </div>
+
+    <div class="ponentes row">
+        <div class="4u">
+            <img src="{{ 'ismael.garridog@um.es' | gravatar }}"
+                alt="Ismael Garrido" />
+            <h5>Ismael Garrido</h5>
+            <p>Club de Rol</p>
+        </div>
+
+        <div class="4u">
+            <img src="{{ 'francisco.mirasg@um.es' | gravatar }}"
+                alt="Francisco Miras" />
+            <h5>Francisco Miras</h5>
+            <p>Club de Rol</p>
+        </div>
+
+        <div class="4u">
+            <img src="{{ 'manuel.ramirezr@um.es' | gravatar }}"
+                alt="Manuel Ramírez" />
+            <h5>Manuel Ramírez</h5>
+            <p>Club de Videojuegos</p>
+        </div>
+    </div>
+{% endblock content %}
