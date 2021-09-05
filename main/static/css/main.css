@@ -3861,7 +3861,7 @@
 
 	#footer {
 		background-color: #e5474b;
-		color: #f2a3a5;
+		color: #fff;
 		padding: 4em 0 2em 0;
 		background: #e5474b;
 	}
@@ -4055,8 +4055,12 @@
 		}
 
 			#footer .copyright a {
-				color: #f2a3a5;
+				color: #fff;
 			}
+
+				#footer .copyright .footer-icons a:hover {
+					text-decoration: none;
+				}
 
 		@media screen and (max-width: 980px) {
 
@@ -4079,14 +4083,14 @@
 			#footer span + span {
 				margin-left: 0.4em;
 				padding-left: 0.5em;
-				border-left: 1px solid #ec7679;
+				border-left: 1px solid #fff;
 			}
 
 		}
 
 		@media screen and (max-width: 480px) {
 
-			#footer .copyright span {
+			#footer .copyright > span {
 				display: block;
 				margin: 0.5em 0;
 			}
