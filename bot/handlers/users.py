@@ -1,42 +1,104 @@
-from telegram import ParseMode
+from typing import Callable, Dict
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-
+from django.contrib.auth.models import Group, User
 from main.utils import get_url
+from telegram import ParseMode
+from telegram.ext import CallbackContext, Updater
 
 from ..utils import create_reply_markup, create_users_list
-
-from .handlers import add_handlers, BasicBotHandler
+from .handlers import BasicBotHandler, add_handlers
 
 User = get_user_model()
 
 
 @add_handlers
-class ViewGroupsPermissions(BasicBotHandler):
-    '''Prints the users in the given group'''
-
-    cmd = 'veracceso'
+class Permissions(BasicBotHandler):
+    ''' Manage the groups and users'''
+    cmd: str = "acceso"
 
     user_required = True
 
-    def user_filter(self, user):
-        return user.has_perm('bot.can_manage_permissions')
+    usage_msg: str = "Uso:\n\
+    \t`/acceso ver <nombre-grupo>`\n\
+    \t`/acceso dar <nombre-usuario> <nombre-grupo>`\n\
+    \t`/acceso quitar <nombre-usuario> <nombre-grupo>`"
 
-    def command(self, update, context):
+    def ver_acceso(self, update: Updater, context: CallbackContext) -> str:
         try:
-            group_name = context.args[0]
+            group_name: str = context.args[1]
         except IndexError:
-            return 'Uso: `/veracceso <nombre-grupo>`'
+            return 'Uso: `/acceso ver <nombre-grupo>`'
 
-        group = Group.objects.filter(name=group_name).first()
+        group: Group = Group.objects.filter(name=group_name).first()
 
         if not group:
             return 'No he encontrado el grupo especificado 😓'
 
-        msg = '*Usuarios en el grupo {}*:\n'.format(group.name)
+        msg: str = '*Usuarios en el grupo {}*:\n'.format(group.name)
 
         return msg + create_users_list(group.user_set.all())
+
+    def dar_acceso(self, update: Updater, context: CallbackContext) -> str:
+        try:
+            user_name: str = context.args[1]
+            group_name: str = context.args[2]
+        except IndexError:
+            return 'Uso: `/acceso dar <nombre-usuario> <nombre-grupo>`'
+
+        group: Group = Group.objects.filter(name=group_name).first()
+        user: User = User.objects.filter(telegram_user=user_name).first()
+
+        if not group:
+            return 'No he encontrado el grupo especificado 😓'
+        if not user:
+            return 'No he encontrado el usuario especificado 😓'
+
+        group.user_set.add(user)
+        return 'He agregado a {} al grupo {} ✅'.format(
+            user.get_full_name(), group.name
+        )
+
+    def quitar_acceso(self, update: Updater, context: CallbackContext) -> str:
+        try:
+            user_name: str = context.args[1]
+            group_name: str = context.args[2]
+        except IndexError:
+            return 'Uso: `/acceso quitar <nombre-usuario> <nombre-grupo>`'
+
+        group: Group = Group.objects.filter(name=group_name).first()
+        user: User = User.objects.filter(telegram_user=user_name).first()
+
+        if not group:
+            return 'No he encontrado el grupo especificado 😓'
+        if not user:
+            return 'No he encontrado el usuario especificado 😓'
+
+        group.user_set.remove(user)
+        return 'He eliminado a {} del grupo {} ✅'.format(
+            user.get_full_name(), group.name
+        )
+
+    acceso: Dict[str, Callable[["Permissions", Updater, CallbackContext], str]] = {
+        "ver":      ver_acceso,
+        "dar":      dar_acceso,
+        "quitar":   quitar_acceso,
+    }
+
+    def user_filter(self, user):
+        return user.has_perm('bot.can_manage_permissions')
+
+    def command(self, update: Updater, context: CallbackContext) -> str:
+        try:
+            option: str = context.args[0]
+        except IndexError:
+            return self.usage_msg
+
+        fonction: Callable[[Permissions, Updater, CallbackContext], str] = self.acceso.get(option)
+        if fonction is not None:
+            return fonction(self, update, context)
+        else:
+            return self.usage_msg
 
 
 @add_handlers
@@ -118,38 +180,6 @@ class UserPermissionsMixin(BasicBotHandler):
             return 'No he encontrado el grupo especificado 😓'
 
         return self.do_action(user, group)
-
-
-@add_handlers
-class AddUserPermissions(UserPermissionsMixin):
-    '''Adds the given user to the given group'''
-
-    cmd = 'daracceso'
-
-    usage_msg = 'Uso: `/daracceso <nombre-usuario> <nombre-grupo>`'
-
-    def do_action(self, user, group):
-        group.user_set.add(user)
-
-        return 'He agregado a {} al grupo {} ✅'.format(
-            user.get_full_name(), group.name
-        )
-
-
-@add_handlers
-class RemoveUserPermissions(UserPermissionsMixin):
-    '''Removes the given user from the given group'''
-
-    cmd = 'quitaracceso'
-
-    usage_msg = 'Uso: `/quitaracceso <nombre-usuario> <nombre-grupo>`'
-
-    def do_action(self, user, group):
-        group.user_set.remove(user)
-
-        return 'He eliminado a {} del grupo {} ✅'.format(
-            user.get_full_name(), group.name
-        )
 
 
 @add_handlers
