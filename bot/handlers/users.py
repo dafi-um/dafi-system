@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, User
@@ -32,7 +32,7 @@ class Permissions(BasicBotHandler):
         except IndexError:
             return 'Uso: `/acceso ver <nombre-grupo>`'
 
-        group: Group = Group.objects.filter(name=group_name).first()
+        group: Optional[Group] = Group.objects.filter(name=group_name).first()
 
         if not group:
             return 'No he encontrado el grupo especificado 😓'
@@ -49,10 +49,10 @@ class Permissions(BasicBotHandler):
             return 'Uso: `/acceso dar <nombre-usuario> <nombre-grupo>`'
 
         group: Group = Group.objects.filter(name=group_name).first()
-        user: User = User.objects.filter(telegram_user=user_name).first()
-
         if not group:
             return 'No he encontrado el grupo especificado 😓'
+
+        user: User = User.objects.filter(telegram_user=user_name).first()
         if not user:
             return 'No he encontrado el usuario especificado 😓'
 
