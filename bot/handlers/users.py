@@ -19,12 +19,14 @@ class Permissions(BasicBotHandler):
 
     user_required = True
 
-    usage_msg: str = "Uso:\n\
-    \t`/acceso ver <nombre-grupo>`\n\
-    \t`/acceso dar <nombre-usuario> <nombre-grupo>`\n\
-    \t`/acceso quitar <nombre-usuario> <nombre-grupo>`"
+    usage_msg: str = (
+        "Uso:\n"
+        "\t`/acceso ver <nombre-grupo>`\n"
+        "\t`/acceso dar <nombre-usuario> <nombre-grupo>`\n"
+        "\t`/acceso quitar <nombre-usuario> <nombre-grupo>`"
+    )
 
-    def ver_acceso(self, update: Updater, context: CallbackContext) -> str:
+    def view_acces(self, update: Updater, context: CallbackContext) -> str:
         try:
             group_name: str = context.args[1]
         except IndexError:
@@ -39,7 +41,7 @@ class Permissions(BasicBotHandler):
 
         return msg + create_users_list(group.user_set.all())
 
-    def dar_acceso(self, update: Updater, context: CallbackContext) -> str:
+    def add_access(self, update: Updater, context: CallbackContext) -> str:
         try:
             user_name: str = context.args[1]
             group_name: str = context.args[2]
@@ -59,7 +61,7 @@ class Permissions(BasicBotHandler):
             user.get_full_name(), group.name
         )
 
-    def quitar_acceso(self, update: Updater, context: CallbackContext) -> str:
+    def remove_access(self, update: Updater, context: CallbackContext) -> str:
         try:
             user_name: str = context.args[1]
             group_name: str = context.args[2]
@@ -79,10 +81,10 @@ class Permissions(BasicBotHandler):
             user.get_full_name(), group.name
         )
 
-    acceso: Dict[str, Callable[["Permissions", Updater, CallbackContext], str]] = {
-        "ver":      ver_acceso,
-        "dar":      dar_acceso,
-        "quitar":   quitar_acceso,
+    _dispatch_table: Dict[str, Callable[["Permissions", Updater, CallbackContext], str]] = {
+        "ver": view_acces,
+        "dar": add_access,
+        "quitar": remove_access,
     }
 
     def user_filter(self, user):
@@ -94,9 +96,9 @@ class Permissions(BasicBotHandler):
         except IndexError:
             return self.usage_msg
 
-        fonction: Callable[[Permissions, Updater, CallbackContext], str] = self.acceso.get(option)
-        if fonction is not None:
-            return fonction(self, update, context)
+        method: Callable[[Permissions, Updater, CallbackContext], str] = self._dispatch_table.get(option)
+        if method is not None:
+            return method(self, update, context)
         else:
             return self.usage_msg
 
