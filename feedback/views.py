@@ -1,16 +1,43 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Count, Q
-from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+)
+from django.db.models import (
+    Count,
+    Q,
+)
+from django.forms.models import ModelForm
+from django.http import (
+    HttpResponseForbidden,
+    HttpResponseNotAllowed,
+    JsonResponse,
+)
+from django.http.response import HttpResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.views.generic import CreateView, DeleteView, DetailView, ListView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+)
 
 from meta.views import MetadataMixin
 
-from .models import Comment, CommentVote, Topic
+from users.utils import (
+    AuthenticatedRequest,
+    SimpleRequest,
+)
+
+from .models import (
+    Comment,
+    CommentVote,
+    Topic,
+)
 
 
 class TopicListView(MetadataMixin, ListView):
+
     model = Topic
 
     title = 'Feedback - DAFI'
@@ -25,21 +52,25 @@ class TopicListView(MetadataMixin, ListView):
 
 
 class TopicDetailView(UserPassesTestMixin, DetailView):
+
+    request: SimpleRequest
+
     model = Topic
 
     def get_queryset(self):
         return (
             super().get_queryset()
-                .prefetch_related('documents')
-                .prefetch_related('comments')
-                .select_related('official_position')
+            .prefetch_related('documents')
+            .prefetch_related('comments')
+            .select_related('official_position')
         )
 
     def test_func(self):
-        return self.get_object().is_public or self.request.user.is_staff
+        topic: Topic = self.get_object()
+        return topic.is_public or self.request.user.is_staff
 
     def get_context_data(self, **kwargs):
-        topic = self.get_object()
+        topic: Topic = self.get_object()
 
         comments = topic.comments.annotate(
             total_upvotes=Count('votes', filter=Q(votes__is_upvote=True)),
@@ -52,8 +83,8 @@ class TopicDetailView(UserPassesTestMixin, DetailView):
         if self.request.user.is_authenticated:
             votes = (
                 CommentVote.objects
-                    .filter(comment__topic=topic, user=self.request.user)
-                    .prefetch_related('comment')
+                .filter(comment__topic=topic, user=self.request.user)
+                .prefetch_related('comment')
             )
 
             for vote in votes:
@@ -79,6 +110,9 @@ class TopicDetailView(UserPassesTestMixin, DetailView):
 
 
 class HistoryView(UserPassesTestMixin, DetailView):
+
+    request: SimpleRequest
+
     model = Topic
 
     template_name = 'feedback/topic_history.html'
@@ -86,37 +120,42 @@ class HistoryView(UserPassesTestMixin, DetailView):
     def get_queryset(self):
         return (
             super().get_queryset()
-                .prefetch_related('documents')
-                .prefetch_related('comments')
-                .select_related('official_position')
+            .prefetch_related('documents')
+            .prefetch_related('comments')
+            .select_related('official_position')
         )
 
-    def test_func(self):
-        return self.get_object().is_public or self.request.user.is_staff
+    def test_func(self) -> bool:
+        topic: Topic = self.get_object()
+        return topic.is_public or self.request.user.is_staff
 
     def get_context_data(self, **kwargs):
-        topic = self.get_object()
+        topic: Topic = self.get_object()
+
         comments = topic.comments.filter(is_official=True)
 
         context = super().get_context_data(**kwargs)
         context['meta'] = topic.as_meta(self.request)
         context['comments'] = comments
-
         return context
 
 
 class CreateOfficialPositionView(UserPassesTestMixin, CreateView):
+
+    request: SimpleRequest
+    object: Comment
+
     model = Comment
 
     fields = ('text', 'topic')
 
-    def test_func(self):
+    def test_func(self) -> bool:
         return self.request.user.is_staff
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         return reverse('feedback:history', args=[self.object.topic.slug])
 
-    def form_valid(self, form):
+    def form_valid(self, form: 'ModelForm[Comment]') -> HttpResponse:
         form.instance.is_official = True
 
         res = super().form_valid(form)
@@ -130,23 +169,31 @@ class CreateOfficialPositionView(UserPassesTestMixin, CreateView):
 
 
 class CreateTopicPointView(UserPassesTestMixin, CreateView):
+
+    request: SimpleRequest
+    object: Comment
+
     model = Comment
 
     fields = ('text', 'topic')
 
-    def test_func(self):
+    def test_func(self) -> bool:
         return self.request.user.is_staff
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         return reverse('feedback:detail', args=[self.object.topic.slug])
 
-    def form_valid(self, form):
+    def form_valid(self, form: 'ModelForm[Comment]') -> HttpResponse:
         form.instance.is_point = True
 
         return super().form_valid(form)
 
 
 class CreateCommentView(LoginRequiredMixin, CreateView):
+
+    request: AuthenticatedRequest
+    object: Comment
+
     model = Comment
 
     fields = ('text', 'topic', 'is_anonymous')
@@ -154,7 +201,7 @@ class CreateCommentView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse('feedback:detail', args=[self.kwargs['slug']])
 
-    def form_valid(self, form):
+    def form_valid(self, form: 'ModelForm[Comment]'):
         form.instance.author = self.request.user
 
         if not form.instance.topic.is_public and not self.request.user.is_staff:
@@ -163,41 +210,55 @@ class CreateCommentView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class DeleteCommentView(LoginRequiredMixin, UserPassesTestMixin, MetadataMixin, DeleteView):
+class DeleteCommentView(
+        LoginRequiredMixin,
+        UserPassesTestMixin,
+        MetadataMixin,
+        DeleteView):
+
+    request: SimpleRequest
+
     model = Comment
 
     image = 'images/favicon.png'
 
     def test_func(self):
-        if self.get_object().is_point:
+        comment: Comment = self.get_object()
+
+        if comment.is_point:
             return self.request.user.is_staff
 
-        return self.request.user == self.get_object().author
+        return self.request.user == comment.author
 
     def get_queryset(self):
         return super().get_queryset().select_related('topic')
 
     def get_meta_title(self, context):
-        return 'Eliminar comentario en {}'.format(self.get_object().topic.title)
+        comment: Comment = self.get_object()
+        return 'Eliminar comentario en {}'.format(comment.topic.title)
 
     def get_success_url(self):
-        return reverse('feedback:detail', args=[self.get_object().topic.slug])
+        comment: Comment = self.get_object()
+        return reverse('feedback:detail', args=[comment.topic.slug])
 
 
-class CommentVoteView(DetailView):
+class CommentVoteView(LoginRequiredMixin, DetailView):
+
+    request: AuthenticatedRequest
+
     model = Comment
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
         return HttpResponseNotAllowed(['POST'], args, kwargs)
 
-    def get_totals(self):
+    def get_totals(self) -> HttpResponse:
         totals = (
             CommentVote.objects
-                .filter(comment=self.get_object())
-                .aggregate(
-                    upvotes=Count('pk', filter=Q(is_upvote=True)),
-                    downvotes=Count('pk', filter=Q(is_upvote=False))
-                )
+            .filter(comment=self.get_object())
+            .aggregate(
+                upvotes=Count('pk', filter=Q(is_upvote=True)),
+                downvotes=Count('pk', filter=Q(is_upvote=False))
+            )
         )
 
         return JsonResponse({
@@ -205,18 +266,15 @@ class CommentVoteView(DetailView):
             'total_downvotes': totals['downvotes']
         })
 
-    def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponseForbidden()
-
-        comment = self.get_object()
+    def post(self, request: AuthenticatedRequest, *args, **kwargs) -> HttpResponse:
+        comment: Comment = self.get_object()
 
         if not comment.topic.is_public and not request.user.is_staff:
             return HttpResponseForbidden()
 
         try:
-            action = int(request.POST.get('action'))
-        except:
+            action = int(request.POST.get('action', ''))
+        except ValueError:
             return JsonResponse({
                 'error': 'invalid action parameter',
             }, status=400)
@@ -230,7 +288,9 @@ class CommentVoteView(DetailView):
 
         if action == 0:
             if not vote:
-                return JsonResponse({'error': 'invalid action'}, status=400)
+                return JsonResponse({
+                    'error': 'invalid action'
+                }, status=400)
 
             vote.delete()
 

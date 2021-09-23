@@ -1,43 +1,53 @@
 import itertools
 
-from telegram.error import Unauthorized
-
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 
-from main.models import Config
-from heart.models import Degree, Group, Year
+from telegram import Update
+from telegram.error import Unauthorized
+from telegram.ext.callbackcontext import CallbackContext
+
 from clubs.models import Club
+from heart.models import (
+    Degree,
+    Group,
+    Year,
+)
+from main.models import Config
+from users.models import User
 
-from .handlers import add_handlers, BasicBotHandler
-
-User = get_user_model()
+from .handlers import (
+    BasicBotHandler,
+    add_handlers,
+)
 
 
 @add_handlers
 class GroupsList(BasicBotHandler):
-    '''Returns a list of all the groups'''
+    """Returns a list of all the groups.
+    """
 
     cmd = 'grupos'
 
     disable_web_page_preview = True
 
-    def command(self, update, context):
+    def command(self, update: Update, context: CallbackContext):
         years = {degree: list(years) for degree, years in itertools.groupby(
             Year
-                .objects
-                .all()
-                .prefetch_related('degree')
-                .order_by('degree', 'year'),
+            .objects
+            .all()
+            .prefetch_related('degree')
+            .order_by('degree', 'year'),
+
             key=lambda y: y.degree.id
         )}
 
         groups = {degree: list(groups) for degree, groups in itertools.groupby(
             Group
-                .objects
-                .filter(~Q(telegram_group_link=''))
-                .prefetch_related('year__degree')
-                .order_by('year__degree', 'year', 'number'),
+            .objects
+            .filter(~Q(telegram_group_link=''))
+            .prefetch_related('year__degree')
+            .order_by('year__degree', 'year', 'number'),
+
             key=lambda g: g.degree().id
         )}
 
@@ -93,7 +103,7 @@ class GroupsList(BasicBotHandler):
 
 @add_handlers
 class GroupsLink(BasicBotHandler):
-    '''Links a telegram group to a students group (only staff and delegates)'''
+    """Links a telegram group to a students group (only staff and delegates)"""
 
     cmd = 'vinculargrupo'
 
@@ -115,7 +125,8 @@ class GroupsLink(BasicBotHandler):
                 'Este chat de Telegram ya está vinculado al grupo {} ⚠️'
             ).format(group)
 
-        user = self.get_user()
+        user: 'User | None' = self.get_user()
+        assert user is not None
 
         query = Q(id=group_id)
 
@@ -141,7 +152,7 @@ class GroupsLink(BasicBotHandler):
 
 @add_handlers
 class GroupsUnlink(BasicBotHandler):
-    '''Unlinks a telegram group from a students group (only staff and delegates)'''
+    """Unlinks a telegram group from a students group (only staff and delegates)"""
 
     cmd = 'desvinculargrupo'
 
@@ -162,7 +173,8 @@ class GroupsUnlink(BasicBotHandler):
         if not group:
             return '⚠️ Este chat de Telegram no está vinculado a ningún grupo ⚠️'
 
-        user = self.get_user()
+        user: 'User | None' = self.get_user()
+        assert user is not None
 
         if (not user.has_perm('heart.can_link_group')
                 and not user == group.delegate
@@ -178,8 +190,8 @@ class GroupsUnlink(BasicBotHandler):
 
 
 @add_handlers
-class GroupsLink(BasicBotHandler):
-    '''Links a telegram group to a club (only staff and managers)'''
+class ClubsLink(BasicBotHandler):
+    """Links a telegram group to a club (only staff and managers)"""
 
     cmd = 'vincularclub'
 
@@ -211,7 +223,8 @@ class GroupsLink(BasicBotHandler):
         elif club.telegram_group:
             return 'El club _{}_ ya está vinculado a otro chat ⚠️'.format(club.name)
 
-        user = self.get_user()
+        user: 'User | None' = self.get_user()
+        assert user is not None
 
         if not user.is_superuser and user not in club.managers.all():
             return 'No tienes permisos para realizar esta acción ⚠️'
@@ -229,8 +242,8 @@ class GroupsLink(BasicBotHandler):
 
 
 @add_handlers
-class GroupsUnlink(BasicBotHandler):
-    '''Unlinks a telegram group from a club (only staff and managers)'''
+class ClubsUnlink(BasicBotHandler):
+    """Unlinks a telegram group from a club (only staff and managers)"""
 
     cmd = 'desvincularclub'
 
@@ -250,7 +263,8 @@ class GroupsUnlink(BasicBotHandler):
         if not club:
             return '⚠️ Este chat de Telegram no está vinculado a ningún club ⚠️'
 
-        user = self.get_user()
+        user: 'User | None' = self.get_user()
+        assert user is not None
 
         if not user.is_superuser and user not in club.managers.all():
             return 'No tienes los permisos necesarios para ejecutar este comando ⚠️'

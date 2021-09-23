@@ -1,20 +1,31 @@
-from django.contrib.auth import get_user_model
+from telegram import (
+    Message,
+    TelegramError,
+    Update,
+)
+from telegram.ext import CallbackContext
+
+from users.models import User
 
 from ..utils import create_reply_markup
-
-from .handlers import add_handlers, BasicBotHandler
-
-User = get_user_model()
+from .handlers import (
+    BasicBotHandler,
+    add_handlers,
+)
 
 
 @add_handlers
 class MainHandler(BasicBotHandler):
-    '''Start command and generic callback handler'''
+    """Start command and generic callback handler.
+    """
 
     cmd = 'start'
     query_prefix = 'main'
 
-    def command(self, update, context):
+    def command(self, update: Update, context: CallbackContext):
+        assert update.effective_chat is not None
+        assert isinstance(update.message, Message)
+
         if update.effective_chat.type != 'private':
             return
 
@@ -39,7 +50,7 @@ class MainHandler(BasicBotHandler):
 
             return msg, reply_markup
 
-    def callback(self, update, context, action, *args):
+    def callback(self, update: Update, context: CallbackContext, action, *args):
         if action == 'abort':
             return 'Operación cancelada.'
         elif action == 'okey':
@@ -48,25 +59,28 @@ class MainHandler(BasicBotHandler):
 
 @add_handlers
 class GetGroupID(BasicBotHandler):
-    '''Sends the user a chat ID keeping it secret (only superusers)'''
+    """Sends the user a chat ID keeping it secret (only superusers)"""
 
     cmd = 'getid'
 
-    def command(self, update, context):
-        user = self.get_user()
+    def command(self, update: Update, context: CallbackContext):
+        user: 'User | None' = self.get_user()
 
         if not user or not user.is_superuser:
             return
 
         chat = update.effective_chat
+        assert chat is not None
 
         msg = 'ID de {}: {}'.format(
             chat.title or chat.username or 'desconocido', chat.id
         )
 
+        assert update.effective_message is not None
+
         try:
             update.effective_message.delete()
-        except:
+        except TelegramError:
             msg += '\n(No he podido eliminar el comando del chat)'
 
         self.answer_private(msg)

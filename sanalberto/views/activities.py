@@ -1,22 +1,40 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from typing import cast
+
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+)
+from django.contrib.auth.models import AbstractUser
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import (
+    DetailView,
+    TemplateView,
+)
 from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 
 from meta.views import MetadataMixin
 
+from users.utils import AuthenticatedRequest
 from website.settings import STRIPE_PK
 
-from ..models import Activity, ActivityRegistration, Event
-from ..payments import create_registration_checkout, is_checkout_paid
-
+from ..models import (
+    Activity,
+    ActivityRegistration,
+)
+from ..payments import (
+    create_registration_checkout,
+    is_checkout_paid,
+)
 from .common import EventMixin
 
 
 class ActivitiesIndexView(EventMixin, MetadataMixin, TemplateView):
-    '''Activities index view'''
+    """Activities index view.
+    """
 
     template_name = 'sanalberto/activity_list.html'
 
@@ -33,16 +51,14 @@ class ActivitiesIndexView(EventMixin, MetadataMixin, TemplateView):
 
 
 class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
-    '''Activity detail view'''
+    """Activity detail view.
+    """
 
     model = Activity
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset=queryset)
-
-        if obj:
-            self.title = obj.title
-
+    def get_object(self, queryset=None) -> Activity:
+        obj: Activity = super().get_object(queryset=queryset)
+        self.title = obj.title
         return obj
 
     def get_context_data(self, **kwargs):
@@ -56,42 +72,38 @@ class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
 
 
 class ActivityRegistrationsView(EventMixin, MetadataMixin, UserPassesTestMixin, DetailView):
-    '''Activity registrations view'''
+    """Activity registrations view.
+    """
 
     model = Activity
 
     template_name = 'sanalberto/activity_registrations.html'
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset=queryset)
-
-        if obj:
-            self.title = 'Inscripciones para ' + obj.title
-
+    def get_object(self, queryset=None) -> Activity:
+        obj: Activity = super().get_object(queryset=queryset)
+        self.title = 'Inscripciones para ' + obj.title
         return obj
 
-    def test_func(self):
+    def test_func(self) -> bool:
         user = self.request.user
 
-        return user.is_authenticated and user in self.get_object().get_organisers
+        return user.is_authenticated and cast(AbstractUser, user) in self.get_object().get_organisers
 
 
 class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):
-    '''Activity create registration view'''
+    """Activity create registration view.
+    """
 
     model = Activity
 
     template_name = 'sanalberto/activity_register.html'
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset=queryset)
-
-        if obj:
-            self.title = 'Inscripción ' + obj.title
-
+    def get_object(self, queryset=None) -> Activity:
+        obj: Activity = super().get_object(queryset=queryset)
+        self.title = 'Inscripción ' + obj.title
         return obj
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> HttpResponse:
         activity = self.get_object()
 
         if not activity.accepts_registration:
@@ -104,7 +116,7 @@ class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, Detail
 
         return super().get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not self.get_current_event():
             return redirect('sanalberto:index')
 
@@ -123,7 +135,7 @@ class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, Detail
 
         try:
             obj.save()
-        except:
+        except Exception: # TODO: Which errors can raise here??
             # TODO: Display error
 
             return redirect('sanalberto:activity_detail', activity.id)
@@ -141,7 +153,8 @@ class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, Detail
 
 
 class RegistrationListView(EventMixin, MetadataMixin, LoginRequiredMixin, ListView):
-    '''Activity registrations list view'''
+    """Activity registrations list view.
+    """
 
     model = ActivityRegistration
 
@@ -150,19 +163,17 @@ class RegistrationListView(EventMixin, MetadataMixin, LoginRequiredMixin, ListVi
 
 
 class RegistrationDetailView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):
-    '''Activity registration detail view'''
+    """Activity registration detail view.
+    """
 
     model = ActivityRegistration
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=None) -> ActivityRegistration:
         obj = super().get_object(queryset=queryset)
-
-        if obj:
-            self.title = 'Mi inscripción para ' + obj.activity.title
-
+        self.title = 'Mi inscripción para ' + obj.activity.title
         return obj
 
     def get_context_data(self, **kwargs):
@@ -172,7 +183,7 @@ class RegistrationDetailView(EventMixin, MetadataMixin, LoginRequiredMixin, Deta
 
 
 class RegistrationUpdateView(EventMixin, MetadataMixin, LoginRequiredMixin, UpdateView):
-    '''Activity registration update view'''
+    """Activity registration update view"""
 
     model = ActivityRegistration
 
@@ -181,19 +192,16 @@ class RegistrationUpdateView(EventMixin, MetadataMixin, LoginRequiredMixin, Upda
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset=queryset)
-
-        if obj:
-            self.title = 'Editar mi inscripción para ' + obj.activity.title
-
+    def get_object(self, queryset=None) -> ActivityRegistration:
+        obj: ActivityRegistration = super().get_object(queryset=queryset)
+        self.title = 'Editar mi inscripción para ' + obj.activity.title
         return obj
 
 
 class RegistrationPaidView(EventMixin, LoginRequiredMixin, View):
-    '''Activity registration paid view'''
+    """Activity registration paid view"""
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: AuthenticatedRequest, *args, **kwargs) -> HttpResponse:
         if not self.get_current_event():
             return redirect('sanalberto:index')
 

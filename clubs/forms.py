@@ -1,9 +1,13 @@
-from django.forms import DateTimeInput, ModelForm
+from django.forms import ModelForm
 
-from .models import Club, ClubMeeting
+from .models import (
+    Club,
+    ClubMeeting,
+)
 
 
 class ClubForm(ModelForm):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         query = self.fields['members'].queryset
@@ -15,6 +19,7 @@ class ClubForm(ModelForm):
 
 
 class ClubMeetingForm(ModelForm):
+
     class Meta:
         model = ClubMeeting
         exclude = ['club']

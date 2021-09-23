@@ -1,16 +1,19 @@
 import logging
-import schedule
-
-from importlib import import_module
-from os import environ, getenv
+from os import (
+    environ,
+    getenv,
+)
 
 from django import setup as django_setup
 
-from telegram.ext import Updater, CommandHandler
-
-from .jobs import SchedulerThread, load_jobs
+from telegram.ext import Updater
 
 from .cli import BotCLI
+from .jobs import (
+    SchedulerThread,
+    load_jobs,
+)
+
 
 def main():
     logging.basicConfig(
@@ -33,7 +36,10 @@ def main():
 
     print('Loading handlers...')
 
-    from . import handlers, persistence
+    from . import (
+        handlers,
+        persistence,
+    )
 
     for handler in handlers.get_handlers():
         updater.dispatcher.add_handler(handler)
@@ -64,6 +70,7 @@ def main():
     persistence.close()
 
     print('Bye!')
+
 
 if __name__ == '__main__':
     main()

@@ -1,22 +1,35 @@
 import json
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+)
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, DeleteView
+from django.urls import (
+    reverse,
+    reverse_lazy,
+)
+from django.views.generic import (
+    DeleteView,
+    DetailView,
+)
 from django.views.generic.base import ContextMixin
+from django.views.generic.detail import SingleObjectMixin
 
 from bot.notifications import telegram_notify
 
-from ..models import TradeOffer, TradeOfferAnswer, YEARS
-
+from ..models import (
+    YEARS,
+    TradeOffer,
+    TradeOfferAnswer,
+)
 from .common import TradingPeriodMixin
 
 
-class TradeOfferAnswerLinesMixin(ContextMixin):
+class TradeOfferAnswerLinesMixin(SingleObjectMixin, ContextMixin):
     def get_context_data(self, **kwargs):
         lines = []
 

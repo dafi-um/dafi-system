@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import TemplateView
 
 from meta.views import MetadataMixin
 
@@ -8,6 +8,7 @@ from clubs.models import ClubMeeting
 
 
 class IndexView(MetadataMixin, TemplateView):
+
     template_name = 'main/index.html'
 
     title = 'DAFI'

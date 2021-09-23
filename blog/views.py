@@ -1,5 +1,7 @@
-from django.shortcuts import render
-from django.views.generic import DetailView, ListView
+from django.views.generic import (
+    DetailView,
+    ListView,
+)
 
 from meta.views import MetadataMixin
 
@@ -7,6 +9,7 @@ from .models import Post
 
 
 class IndexView(MetadataMixin, ListView):
+
     title = 'El blog de DAFI'
     description = 'Noticias de la Delegación de Estudiantes de Informática'
     image = 'images/favicon.png'
@@ -17,6 +20,7 @@ class IndexView(MetadataMixin, ListView):
 
 
 class DetailView(DetailView):
+
     model = Post
 
     def get_context_data(self, **kwargs):

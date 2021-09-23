@@ -1,31 +1,41 @@
+from typing import (
+    Iterable,
+    cast,
+)
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import AbstractUser
+from django.forms.models import ModelForm
+from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView, TemplateView
-from django.views.generic.base import ContextMixin
+from django.views.generic import (
+    CreateView,
+    DetailView,
+)
 
 from meta.views import MetadataMixin
 
-from ..models import Poll, PollDesign
-
+from ..models import (
+    Poll,
+    PollDesign,
+)
 from .common import EventMixin
 
 
 class PollMixin(EventMixin):
-    '''Poll mixin'''
+    """Poll mixin.
+    """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    _poll: Poll
 
-        self._poll = False
-
-    def get_poll(self):
-        if self._poll is False:
+    def get_poll(self) -> Poll:
+        try:
+            return self._poll
+        except AttributeError:
             slug = self.kwargs.get('slug')
-            self._poll = Poll.objects.filter(slug=slug).first()
-
-            if self._poll:
-                self.title = self._poll.title
+            self._poll = Poll.objects.filter(slug=slug).get()
+            self.title = self._poll.title
 
         return self._poll
 
@@ -35,35 +45,35 @@ class PollMixin(EventMixin):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.get_poll():
+        try:
+            self.get_poll()
+        except Poll.DoesNotExist:
             return redirect('sanalberto:index')
 
         return super().dispatch(request, *args, **kwargs)
 
 
 class PollIndexView(EventMixin, MetadataMixin, DetailView):
-    '''Poll index view'''
+    """Poll index view.
+    """
 
     model = Poll
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('designs')
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset=queryset)
-
-        if obj:
-            self.title = obj.title
-
+    def get_object(self, queryset=None) -> Poll:
+        obj: Poll = super().get_object(queryset=queryset)
+        self.title = obj.title
         return obj
 
-    def get_my_designs(self):
+    def get_my_designs(self) -> 'Iterable[PollDesign] | None':
         if not self.request.user.is_authenticated:
             return None
 
         return self.get_object().designs.filter(user=self.request.user)
 
-    def get_approved_designs(self):
+    def get_approved_designs(self) -> Iterable[PollDesign]:
         return self.get_object().designs.filter(is_approved=True)
 
     def get_context_data(self, **kwargs):
@@ -75,23 +85,25 @@ class PollIndexView(EventMixin, MetadataMixin, DetailView):
 
 
 class DesignCreateView(PollMixin, MetadataMixin, LoginRequiredMixin, CreateView):
-    '''Design create view'''
+    """Design create view.
+    """
 
     model = PollDesign
     fields = ['title', 'image', 'source_file', 'vector_file']
 
     def dispatch(self, request, *args, **kwargs):
-        poll = self.get_poll()
-
-        if not poll or not poll.register_enabled:
+        try:
+            poll = self.get_poll()
+            assert poll.register_enabled
+        except (Poll.DoesNotExist, AssertionError):
             return redirect('sanalberto:index')
 
         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
+    def form_valid(self, form: 'ModelForm[PollDesign]') -> HttpResponse:
         obj = form.save(commit=False)
         obj.poll = self.get_poll()
-        obj.user = self.request.user
+        obj.user = cast(AbstractUser, self.request.user)
         obj.save()
 
         return redirect('sanalberto:poll_index', slug=obj.poll.slug)

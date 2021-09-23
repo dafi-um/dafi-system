@@ -25,7 +25,7 @@ class BotUtilitiesTests(TestCase):
         self.u3 = StubUser('u3', 'u3', '3333')
 
     def test_create_reply_markup(self):
-        '''create_reply_markup returns same structures as if made manually'''
+        """create_reply_markup returns same structures as if made manually"""
 
         # Single type: callback_data
         m1 = InlineKeyboardMarkup([[
@@ -116,7 +116,7 @@ class BotUtilitiesTests(TestCase):
         )
 
     def test_create_users_list(self):
-        '''Checks the returned values in create_users_list for valid inputs'''
+        """Checks the returned values in create_users_list for valid inputs"""
 
         # No user
         users = []

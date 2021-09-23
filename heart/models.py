@@ -1,7 +1,11 @@
+from datetime import datetime
 from os.path import basename
+from typing import Iterable
 
-from django.contrib.auth import get_user_model
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+)
 from django.db import models
 from django.template.defaultfilters import date
 from django.urls import reverse
@@ -9,21 +13,26 @@ from django.utils.functional import cached_property
 
 from meta.models import ModelMeta
 
-User = get_user_model()
+from users.models import User
 
 
 class Committee(models.Model):
-    '''Internal committee'''
+    """Internal committee.
+    """
 
-    name = models.CharField(
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[Committee]'
+
+    name: 'models.CharField[str, str]' = models.CharField(
         'nombre', max_length=120
     )
 
-    description = models.TextField(
+    description: 'models.TextField[str, str]' = models.TextField(
         'descripción'
     )
 
-    manager = models.ForeignKey(
+    manager: 'models.ForeignKey[User, User]' = models.ForeignKey(
         User, models.PROTECT, verbose_name='responsable'
     )
 
@@ -35,18 +44,23 @@ class Committee(models.Model):
 
 
 class DocumentMedia(models.Model):
-    '''Document and media files'''
+    """Document and media files.
+    """
 
-    name = models.CharField('nombre', max_length=120)
+    id: 'models.AutoField[int, int]'
 
-    file = models.FileField('archivo', upload_to='docs/')
+    objects: 'models.Manager[DocumentMedia]'
 
-    hidden = models.BooleanField(
+    name: 'models.CharField[str, str]' = models.CharField('nombre', max_length=120)
+
+    file: 'models.FileField' = models.FileField('archivo', upload_to='docs/')
+
+    hidden: 'models.BooleanField[bool, bool]' = models.BooleanField(
         'oculto', default=False,
         help_text='Ocultar el archivo en las listas'
     )
 
-    category = models.CharField(
+    category: 'models.CharField[str, str]' = models.CharField(
         'categoría', max_length=200, blank=True, default='',
         help_text=(
             'Los documentos con la misma categoría '
@@ -57,23 +71,26 @@ class DocumentMedia(models.Model):
     class Meta:
         verbose_name = 'documento'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def get_filename(self):
+    def get_filename(self) -> str:
         return basename(self.file.name)
 
 
 class Degree(models.Model):
-    '''Degree'''
+    """Degree.
+    """
 
-    id = models.CharField('identificador', max_length=16, primary_key=True)
+    objects: 'models.Manager[Degree]'
 
-    name = models.CharField('nombre', max_length=120)
+    id: 'models.CharField[str, str]' = models.CharField('identificador', max_length=16, primary_key=True)
 
-    is_master = models.BooleanField('es un máster', default=False)
+    name: 'models.CharField[str, str]' = models.CharField('nombre', max_length=120)
 
-    order = models.IntegerField(
+    is_master: 'models.BooleanField[bool, bool]' = models.BooleanField('es un máster', default=False)
+
+    order: 'models.IntegerField[int, int]' = models.IntegerField(
         'orden', default=0,
         help_text='Las titulaciones con mayor orden salen antes'
     )
@@ -84,25 +101,30 @@ class Degree(models.Model):
 
         ordering = ('-order', 'id')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class Year(models.Model):
-    '''Academic Year'''
+    """Academic Year.
+    """
 
-    year = models.IntegerField('año')
+    id: 'models.AutoField[int, int]'
 
-    degree = models.ForeignKey(
+    objects: 'models.Manager[Year]'
+
+    year: 'models.IntegerField[int, int]' = models.IntegerField('año')
+
+    degree: 'models.ForeignKey[Degree, Degree]' = models.ForeignKey(
         Degree, models.PROTECT, 'years',
         verbose_name='titulación'
     )
 
-    telegram_group = models.CharField(
+    telegram_group: 'models.CharField[str, str]' = models.CharField(
         'grupo de telegram', max_length=64, blank=True, default=''
     )
 
-    telegram_group_link = models.CharField(
+    telegram_group_link: 'models.CharField[str, str]' = models.CharField(
         'enlace al grupo de telegram', max_length=64, blank=True, default=''
     )
 
@@ -111,51 +133,56 @@ class Year(models.Model):
 
         ordering = ('-degree__order', 'degree', 'year',)
 
-    def __str__(self):
-        return '{} Año {}'.format(self.degree.id, self.year)
+    def __str__(self) -> str:
+        return f'{self.degree.id} Año {self.year}'
 
 
 class Group(models.Model):
-    '''Group of Students'''
+    """Group of Students.
+    """
 
-    name = models.CharField(
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[Group]'
+
+    name: 'models.CharField[str, str]' = models.CharField(
         'nombre', max_length=64
     )
 
-    number = models.IntegerField(
+    number: 'models.IntegerField[int, int]' = models.IntegerField(
         'número de grupo', blank=True, null=True
     )
 
-    year = models.ForeignKey(
+    year: 'models.ForeignKey[Year, Year]' = models.ForeignKey(
         Year, models.PROTECT, 'groups',
         verbose_name='año'
     )
 
-    subgroups = models.IntegerField(
+    subgroups: 'models.IntegerField[int, int]' = models.IntegerField(
         'número de subgrupos', validators=[
             MinValueValidator(1), MaxValueValidator(4)
         ]
     )
 
-    delegate = models.ForeignKey(
+    delegate: 'models.ForeignKey[User | None, User | None]' = models.ForeignKey(
         User, models.PROTECT, blank=True, null=True, related_name='delegate_group',
         verbose_name='delegado'
     )
 
-    subdelegate = models.ForeignKey(
+    subdelegate: 'models.ForeignKey[User | None, User | None]' = models.ForeignKey(
         User, models.PROTECT, blank=True, null=True, related_name='subdelegate_group',
         verbose_name='subdelegado'
     )
 
-    telegram_group = models.CharField(
+    telegram_group: 'models.CharField[str, str]' = models.CharField(
         'grupo de telegram', max_length=64, blank=True, default=''
     )
 
-    telegram_group_link = models.CharField(
+    telegram_group_link: 'models.CharField[str, str]' = models.CharField(
         'enlace al grupo de telegram', max_length=64, blank=True, default=''
     )
 
-    class Meta():
+    class Meta:
         verbose_name = 'grupo'
 
         ordering = ('-year__degree__order', 'year__degree', 'year', 'number')
@@ -164,50 +191,53 @@ class Group(models.Model):
             ('can_link_group', 'Puede vincular un grupo de Telegram con un grupo de alumnos')
         ]
 
-    def __str__(self):
-        return '{} {}'.format(
-            self.year, self.name
-        )
+    def __str__(self) -> str:
+        return f'{self.year} {self.name}'
 
-    def subgroups_range(self):
+    def subgroups_range(self) -> Iterable[int]:
         return range(1, self.subgroups + 1)
 
-    def degree(self):
+    def degree(self) -> Degree:
         return self.year.degree
 
 
 class Meeting(ModelMeta, models.Model):
-    '''Assembly and commitees meetings'''
+    """Assembly and commitees meetings.
+    """
 
-    date = models.DateTimeField('fecha')
+    id: 'models.AutoField[int, int]'
 
-    is_ordinary = models.BooleanField(
+    objects: 'models.Manager[Meeting]'
+
+    date: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField('fecha')
+
+    is_ordinary: 'models.BooleanField[bool, bool]' = models.BooleanField(
         'es una asamblea ordinaria', default=True
     )
 
-    call = models.FileField(
+    call: 'models.FileField' = models.FileField(
         'convocatoria', upload_to='meetings/'
     )
 
-    minutes = models.FileField(
+    minutes: 'models.FileField' = models.FileField(
         'acta', upload_to='meetings/', blank=True
     )
 
-    minutes_approved = models.BooleanField(
+    minutes_approved: 'models.BooleanField[bool, bool]' = models.BooleanField(
         'el acta se ha aprobado', default=False
     )
 
-    documents = models.ManyToManyField(
+    documents: 'models.ManyToManyField[None, models.Manager[DocumentMedia]]' = models.ManyToManyField(
         DocumentMedia, verbose_name='documentos relacionados',
         blank=True
     )
 
-    attendees = models.ManyToManyField(
+    attendees: 'models.ManyToManyField[None, models.Manager[User]]' = models.ManyToManyField(
         User, 'meetings_attended',
         verbose_name='asistentes', blank=True
     )
 
-    absents = models.ManyToManyField(
+    absents: 'models.ManyToManyField[None, models.Manager[User]]' = models.ManyToManyField(
         User, 'meetings_absent',
         verbose_name='ausencias justificadas', blank=True
     )
@@ -222,30 +252,36 @@ class Meeting(ModelMeta, models.Model):
 
         ordering = ('-date',)
 
-    def __str__(self):
-        return 'Asamblea de Alumnos {}'.format(date(self.date, 'j F Y'))
+    def __str__(self) -> str:
+        when = date(self.date, 'j F Y')
+        return f'Asamblea de Alumnos {when}'
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse('heart:meetings_update', args=[self.pk])
 
 
 class PeopleGroup(models.Model):
-    '''Groups of relevant people'''
+    """Groups of relevant people.
+    """
 
-    name = models.CharField(
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[PeopleGroup]'
+
+    name: 'models.CharField[str, str]' = models.CharField(
         'nombre', max_length=120, unique=True
     )
 
-    members = models.ManyToManyField(
+    members: 'models.ManyToManyField[None, models.Manager[User]]' = models.ManyToManyField(
         User, through='PeopleGroupMember'
     )
 
-    order = models.IntegerField(
+    order: 'models.IntegerField[int, int]' = models.IntegerField(
         'orden', default=1,
         help_text='Se ordena de forma creciente (menor número sale antes).'
     )
 
-    is_hidden = models.BooleanField(
+    is_hidden: 'models.BooleanField[bool, bool]' = models.BooleanField(
         'ocultar grupo', default=False,
         help_text=(
             'Ocultar los miembros de este colectivo '
@@ -253,7 +289,7 @@ class PeopleGroup(models.Model):
         )
     )
 
-    show_in_meetings = models.BooleanField(
+    show_in_meetings: 'models.BooleanField[bool, bool]' = models.BooleanField(
         'mostrar en asambleas', default=True,
         help_text=(
             'Mostrar los miembros de este colectivo '
@@ -267,26 +303,31 @@ class PeopleGroup(models.Model):
 
         ordering = ('order', 'name')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class PeopleGroupMember(models.Model):
-    '''Members of groups of relevant people'''
+    """Members of groups of relevant people.
+    """
 
-    group = models.ForeignKey(
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[PeopleGroupMember]'
+
+    group: 'models.ForeignKey[PeopleGroup, PeopleGroup]' = models.ForeignKey(
         PeopleGroup, models.CASCADE, verbose_name='grupo'
     )
 
-    user = models.ForeignKey(
+    user: 'models.ForeignKey[User, User]' = models.ForeignKey(
         User, models.CASCADE, verbose_name='usuario'
     )
 
-    title = models.CharField(
+    title: 'models.CharField[str, str]' = models.CharField(
         'título', max_length=120, default='', blank=True
     )
 
-    order = models.IntegerField(
+    order: 'models.IntegerField[int, int]' = models.IntegerField(
         'orden', default=1,
         help_text='Se ordena de forma creciente (menor número sale antes).'
     )
@@ -297,14 +338,14 @@ class PeopleGroupMember(models.Model):
 
         ordering = ('order', 'user__first_name')
 
-    def __str__(self):
-        txt = '{} en {}'.format(self.user.email, self.group)
+    def __str__(self) -> str:
+        txt = f'{self.user.email} en {self.group}'
 
         if self.title:
-            txt += ' ({})'.format(self.title)
+            txt += f' ({self.title})'
 
         return txt
 
     @cached_property
-    def name(self):
+    def name(self) -> str:
         return self.user.get_full_name()

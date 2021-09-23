@@ -1,13 +1,14 @@
-import schedule
 import threading
-
 from time import sleep
+
+import schedule
+
 
 _jobs = []
 
 
 class SchedulerThread(threading.Thread):
-    '''Thread that runs scheduled jobs'''
+    """Thread that runs scheduled jobs"""
 
     stopper = threading.Event()
 
@@ -21,7 +22,7 @@ class SchedulerThread(threading.Thread):
 
 
 def add_job(timing):
-    '''Decorator to add a job to the scheduler'''
+    """Decorator to add a job to the scheduler"""
 
     def decorator(job):
         _jobs.append((timing, job))
@@ -29,8 +30,9 @@ def add_job(timing):
 
     return decorator
 
+
 def load_jobs(bot):
-    '''Loads all the scheduled jobs into the scheduler'''
+    """Loads all the scheduled jobs into the scheduler"""
 
     for timing, job in _jobs:
         timing.do(job, bot)

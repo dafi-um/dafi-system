@@ -1,13 +1,17 @@
+from typing import Type
+
 from django.urls import path
+from django.views.generic.base import View
 
 from . import views
+
 
 urlpatterns = [
     path('', views.ProfileView.as_view(), name='profile'),
     path('crear/', views.SignUpView.as_view(), name='signup'),
 ]
 
-urls = [
+urls: list[tuple[str, str, Type[View]]] = [
     ('acceder/', 'login', views.LoginView),
     ('salir/', 'logout', views.LogoutView),
     ('cambiar-clave/', 'password_change', views.PasswordChangeView),

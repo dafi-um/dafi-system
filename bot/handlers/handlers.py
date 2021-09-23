@@ -1,10 +1,18 @@
-from telegram import ParseMode as _ParseMode
-from telegram.error import BadRequest, ChatMigrated
-from telegram.ext import CallbackQueryHandler, CommandHandler, run_async
-
 from django.contrib.auth import get_user_model as _get_user_model
 
+from telegram import ParseMode as _ParseMode
+from telegram.error import (
+    BadRequest,
+    ChatMigrated,
+)
+from telegram.ext import (
+    CallbackQueryHandler,
+    CommandHandler,
+    run_async,
+)
+
 from main.models import Config
+
 
 _user_model = _get_user_model()
 
@@ -12,7 +20,8 @@ _handlers = []
 
 
 class BasicBotHandler():
-    '''Basic bot handler functionality and checks'''
+    """Basic bot handler functionality and checks.
+    """
 
     cmd = None
     commands_available = []
@@ -70,7 +79,6 @@ class BasicBotHandler():
 
     def get_invite_link(self):
         chat_id = self.update.effective_chat.id
-        chat = self.context.bot.get_chat(chat_id)
 
         try:
             return chat_id, self.context.bot.export_chat_invite_link(chat_id)
@@ -166,7 +174,6 @@ class BasicBotHandler():
                 self.msg, reply_markup=self.reply_markup
             )
 
-    @run_async
     def run(self):
         if not self.run_checks():
             return self.send_answer()
@@ -213,6 +220,7 @@ class BasicBotHandler():
                 handlers.append(create_cmd_handler(cls, cmd))
 
         if cls.query_prefix and callable(getattr(cls, 'callback', None)):
+            @run_async
             def callback_handler(update, context):
                 return cls(update, context).run()
 
@@ -232,11 +240,13 @@ def create_cmd_handler(cls, cmd):
 
     return CommandHandler(cmd, cmd_handler)
 
+
 def add_handlers(cls):
     global _handlers
 
     _handlers += cls.get_handlers()
     return cls
+
 
 def get_handlers():
     return _handlers

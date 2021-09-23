@@ -1,4 +1,8 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
+
 
 def create_reply_markup(*lines, prefix=None):
     buttons = []
@@ -19,6 +23,7 @@ def create_reply_markup(*lines, prefix=None):
         buttons.append(line)
 
     return InlineKeyboardMarkup(buttons)
+
 
 def create_users_list(users):
     if not users:

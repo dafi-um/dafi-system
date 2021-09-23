@@ -1,13 +1,19 @@
 import os
 
-from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+    Bot,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 
 from main.utils import get_domain
+
 
 _bot = None
 
 if 'BOT_TOKEN' in os.environ:
     _bot = Bot(os.environ['BOT_TOKEN'])
+
 
 def telegram_notify(user, message, url=None, url_button=None):
     if not _bot or not user.telegram_id:

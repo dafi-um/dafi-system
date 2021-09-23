@@ -1,16 +1,21 @@
 import schedule
+from telegram import (
+    ParseMode,
+    TelegramError,
+    Update,
+)
+from telegram.ext import CallbackContext
 
-from telegram import ParseMode
-
-from django.contrib.auth import get_user_model
+from users.models import User
 
 from .. import persistence
 from ..jobs import add_job
 from ..utils import create_reply_markup
+from .handlers import (
+    BasicBotHandler,
+    add_handlers,
+)
 
-from .handlers import add_handlers, BasicBotHandler, Config
-
-User = get_user_model()
 
 ROOM_MEMBERS_LIST = 'room_members'
 ROOM_QUEUE_LIST = 'room_queue'
@@ -21,7 +26,8 @@ ALT_ROOM_QUEUE_LIST = 'alt_room_queue'
 
 @add_handlers
 class DafiRoom(BasicBotHandler):
-    '''Main room handler'''
+    """Main room handler.
+    """
 
     cmd = 'dafi'
     query_prefix = 'dafi'
@@ -40,11 +46,12 @@ class DafiRoom(BasicBotHandler):
 
     OPTIONS = (OPTION_ON, OPTION_OFF, OPTION_LIST)
 
-    def command(self, update, context):
-        members = persistence.get_item(self.members_list_key, [])
+    def command(self, update: Update, context: CallbackContext):
+        members: list[User] = persistence.get_item(self.members_list_key, [])
 
         if not context.args:
             if not members:
+                assert update.effective_user
                 reply_markup = create_reply_markup(
                     [(
                         'Avísame cuando llegue alguien ✔️',
@@ -99,7 +106,7 @@ class DafiRoom(BasicBotHandler):
                 for user_id in queue:
                     try:
                         context.bot.send_message(user_id, msg)
-                    except:
+                    except TelegramError:
                         # So many errors can occur here but it's a simple
                         # notification, so we'll just ignore a failed one
                         pass
@@ -110,7 +117,7 @@ class DafiRoom(BasicBotHandler):
                 ('Me voy 💤', '{}:off'.format(self.query_prefix))
             ])
 
-            return 'He anotado que estás en DAFI ✅'.format(self.room_name), reply_markup
+            return 'He anotado que estás en DAFI ✅', reply_markup
 
         elif action == self.OPTION_OFF:
             if user not in members:
@@ -186,7 +193,8 @@ class DafiRoom(BasicBotHandler):
 
 @add_handlers
 class AltRoomHandler(DafiRoom):
-    '''Alternative room handler'''
+    """Alternative room handler.
+    """
 
     cmd = 'repro'
     query_prefix = 'repro'

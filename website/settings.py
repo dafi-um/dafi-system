@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'clubs', # .apps.ClubsConfig
     'trading', # .apps.TradingConfig
     'feedback', # .apps.FeedbackConfig
-    'notes', # .apps.NotesConfig
     'sanalberto', # .apps.SanAlbertoConfig
     'bot', # .apps.BotConfig
 

@@ -1,24 +1,32 @@
-from telegram import ParseMode
+from typing import cast
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 
+from telegram import (
+    ParseMode,
+    Update,
+)
+from telegram.ext import CallbackContext
+
 from heart.models import Group
+from users.models import User
 
 from .. import persistence
 from ..utils import create_reply_markup
+from .handlers import (
+    BasicBotHandler,
+    add_handlers,
+)
 
-from .handlers import add_handlers, BasicBotHandler
-
-User = get_user_model()
 
 ELECTIONS_KEY = 'elections_active'
 
 
 @add_handlers
 class ElectionsToggleHandler(BasicBotHandler):
-    '''Toggle the elections period'''
+    """Toggle the elections period.
+    """
 
     cmd = 'elecciones'
     query_prefix = 'elections_toggle'
@@ -70,7 +78,8 @@ class ElectionsToggleHandler(BasicBotHandler):
 
 @add_handlers
 class ElectionRequestMixin(BasicBotHandler):
-    '''Mixin to handle elections request commands'''
+    """Mixin to handle elections request commands.
+    """
 
     commands_available = [
         'soydelegado',
@@ -84,9 +93,11 @@ class ElectionRequestMixin(BasicBotHandler):
     def elections_active(self):
         return persistence.get_item(ELECTIONS_KEY, False)
 
-    def command(self, update, context):
+    def command(self, update: Update, context: CallbackContext):
         if not self.elections_active():
             return 'No hay un periodo de elecciones activo ⚠️'
+
+        assert context.args is not None
 
         is_delegate = self.current_command == self.commands_available[0]
 
@@ -98,7 +109,10 @@ class ElectionRequestMixin(BasicBotHandler):
             return '**Uso**: _/soy{0}delegado <ID>_\n\n'.format(prefix)
 
         telegram_user = update.effective_user
-        user = self.get_user()
+        assert telegram_user is not None
+
+        user: 'User | None' = self.get_user()
+        assert user is not None
 
         group = Group.objects.filter(id=group_id).first()
 
@@ -135,7 +149,7 @@ class ElectionRequestMixin(BasicBotHandler):
     def callback_user_filter(self, user):
         return user.has_perm('bot.can_manage_elections')
 
-    def callback(self, update, context, action, *args):
+    def callback(self, update: Update, context: CallbackContext, action, *args):
         if action != 'deny' and action != 'request':
             return
 
@@ -188,11 +202,11 @@ class ElectionRequestMixin(BasicBotHandler):
         else:
             msg = 'Tu petición para ser {}delegado ha sido denegada ❌'.format(prefix)
 
-        self.context.bot.send_message(user_id, msg)
+        context.bot.send_message(user_id, msg)
 
         msg = 'La solicitud de {} ha sido {} por {}'.format(
             user.get_full_name(), 'aceptada' if accepted else 'denegada',
-            self.get_user().get_full_name()
+            cast(User, self.get_user()).get_full_name()
         )
 
         if accepted:

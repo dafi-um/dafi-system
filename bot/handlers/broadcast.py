@@ -1,15 +1,23 @@
-import itertools
-
-from telegram import ParseMode
-
 from django.db.models import Q
 
-from heart.models import Group, Year
+from telegram import (
+    Message,
+    ParseMode,
+    TelegramError,
+    Update,
+)
+from telegram.ext import CallbackContext
+
 from clubs.models import Club
+from heart.models import Group
+from users.models import User
 
 from ..utils import create_reply_markup
+from .handlers import (
+    BasicBotHandler,
+    add_handlers,
+)
 
-from .handlers import add_handlers, BasicBotHandler
 
 TARGET_GROUPS = 'groups'
 TARGET_CLUBS = 'clubs'
@@ -19,39 +27,44 @@ BROADCAST_TARGETS = [
     TARGET_CLUBS
 ]
 
-pending_broadcasts = {}
-
 
 class Broadcast():
-    '''Broadcast helper'''
+    """Broadcast helper.
+    """
 
-    def __init__(self, text):
+    def __init__(self, text: str):
         self.text = text
-        self.msg = None
-        self.chats = set()
+        self.msg: 'Message | None' = None
+        self.chats: set[tuple[str, str]] = set()
 
-    def add_chat(self, title, id):
+    def add_chat(self, title: str, id: str) -> None:
         self.chats.add((title, id))
+
+
+pending_broadcasts: dict[str, Broadcast] = {}
 
 
 @add_handlers
 class BroadcastHandler(BasicBotHandler):
-    '''Sends a broadcast message (only staff and managers)'''
+    """Sends a broadcast message (only staff and managers).
+    """
 
     cmd = 'broadcast'
     query_prefix = 'broadcast'
 
     user_required = True
 
-    def user_filter(self, user):
+    def user_filter(self, user: User):
         return user.has_perm('bot.can_manage_permissions')
 
-    def callback_user_filter(self, user):
+    def callback_user_filter(self, user: User):
         return user.has_perm('bot.can_manage_permissions')
 
-    def command(self, update, context):
+    def command(self, update: Update, context: CallbackContext):
         message = update.effective_message
-        reply = message.reply_to_message
+        assert message is not None
+
+        reply: Message = message.reply_to_message
 
         if not reply:
             message.reply_markdown(
@@ -87,6 +100,8 @@ class BroadcastHandler(BasicBotHandler):
         )
 
         msg = 'El mensaje se enviará a los siguientes grupos:\n\n'
+
+        assert context.args is not None
 
         targets = context.args[0].split(';') if len(context.args) else BROADCAST_TARGETS
 
@@ -144,11 +159,11 @@ class BroadcastHandler(BasicBotHandler):
         # TODO: Remove when the handlers API is updated to ignore returned values
         self.msg = None
 
-    def callback(self, update, context, action, *args):
+    def callback(self, update: Update, context: CallbackContext, action: str, *args):
         if not len(args):
             return
 
-        bcast_id = args[0]
+        bcast_id: str = args[0]
 
         if bcast_id not in pending_broadcasts:
             # TODO: Update
@@ -172,7 +187,7 @@ class BroadcastHandler(BasicBotHandler):
                 context.bot.send_message(
                     chat_id, bcast_obj.text, ParseMode.MARKDOWN
                 )
-            except:
+            except TelegramError:
                 errors.append(chat_title)
 
         msg = '¡Mensaje enviado con éxito a {} chats!\n'.format(
