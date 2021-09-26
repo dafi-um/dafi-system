@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.models import (
     AbstractUser,
     Group,
+    UserManager,
 )
 from django.db import models
 
@@ -18,6 +19,8 @@ class User(AbstractUser):
     """
 
     id: 'models.AutoField[int, int]'
+
+    objects: 'UserManager[User]'
 
     groups: 'models.manager.RelatedManager[Group]'
 

@@ -173,6 +173,11 @@ CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
 
+# Bot
+
+BOT_TOKEN = env.str('BOT_TOKEN', default='')
+
+
 # Payments
 
 STRIPE_PK = env.str('STRIPE_PK', default='')

@@ -1,5 +1,4 @@
 from telegram import (
-    Message,
     TelegramError,
     Update,
 )
@@ -7,80 +6,74 @@ from telegram.ext import CallbackContext
 
 from users.models import User
 
-from ..utils import create_reply_markup
-from .handlers import (
-    BasicBotHandler,
-    add_handlers,
+from ..decorators import (
+    auth_required,
+    limit_chat_type,
+)
+from ..utils import (
+    create_reply_markup,
+    prepare_callback,
 )
 
 
-@add_handlers
-class MainHandler(BasicBotHandler):
-    """Start command and generic callback handler.
-    """
+@limit_chat_type('private', silent=True)
+def cmd_start(update: Update, context: CallbackContext) -> None:
+    assert update.effective_message is not None
+    assert update.effective_user is not None
 
-    cmd = 'start'
-    query_prefix = 'main'
+    update.effective_message.reply_text(
+        f'Hola {update.effective_user.first_name}, soy el DAFI Bot. ¿En qué puedo ayudarte?'
+    )
 
-    def command(self, update: Update, context: CallbackContext):
-        assert update.effective_chat is not None
-        assert isinstance(update.message, Message)
+    user = User.objects.filter(telegram_user=update.effective_user.username).first()
 
-        if update.effective_chat.type != 'private':
-            return
+    if user is None:
+        return None
 
-        telegram_user = update.message.from_user
-        user = User.objects.filter(telegram_user=telegram_user.username).first()
+    if not user.telegram_id:
+        update.effective_message.reply_markdown(
+            f'He encontrado una cuenta de DAFI ({user.email}) '
+            'con tu usuario de Telegram, ¿quieres vincularla '
+            'ahora a tu cuenta de Telegram?',
 
-        update.message.reply_text(
-            'Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?'.format(telegram_user.first_name)
-        )
-
-        if user and not user.telegram_id:
-            msg = (
-                'He encontrado una cuenta de DAFI ({}) '
-                'con tu usuario de Telegram, ¿quieres vincularla '
-                'ahora a tu cuenta de Telegram?'
-            ).format(user.email)
-
-            reply_markup = create_reply_markup([
+            reply_markup=create_reply_markup([
                 ('Sí, vincular cuenta', 'users:link'),
-                ('No, cancelar', 'main:abort'),
-            ])
-
-            return msg, reply_markup
-
-    def callback(self, update: Update, context: CallbackContext, action, *args):
-        if action == 'abort':
-            return 'Operación cancelada.'
-        elif action == 'okey':
-            return '¡De acuerdo!'
-
-
-@add_handlers
-class GetGroupID(BasicBotHandler):
-    """Sends the user a chat ID keeping it secret (only superusers)"""
-
-    cmd = 'getid'
-
-    def command(self, update: Update, context: CallbackContext):
-        user: 'User | None' = self.get_user()
-
-        if not user or not user.is_superuser:
-            return
-
-        chat = update.effective_chat
-        assert chat is not None
-
-        msg = 'ID de {}: {}'.format(
-            chat.title or chat.username or 'desconocido', chat.id
+                ('No, cancelar', 'main:start_link_cancel'),
+            ]),
         )
 
-        assert update.effective_message is not None
 
-        try:
-            update.effective_message.delete()
-        except TelegramError:
-            msg += '\n(No he podido eliminar el comando del chat)'
+def callback_generic(update: Update, context: CallbackContext) -> None:
+    query, action, _ = prepare_callback(update)
 
-        self.answer_private(msg)
+    if action == 'abort':
+        query.edit_message_text('¡Operación cancelada!')
+    elif action == 'okey':
+        query.edit_message_text('¡De acuerdo!')
+    elif action == 'start_link_cancel':
+        query.edit_message_text(
+            '¡Okey! Recuerda que puedes vincular tu cuenta en cualquier '
+            'momento ejecutando /vincular'
+        )
+
+    query.answer()
+
+
+@auth_required(only_superuser=True, silent=True)
+def cmd_getid(update: Update, context: CallbackContext, *args) -> None:
+    assert update.effective_chat is not None
+    assert update.effective_message is not None
+    assert update.effective_user is not None
+
+    chat = update.effective_chat
+
+    msg = 'ID de {}: {}'.format(
+        chat.title or chat.username or 'desconocido', chat.id
+    )
+
+    try:
+        update.effective_message.delete()
+    except TelegramError:
+        msg += '\n(No he podido eliminar el comando del chat)'
+
+    context.bot.send_message(update.effective_user.id, msg)
