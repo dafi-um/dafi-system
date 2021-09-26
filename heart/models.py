@@ -121,11 +121,13 @@ class Year(models.Model):
     )
 
     telegram_group: 'models.CharField[str, str]' = models.CharField(
-        'grupo de telegram', max_length=64, blank=True, default=''
+        'grupo de telegram', max_length=64,
+        blank=True, null=True,
     )
 
     telegram_group_link: 'models.CharField[str, str]' = models.CharField(
-        'enlace al grupo de telegram', max_length=64, blank=True, default=''
+        'enlace al grupo de telegram', max_length=64,
+        blank=True, null=True,
     )
 
     class Meta:
@@ -175,11 +177,13 @@ class Group(models.Model):
     )
 
     telegram_group: 'models.CharField[str, str]' = models.CharField(
-        'grupo de telegram', max_length=64, blank=True, default=''
+        'grupo de telegram', max_length=64,
+        blank=True, null=True,
     )
 
     telegram_group_link: 'models.CharField[str, str]' = models.CharField(
-        'enlace al grupo de telegram', max_length=64, blank=True, default=''
+        'enlace al grupo de telegram', max_length=64,
+        blank=True, null=True,
     )
 
     class Meta:
@@ -199,6 +203,10 @@ class Group(models.Model):
 
     def degree(self) -> Degree:
         return self.year.degree
+
+    @property
+    def display_title(self) -> str:
+        return self.__str__()
 
 
 class Meeting(ModelMeta, models.Model):

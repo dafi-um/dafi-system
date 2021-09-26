@@ -47,11 +47,13 @@ class Club(ModelMeta, models.Model):
     )
 
     telegram_group: 'models.CharField[str, str]' = models.CharField(
-        'grupo de telegram', max_length=64, blank=True, default=''
+        'grupo de telegram', max_length=64,
+        blank=True, null=True,
     )
 
     telegram_group_link: 'models.CharField[str, str]' = models.CharField(
-        'enlace al grupo de telegram', max_length=64, blank=True, default=''
+        'enlace al grupo de telegram', max_length=64,
+        blank=True, null=True,
     )
 
     managers: 'models.ManyToManyField[None, models.Manager[AbstractUser]]' = models.ManyToManyField(
