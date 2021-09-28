@@ -3,17 +3,23 @@ import json
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    int_list_validator,
+)
 from django.db import models
-from django.shortcuts import reverse
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 
 
 class Subject(models.Model):
-    '''
+    """
     Academic subject
-    '''
+    """
+
+    id: 'models.AutoField[int, int]'
 
     QUARTERS = [
         (1, 'Primer cuatrimestre'),
@@ -57,7 +63,7 @@ class Subject(models.Model):
 
 
 class Year:
-    '''Academic year'''
+    """Academic year"""
 
     def __init__(self, id, max_subgroups, groups):
         self.id = id
@@ -99,9 +105,11 @@ YEARS = {
 
 
 class TradePeriod(models.Model):
-    '''
+    """
     Trading allowed Period
-    '''
+    """
+
+    id: 'models.AutoField[int, int]'
 
     name = models.CharField('nombre', max_length=120)
     start = models.DateTimeField('fecha de inicio')
@@ -125,9 +133,11 @@ class TradePeriod(models.Model):
 
 
 class TradeOffer(models.Model):
-    '''
+    """
     Trading Offer
-    '''
+    """
+
+    id: 'models.AutoField[int, int]'
 
     user = models.ForeignKey(get_user_model(), models.CASCADE, verbose_name='usuario')
     period = models.ForeignKey(TradePeriod, models.CASCADE, verbose_name='periodo')
@@ -155,9 +165,11 @@ class TradeOffer(models.Model):
 
 
 class TradeOfferLine(models.Model):
-    '''
+    """
     Trading Offer Line representing all the subjects in a year
-    '''
+    """
+
+    id: 'models.AutoField[int, int]'
 
     offer = models.ForeignKey(
         TradeOffer, on_delete=models.CASCADE, related_name='lines', verbose_name='oferta'
@@ -243,7 +255,7 @@ class TradeOfferLine(models.Model):
 
         for subject in started_list:
             if subject not in subjects_list:
-                errors['started'] = 'La asignatura {} no aparece en esta línea'.format(s.code)
+                errors['started'] = 'La asignatura {} no aparece en esta línea'.format(subject)
 
         if self.started and not started_list:
             errors['started'] = 'Valor de intercambios iniciados inválido'
@@ -252,7 +264,7 @@ class TradeOfferLine(models.Model):
 
         for subject in completed_list:
             if subject not in started_list:
-                errors['completed'] = 'La asignatura {} no se está intercambiando'.format(s.code)
+                errors['completed'] = 'La asignatura {} no se está intercambiando'.format(subject)
 
         if self.completed and not completed_list:
             errors['completed'] = 'Valor de intercambios completados inválido'
@@ -298,9 +310,11 @@ class TradeOfferLine(models.Model):
         return self.year - 1
 
 class TradeOfferAnswer(models.Model):
-    '''
+    """
     Trade Offer Answer
-    '''
+    """
+
+    id: 'models.AutoField[int, int]'
 
     offer = models.ForeignKey(
         TradeOffer, models.CASCADE, 'answers', verbose_name='oferta'

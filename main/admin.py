@@ -2,18 +2,18 @@ from django.contrib import admin
 from django.contrib.flatpages.admin import FlatPageAdmin
 from django.contrib.flatpages.models import FlatPage
 
-from pagedown.widgets import AdminPagedownWidget
-
-from . import models
 from .forms import FlatPageForm
+from .models import Config
 
 
-@admin.register(models.Config)
+@admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
+
     list_display = ('key', 'name', 'category')
 
 
 class PageAdmin(FlatPageAdmin):
+
     form = FlatPageForm
 
 

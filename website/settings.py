@@ -11,17 +11,14 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from email.utils import getaddresses
+from typing import cast
+
 import environ
 
-from email.utils import getaddresses
 
-env = environ.Env(
-    ADMINS=(str, ''),
-    DEBUG=(bool, False),
-    HOSTS=(list, [])
-)
-
-environ.Env.read_env('.env')
+env = environ.Env()
+env.read_env('.env')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,11 +26,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Application configuration
 
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env.str('SECRET_KEY', default='my-random-secret-key')
 
-DEBUG = env('DEBUG')
+DEBUG = cast(bool, env.bool('DEBUG', default=False))
 
-ALLOWED_HOSTS = env('HOSTS')
+ALLOWED_HOSTS = env.list('HOSTS', default=[])
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # Application definition
@@ -41,6 +40,7 @@ ALLOWED_HOSTS = env('HOSTS')
 SITE_ID = 1
 
 INSTALLED_APPS = [
+    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,19 +49,23 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'users.apps.UsersConfig',
-    'main.apps.MainConfig',
-    'heart.apps.HeartConfig',
-    'blog.apps.BlogConfig',
-    'clubs.apps.ClubsConfig',
-    'trading.apps.TradingConfig',
-    'feedback.apps.FeedbackConfig',
-    'sanalberto.apps.SanAlbertoConfig',
-    'bot.apps.BotConfig',
-    'django_cleanup.apps.CleanupConfig',
+
+    # Our apps
+    'users', # .apps.UsersConfig
+    'main', # .apps.MainConfig
+    'heart', # .apps.HeartConfig
+    'blog', # .apps.BlogConfig
+    'clubs', # .apps.ClubsConfig
+    'trading', # .apps.TradingConfig
+    'feedback', # .apps.FeedbackConfig
+    'sanalberto', # .apps.SanAlbertoConfig
+    'bot', # .apps.BotConfig
+
+    # 3rd party
     'pagedown',
     'markdown_deux',
     'meta',
+    'django_cleanup', # .apps.CleanupConfig
 ]
 
 MIDDLEWARE = [
@@ -98,10 +102,6 @@ WSGI_APPLICATION = 'website.wsgi.application'
 # Database
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    # }
     'default': env.db('DB_URL', default='sqlite:///db.sqlite3'),
 }
 
@@ -132,16 +132,17 @@ LOGGING = {
 
 # Communication
 
-ADMINS = getaddresses([env('ADMINS')])
+ADMINS = getaddresses(cast(list, env.list('ADMINS', default=[])))
 
-DEFAULT_FROM_EMAIL = env('EMAIL_FROM')
+DEFAULT_FROM_EMAIL = env.str('EMAIL_FROM', default='DAFI <dafi@um.es>')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+if not DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_USE_SSL = True
+    EMAIL_USE_SSL = True
 
-EMAIL_CONFIG = env.email_url('EMAIL')
-vars().update(EMAIL_CONFIG)
+    EMAIL_CONFIG = env.email_url('EMAIL')
+    vars().update(EMAIL_CONFIG)
 
 
 # Auth
@@ -172,18 +173,23 @@ CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
 
+# Bot
+
+BOT_TOKEN = env.str('BOT_TOKEN', default='')
+
+
 # Payments
 
-STRIPE_PK = env('STRIPE_PK')
+STRIPE_PK = env.str('STRIPE_PK', default='')
 
-STRIPE_SK = env('STRIPE_SK')
+STRIPE_SK = env.str('STRIPE_SK', default='')
 
 
 # FIUMCRAFT
 
-FIUMCRAFT_WHITELIST_ENDPOINT = env('FIUMCRAFT_WHITELIST_ENDPOINT')
+FIUMCRAFT_WHITELIST_ENDPOINT = env.str('FIUMCRAFT_WHITELIST_ENDPOINT', default='')
 
-FIUMCRAFT_WHITELIST_TOKEN = env('FIUMCRAFT_WHITELIST_TOKEN')
+FIUMCRAFT_WHITELIST_TOKEN = env.str('FIUMCRAFT_WHITELIST_TOKEN', default='')
 
 
 # Internationalization

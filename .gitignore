@@ -2,11 +2,10 @@
 .vscode/**
 
 # Python
-venv
+venv**
 __pycache__
 *.pyc
 db.sqlite3*
-botstorage
 
 # Dist
 /static
@@ -19,3 +18,7 @@ botstorage
 *.log
 *.pid
 *.sock
+
+# Bot
+botstorage
+bot_persistence

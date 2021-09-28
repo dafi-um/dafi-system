@@ -3,7 +3,7 @@ DAFI Website
 
 ## Requirements
 
-You'll need Python 3.6 or higher and a compatible version of pip to run this project.
+You'll need Python 3.9 or higher and a compatible version of pip to run this project.
 
 ## Deployment
 

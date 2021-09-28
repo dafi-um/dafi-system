@@ -5,6 +5,7 @@ from pagedown.widgets import AdminPagedownWidget
 
 
 class FlatPageForm(forms.ModelForm):
+
     content = forms.CharField(widget=AdminPagedownWidget())
 
     class Meta:

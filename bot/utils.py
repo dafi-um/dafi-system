@@ -1,34 +1,80 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from typing import (
+    Iterable,
+    cast,
+)
 
-def create_reply_markup(*lines, prefix=None):
-    buttons = []
+from telegram import (
+    Bot,
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyMarkup,
+    Update,
+)
+from telegram.chat import Chat
+from telegram.error import (
+    BadRequest,
+    ChatMigrated,
+)
 
-    for items in lines:
-        line = []
+from users.models import User
 
-        for text, data, *extra in items:
-            url = extra[0] if extra else None
 
-            if prefix:
-                data = prefix + ':' + data
+def prepare_callback(update: Update) -> tuple[CallbackQuery, str, list[str]]:
+    """Parses the update callback query.
 
-            line.append(
-                InlineKeyboardButton(text, callback_data=data, url=url)
-            )
+    Provides a type-safe way of getting the callback query object.
 
-        buttons.append(line)
+    Splits the callback query data by ':', discarding the first item and
+    returning the second one by itself and the remaining as a list.
+    """
+    assert update.callback_query is not None
 
-    return InlineKeyboardMarkup(buttons)
+    query: CallbackQuery = update.callback_query
 
-def create_users_list(users):
+    _, action, *args = cast(str, query.data).split(':')
+
+    return query, action, args
+
+
+def create_reply_markup(*lines: list[tuple[str, str]]) -> ReplyMarkup:
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(text, callback_data=data)
+            for text, data in button
+        ]
+        for button in lines
+    ])
+
+
+def user_display_link(user: User) -> str:
+    return '{} ([@{}](tg://user?id={}))'.format(
+        user.get_full_name(), user.telegram_user, user.telegram_id
+    )
+
+
+def create_users_list(users: Iterable[User]) -> str:
     if not users:
-        return '\nNo hay usuarios para mostrar...'
+        return '_No hay usuarios para mostrar_'
 
-    msg = ''
+    return '\n'.join(user_display_link(user) for user in users)
 
-    for user in users:
-        msg += '\n[{}](tg://user?id={})'.format(
-            user.get_full_name(), user.telegram_id
-        )
 
-    return msg
+def generate_invite_link(chat: Chat, bot: Bot) -> 'str | None':
+    """Generates an invite link for the given chat.
+
+    Returns None on error.
+    """
+    chat_id = chat.id
+
+    try:
+        return bot.export_chat_invite_link(chat_id)
+    except BadRequest:
+        return None
+    except ChatMigrated as e:
+        chat_id = e.new_chat_id
+
+    try:
+        return bot.export_chat_invite_link(chat_id)
+    except BadRequest:
+        return None

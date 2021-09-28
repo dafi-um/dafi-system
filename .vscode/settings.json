@@ -1,4 +1,7 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
   "editor.tabSize": 4,
   "emmet.includeLanguages": {"django-html": "html"},
   "files.associations": {
@@ -6,10 +9,6 @@
     "**/templates/*": "django-txt",
     "**/requirements{/**,*}.{txt,in}": "pip-requirements"
   },
-  "python.pythonPath": "venv/bin/python",
-  "python.autoComplete.extraPaths": [
-    "venv/lib/python3.6",
-    "venv/lib/python3.6/site-packages",
-    "website"
-  ]
+  "python.analysis.diagnosticMode": "workspace",
+  "python.pythonPath": "venv/bin/python"
 }

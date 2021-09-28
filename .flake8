@@ -1,0 +1,11 @@
+[flake8]
+
+ignore =
+    E261, # two spaces before inline comment
+    E501, # Line too long
+    W503, # line break before binary operator (we follow PEP 8)
+
+per-file-ignores =
+    admin.py: E305,
+
+exclude = venv,.git,__pycache__,migrations

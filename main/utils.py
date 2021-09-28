@@ -2,7 +2,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
 from django.urls import reverse
 
-def get_domain():
+
+def get_domain() -> str:
     site_url = cache.get('main_domain')
 
     if not site_url:
@@ -11,5 +12,6 @@ def get_domain():
 
     return site_url
 
-def get_url(*args, **kwargs):
+
+def get_url(*args, **kwargs) -> str:
     return get_domain() + reverse(*args, **kwargs)

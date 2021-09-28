@@ -1,23 +1,39 @@
+from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.db.models import Count, Q
-from django.urls import reverse_lazy
+from django.db.models import (
+    Count,
+    Q,
+)
 from django.http import HttpResponseBadRequest
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  TemplateView, UpdateView, FormView)
-from django.views.generic.base import ContextMixin
+from django.urls import reverse_lazy
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+from django.views.generic.detail import SingleObjectMixin
 
 import requests
-
 from meta.views import MetadataMixin
 
 from main.models import Config
-from website.settings import FIUMCRAFT_WHITELIST_ENDPOINT, FIUMCRAFT_WHITELIST_TOKEN
 
-from .models import Committee, DocumentMedia, Group, Meeting, PeopleGroup
 from .forms import FiumcraftWhitelistForm
+from .models import (
+    Committee,
+    DocumentMedia,
+    Group,
+    Meeting,
+    PeopleGroup,
+)
 
 
 class AboutUsView(MetadataMixin, TemplateView):
+
     template_name = 'heart/about_us.html'
 
     title = 'La Delegación - DAFI'
@@ -39,6 +55,7 @@ class AboutUsView(MetadataMixin, TemplateView):
 
 
 class DocumentsView(MetadataMixin, ListView):
+
     model = DocumentMedia
     ordering = ('name',)
 
@@ -56,6 +73,7 @@ class DocumentsView(MetadataMixin, ListView):
 
 
 class MeetingsView(MetadataMixin, ListView):
+
     model = Meeting
     ordering = ('-date',)
 
@@ -68,6 +86,7 @@ class MeetingsView(MetadataMixin, ListView):
 
 
 class MeetingsDetailView(DetailView):
+
     model = Meeting
 
     def get_queryset(self):
@@ -79,7 +98,7 @@ class MeetingsDetailView(DetailView):
         )
 
     def get_context_data(self, **kwargs):
-        obj = self.get_object()
+        obj: Meeting = self.get_object()
 
         context = super().get_context_data(**kwargs)
         context['meta'] = obj.as_meta(self.request)
@@ -88,7 +107,8 @@ class MeetingsDetailView(DetailView):
         return context
 
 
-class MeetingMixin(ContextMixin):
+class MeetingMixin(SingleObjectMixin):
+
     model = Meeting
 
     def get_queryset(self):
@@ -145,6 +165,7 @@ class MeetingMixin(ContextMixin):
 
 
 class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, MeetingMixin, CreateView):
+
     model = Meeting
     fields = (
         'date', 'call', 'minutes', 'documents',
@@ -172,6 +193,7 @@ class MeetingsCreateView(PermissionRequiredMixin, MetadataMixin, MeetingMixin, C
 
 
 class MeetingsUpdateView(PermissionRequiredMixin, MeetingMixin, UpdateView):
+
     model = Meeting
     fields = (
         'date', 'is_ordinary', 'call', 'minutes', 'minutes_approved',
@@ -183,7 +205,7 @@ class MeetingsUpdateView(PermissionRequiredMixin, MeetingMixin, UpdateView):
     title = 'Editar Asamblea de Alumnos'
 
     def get_context_data(self, **kwargs):
-        obj = self.get_object()
+        obj: Meeting = self.get_object()
 
         context = super().get_context_data(**kwargs)
         context['lists'] = (
@@ -195,6 +217,7 @@ class MeetingsUpdateView(PermissionRequiredMixin, MeetingMixin, UpdateView):
 
 
 class MeetingsDeleteView(PermissionRequiredMixin, MetadataMixin, DeleteView):
+
     model = Meeting
     permission_required = 'heart.delete_meeting'
     success_url = reverse_lazy('heart:meetings')
@@ -203,6 +226,7 @@ class MeetingsDeleteView(PermissionRequiredMixin, MetadataMixin, DeleteView):
 
 
 class StudentsView(MetadataMixin, ListView):
+
     model = Group
 
     template_name = 'heart/students.html'
@@ -226,12 +250,12 @@ class FiumcraftWhitelistView(MetadataMixin, FormView):
     description = 'Formulario para solicitar acceso al servidor de Minecraft FIUMCRAFT'
     image = 'images/favicon.png'
 
-    def form_valid(self, form):
+    def form_valid(self, form: FiumcraftWhitelistForm):
         nickname = form.cleaned_data['nickname']
         faculty = form.cleaned_data['faculty']
         source = form.cleaned_data['source']
         headers = {
-            'Authorization': 'Token ' + FIUMCRAFT_WHITELIST_TOKEN
+            'Authorization': 'Token ' + settings.FIUMCRAFT_WHITELIST_TOKEN
         }
         params = {
             'nickname': nickname,
@@ -242,7 +266,7 @@ class FiumcraftWhitelistView(MetadataMixin, FormView):
 
         try:
             r = requests.post(
-                FIUMCRAFT_WHITELIST_ENDPOINT,
+                settings.FIUMCRAFT_WHITELIST_ENDPOINT,
                 headers=headers,
                 json=params,
                 timeout=10

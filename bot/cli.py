@@ -1,20 +1,29 @@
-import schedule
-
 from cmd import Cmd
 
-from . import persistence
+from telegram.ext import (
+    BasePersistence,
+    JobQueue,
+)
 
 
 class BotCLI(Cmd):
+
     intro = 'Bot started! Type exit to stop the bot.'
     prompt = 'bot> '
 
+    def __init__(self, persistence: BasePersistence[dict, dict, dict], job_queue: JobQueue) -> None:
+        super().__init__()
+        self.persistence = persistence
+        self.job_queue = job_queue
+
     def do_data(self, arg):
-        'Print the current content of the persistent data dictionary.'
+        'Shows the content of the bot persistent data dictionary.'
 
-        print('Persistent data ({}):'.format(len(persistence.get_all())))
+        persistence = self.persistence.get_bot_data()
 
-        for k, v in persistence.get_all():
+        print('Persistent data ({}):'.format(len(persistence.keys())))
+
+        for k, v in persistence.items():
             print('  {}: {}'.format(k, v))
 
     def do_exit(self, arg):
@@ -23,20 +32,20 @@ class BotCLI(Cmd):
         return True
 
     def do_flush(self, arg):
-        'Flush the persistent data dictionary.'
+        'Flush the bot persistent data dictionary.'
 
-        persistence.flush()
-        print('Persistent data flushed!!')
+        self.persistence.flush()
+        print('Bot persistent data flushed to disk!')
 
     def do_jobs(self, arg):
         'Print the scheduled jobs.'
 
-        for job in schedule.jobs:
-            print(' -', job)
+        for job in self.job_queue.jobs():
+            print(f'{job.callback} - next at {job.next_t}')
 
-    def do_sync(self, arg):
-        'Force a persistent data sync to disk.'
+    def do_clear(self, arg):
+        'Clears the bot persistent data.'
 
-        print('Saving persistent data...')
-        persistence.sync()
-        print('Done!')
+        self.persistence.update_bot_data({})
+
+        print('Bot persistent data cleared!')

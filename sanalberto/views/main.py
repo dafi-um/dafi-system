@@ -6,14 +6,16 @@ from meta.views import MetadataMixin
 
 from .common import EventMixin
 
-def datetime_to_pos(date):
+
+def datetime_to_pos(date: datetime.datetime) -> float:
     m = date.hour * 60 + date.minute
 
     return m * 100 / 1440
 
 
 class IndexView(EventMixin, MetadataMixin, TemplateView):
-    '''Index event view'''
+    """Index event view.
+    """
 
     template_name = 'sanalberto/index.html'
 
@@ -23,7 +25,7 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
         activities = event.activities.filter(is_public=True).order_by('start')
         polls = event.polls.all()
 
-        days = {}
+        days: dict[int, list[dict]] = {}
 
         for activity in activities:
             start = activity.start
@@ -81,17 +83,18 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
 
                 d += datetime.timedelta(days=1)
 
-        days = [(value, datetime.date.fromordinal(key)) for key, value in days.items()]
-        days = sorted(days, key=lambda x: x[1])
+        days_list = [(value, datetime.date.fromordinal(key)) for key, value in days.items()]
+        # days_list = sorted(days, key=lambda x: x[1]) # TODO: Fix this sorting method
 
         context = super().get_context_data(**kwargs)
-        context['days'] = days
+        context['days'] = days_list
         context['polls'] = polls
         return context
 
 
 class InfoView(MetadataMixin, TemplateView):
-    '''Information view'''
+    """Information view.
+    """
 
     title = 'San Alberto - DAFI'
     description = 'San Alberto: Fiestas patronales de la Facultad de Informática'

@@ -1,14 +1,30 @@
 from datetime import timedelta
 
-from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser, Permission
-from django.shortcuts import reverse
-from django.template import Context, Template
-from django.test import Client, TestCase
+from django.contrib.auth.models import (
+    AnonymousUser,
+    Permission,
+)
+from django.core.exceptions import ValidationError
+from django.template import (
+    Context,
+    Template,
+)
+from django.test import (
+    Client,
+    TestCase,
+)
+from django.urls import reverse
 from django.utils import timezone
 
-from .models import Subject, TradeOffer, TradeOfferAnswer, TradeOfferLine, TradePeriod
+from .models import (
+    Subject,
+    TradeOffer,
+    TradeOfferAnswer,
+    TradeOfferLine,
+    TradePeriod,
+)
+
 
 User = get_user_model()
 
@@ -26,7 +42,7 @@ class TradingModelsTests(TestCase):
         self.period = TradePeriod.objects.create(name='Period 1', start=start, end=end)
 
     def test_tradeofferline_getters(self):
-        '''TradeOfferLine getters return correct values'''
+        """TradeOfferLine getters return correct values"""
 
         line = TradeOfferLine()
 
@@ -51,7 +67,7 @@ class TradingModelsTests(TestCase):
         self.assertEquals(line.get_subjects().count(), 0)
 
     def test_tradeofferline_validate_subjects(self):
-        '''TradeOfferLine validates subjects properly'''
+        """TradeOfferLine validates subjects properly"""
 
         line = TradeOfferLine(year=1, curr_group=1, curr_subgroup=1, wanted_groups='2')
 
@@ -78,7 +94,7 @@ class TradingModelsTests(TestCase):
             self.fail('Subject is valid but validation failed')
 
     def test_tradeofferline_validate_groups(self):
-        '''TradeOfferLine validates groups properly'''
+        """TradeOfferLine validates groups properly"""
 
         line = TradeOfferLine(year=1, curr_group=1, curr_subgroup=1, subjects='1')
 
@@ -127,7 +143,7 @@ class TradingModelsTests(TestCase):
             self.fail('Current subgroup is valid but validation failed')
 
     def test_tradeofferanswer_getter_setter_groups(self):
-        '''TradeOfferAnswer groups getter and setter works properly'''
+        """TradeOfferAnswer groups getter and setter works properly"""
 
         answer = TradeOfferAnswer()
 
@@ -139,7 +155,7 @@ class TradingModelsTests(TestCase):
         self.assertEquals(answer.groups, '', 'setter does not sets empty field for falsy objects')
 
     def test_tradeofferanswer_validate_groups(self):
-        '''TradeOfferAnswer validates groups properly'''
+        """TradeOfferAnswer validates groups properly"""
 
         offer = TradeOffer.objects.create(user=self.user, period=self.period)
 
@@ -237,7 +253,7 @@ class TradingViewsTests(TestCase):
         self.offer.save()
 
     def test_list_view_period_access(self):
-        '''TradeOffer list view restricts access properly depending on the current trading period'''
+        """TradeOffer list view restricts access properly depending on the current trading period"""
 
         c = Client()
 
@@ -266,7 +282,7 @@ class TradingViewsTests(TestCase):
         self.period_active()
 
     def test_list_view_answered_offers_access(self):
-        '''TradeOffer list view restricts access properly for offers with accepted answers'''
+        """TradeOffer list view restricts access properly for offers with accepted answers"""
 
         c = Client()
 
@@ -301,7 +317,7 @@ class TradingViewsTests(TestCase):
         self.offer_remove_answer()
 
     def test_tradeoffer_views_access(self):
-        '''TradeOffer CRUD views restrict access properly'''
+        """TradeOffer CRUD views restrict access properly"""
 
         c = Client()
 
@@ -345,7 +361,7 @@ class TradingViewsTests(TestCase):
             c.logout()
 
     def test_tradeofferanswer_views_access(self):
-        '''TradeOfferAnswer CRUD views restrict access properly'''
+        """TradeOfferAnswer CRUD views restrict access properly"""
 
         c = Client()
 
@@ -419,7 +435,7 @@ class TradingViewsTests(TestCase):
         c.logout()
 
     def test_answered_offer_views_access(self):
-        '''Answered TradeOffer related views restrict access properly'''
+        """Answered TradeOffer related views restrict access properly"""
 
         c = Client()
 
@@ -484,7 +500,7 @@ class TradingUpdateViewsTests(TestCase):
         )
 
     def test_tradeoffer_edit_valid(self):
-        '''TradeOffer update form works properly with valid input data'''
+        """TradeOffer update form works properly with valid input data"""
 
         c = Client()
         c.force_login(self.user)
@@ -593,61 +609,66 @@ class TradingProcessTests(TestCase):
             curr_group=1, curr_subgroup=1, wanted_groups='2, 3'
         )
 
-        self.answer1 = TradeOfferAnswer(user=self.user2, offer=self.offer1)
-        self.answer1.set_groups({'1': [2, 1]})
-        self.answer1.save()
+        self.answer = TradeOfferAnswer(user=self.user2, offer=self.offer1)
+        self.answer.set_groups({'1': [2, 1]})
+        self.answer.save()
 
         self.answer2 = TradeOfferAnswer(user=self.user1, offer=self.offer2)
         self.answer2.set_groups({'1': [2, 1]})
         self.answer2.save()
 
     def test_answer_posts(self):
-        '''TradeOfferAnswer views work properly with valid input in POST requests'''
+        """TradeOfferAnswer views work properly with valid input in POST requests"""
 
         c = Client()
         c.force_login(self.user2)
 
-        # delete existing answer
-        self.assertRedirects(c.post(reverse('trading:answer_delete', args=[self.answer1.id])), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
+        assert self.answer is not None
 
-        self.assertEqual(TradeOfferAnswer.objects.filter(pk=self.answer1.id).count(), 0, 'deleted answer still exists')
+        # delete existing answer
+        self.assertRedirects(c.post(reverse('trading:answer_delete', args=[self.answer.id])), reverse('trading:list'), msg_prefix='answer creator cannot delete answer')
+
+        self.assertEqual(TradeOfferAnswer.objects.filter(pk=self.answer.id).count(), 0, 'deleted answer still exists')
 
         # create another answer
         res = c.post(reverse('trading:answer_create', args=[self.offer1.id]), {'0-group': '2', '0-subgroup': '1'})
 
         self.assertEqual(TradeOfferAnswer.objects.filter(offer=self.offer1).count(), 1, 'created answer does not exist')
 
-        self.answer1 = TradeOfferAnswer.objects.filter(offer=self.offer1).first()
+        self.answer = TradeOfferAnswer.objects.filter(offer=self.offer1).first()
 
-        self.assertRedirects(res, reverse('trading:answer_detail', args=[self.answer1.id]), msg_prefix='answer creator cannot create answer after deleting the existing one')
+        self.assertIsNotNone(self.answer)
+        assert self.answer is not None
 
-        self.assertEqual(c.get(self.answer1.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after creating it')
+        self.assertRedirects(res, reverse('trading:answer_detail', args=[self.answer.id]), msg_prefix='answer creator cannot create answer after deleting the existing one')
+
+        self.assertEqual(c.get(self.answer.get_absolute_url()).status_code, 200, 'answer creator cannot read answer after creating it')
 
         # update new answer
-        res = c.post(reverse('trading:answer_edit', args=[self.answer1.id]), {'0-group': '3', '0-subgroup': '2'})
+        res = c.post(reverse('trading:answer_edit', args=[self.answer.id]), {'0-group': '3', '0-subgroup': '2'})
         self.assertEqual(res.status_code, 200, 'valid post data generates error')
         self.assertContains(res, 'Respuesta actualizada correctamente.', msg_prefix='successful update does not show notification')
 
-        self.answer1.refresh_from_db()
+        self.answer.refresh_from_db()
 
-        self.assertDictEqual(self.answer1.get_groups(), {'1': [3, 2]}, 'updated data does not change object data')
+        self.assertDictEqual(self.answer.get_groups(), {'1': [3, 2]}, 'updated data does not change object data')
 
         # accept answer
         c.logout()
         c.force_login(self.user1)
 
-        res = c.post(reverse('trading:answer_accept', args=[self.answer1.id]), {})
+        res = c.post(reverse('trading:answer_accept', args=[self.answer.id]), {})
 
         self.offer1.refresh_from_db()
         self.offer2.refresh_from_db()
-        self.answer1.refresh_from_db()
+        self.answer.refresh_from_db()
         self.answer2.refresh_from_db()
 
         self.assertRedirects(res, reverse('trading:change_process', args=[self.offer1.id]), msg_prefix='valid answer cannot be accepted by offer creator')
-        self.assertEqual(self.offer1.answer, self.answer1, 'accepted answer is not saved in the offer')
+        self.assertEqual(self.offer1.answer, self.answer, 'accepted answer is not saved in the offer')
         self.assertFalse(self.offer1.is_visible, 'answered offer is still visible')
         self.assertTrue(self.offer2.is_visible, 'random offer is affected by another offer process')
-        self.assertTrue(self.answer1.is_visible, 'accepted answer is hidden after it is accepted')
+        self.assertTrue(self.answer.is_visible, 'accepted answer is hidden after it is accepted')
         self.assertFalse(self.answer2.is_visible, 'answer from answered offer creator is not hidden')
 
         # restore modified data
@@ -685,7 +706,7 @@ class TradingAuxiliarToolsTests(TestCase):
         return Template(template_str).render(context)
 
     def test_templatetags_get_answer(self):
-        '''get_answer template tag works as expected'''
+        """get_answer template tag works as expected"""
 
         self.assertEquals(self.render_get_answer(self.offer, AnonymousUser()), 'None')
         self.assertEquals(self.render_get_answer(self.offer, self.user1), 'None')

@@ -1,72 +1,79 @@
-from django.contrib.auth import get_user_model
+from telegram import (
+    TelegramError,
+    Update,
+)
+from telegram.ext import CallbackContext
 
-from ..utils import create_reply_markup
+from users.models import User
 
-from .handlers import add_handlers, BasicBotHandler
+from ..decorators import (
+    auth_required,
+    limit_chat_type,
+)
+from ..utils import (
+    create_reply_markup,
+    prepare_callback,
+)
 
-User = get_user_model()
 
+@limit_chat_type('private', silent=True)
+def cmd_start(update: Update, context: CallbackContext) -> None:
+    assert update.effective_message is not None
+    assert update.effective_user is not None
 
-@add_handlers
-class MainHandler(BasicBotHandler):
-    '''Start command and generic callback handler'''
+    update.effective_message.reply_text(
+        f'Hola {update.effective_user.first_name}, soy el DAFI Bot. ¿En qué puedo ayudarte?'
+    )
 
-    cmd = 'start'
-    query_prefix = 'main'
+    user = User.objects.filter(telegram_user=update.effective_user.username).first()
 
-    def command(self, update, context):
-        if update.effective_chat.type != 'private':
-            return
+    if user is None:
+        return None
 
-        telegram_user = update.message.from_user
-        user = User.objects.filter(telegram_user=telegram_user.username).first()
+    if not user.telegram_id:
+        update.effective_message.reply_markdown(
+            f'He encontrado una cuenta de DAFI ({user.email}) '
+            'con tu usuario de Telegram, ¿quieres vincularla '
+            'ahora a tu cuenta de Telegram?',
 
-        update.message.reply_text(
-            'Hola {}, soy el DAFI Bot. ¿En qué puedo ayudarte?'.format(telegram_user.first_name)
-        )
-
-        if user and not user.telegram_id:
-            msg = (
-                'He encontrado una cuenta de DAFI ({}) '
-                'con tu usuario de Telegram, ¿quieres vincularla '
-                'ahora a tu cuenta de Telegram?'
-            ).format(user.email)
-
-            reply_markup = create_reply_markup([
+            reply_markup=create_reply_markup([
                 ('Sí, vincular cuenta', 'users:link'),
-                ('No, cancelar', 'main:abort'),
-            ])
-
-            return msg, reply_markup
-
-    def callback(self, update, context, action, *args):
-        if action == 'abort':
-            return 'Operación cancelada.'
-        elif action == 'okey':
-            return '¡De acuerdo!'
-
-
-@add_handlers
-class GetGroupID(BasicBotHandler):
-    '''Sends the user a chat ID keeping it secret (only superusers)'''
-
-    cmd = 'getid'
-
-    def command(self, update, context):
-        user = self.get_user()
-
-        if not user or not user.is_superuser:
-            return
-
-        chat = update.effective_chat
-
-        msg = 'ID de {}: {}'.format(
-            chat.title or chat.username or 'desconocido', chat.id
+                ('No, cancelar', 'main:start_link_cancel'),
+            ]),
         )
 
-        try:
-            update.effective_message.delete()
-        except:
-            msg += '\n(No he podido eliminar el comando del chat)'
 
-        self.answer_private(msg)
+def callback_generic(update: Update, context: CallbackContext) -> None:
+    query, action, _ = prepare_callback(update)
+
+    if action == 'abort':
+        query.edit_message_text('¡Operación cancelada!')
+    elif action == 'okey':
+        query.edit_message_text('¡De acuerdo!')
+    elif action == 'start_link_cancel':
+        query.edit_message_text(
+            '¡Okey! Recuerda que puedes vincular tu cuenta en cualquier '
+            'momento ejecutando /vincular'
+        )
+
+    query.answer()
+
+
+@auth_required(only_superuser=True, silent=True)
+def cmd_getid(update: Update, context: CallbackContext, *args) -> None:
+    assert update.effective_chat is not None
+    assert update.effective_message is not None
+    assert update.effective_user is not None
+
+    chat = update.effective_chat
+
+    msg = 'ID de {}: {}'.format(
+        chat.title or chat.username or 'desconocido', chat.id
+    )
+
+    try:
+        update.effective_message.delete()
+    except TelegramError:
+        msg += '\n(No he podido eliminar el comando del chat)'
+
+    context.bot.send_message(update.effective_user.id, msg)
