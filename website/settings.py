@@ -51,21 +51,21 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
 
     # Our apps
-    'users', # .apps.UsersConfig
-    'main', # .apps.MainConfig
-    'heart', # .apps.HeartConfig
-    'blog', # .apps.BlogConfig
-    'clubs', # .apps.ClubsConfig
-    'trading', # .apps.TradingConfig
-    'feedback', # .apps.FeedbackConfig
-    'sanalberto', # .apps.SanAlbertoConfig
-    'bot', # .apps.BotConfig
+    'users',
+    'main',
+    'heart',
+    'blog',
+    'clubs',
+    'trading',
+    'feedback',
+    'sanalberto',
+    'bot',
 
     # 3rd party
     'pagedown',
     'markdown_deux',
     'meta',
-    'django_cleanup', # .apps.CleanupConfig
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [
