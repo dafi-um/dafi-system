@@ -1,4 +1,7 @@
-from telegram import Update
+from telegram import (
+    ReplyMarkup,
+    Update,
+)
 from telegram.ext import CallbackContext
 
 from heart.models import Group
@@ -15,33 +18,40 @@ from ...utils import (
 
 
 @auth_required('bot.can_manage_elections', silent=True)
-def cmd_toggle_elections(update: Update, context: CallbackContext, user: User) -> None:
+def cmd_toggle_elections(update: Update, context: CallbackContext[dict, dict, dict], user: User) -> None:
     assert update.effective_message is not None
 
     msg = 'El periodo de elecciones está '
+    reply_markup: ReplyMarkup
 
     if context.bot_data.get('elections', False):
         msg += '*activo*. ¿Quieres finalizarlo?'
-        btn = ('Sí, finalizar 🔒', 'elections_toggle:off')
+
+        reply_markup = create_reply_markup([
+            ('Sí, finalizar 🔒', 'elections_toggle:off'),
+            ('No, cancelar ❌', 'main:abort'),
+        ])
     else:
         msg += '*inactivo*. ¿Quieres iniciarlo?'
-        btn = ('Sí, iniciar ✅', 'elections_toggle:on')
+
+        reply_markup = create_reply_markup([
+            ('Sí, iniciar ✅', 'elections_toggle:on'),
+            ('No, cancelar ❌', 'main:abort'),
+        ], [
+            ('Limpiar delegados e iniciar 💥', 'elections_toggle:on:start_clean')
+        ])
 
     update.effective_message.reply_markdown(
-        msg,
-        reply_markup=create_reply_markup([
-            btn,
-            ('No, cancelar ❌', 'main:abort'),
-        ]),
+        msg, reply_markup=reply_markup,
     )
 
 
 @auto_answer_query
-def callback_toggle_elections(update: Update, context: CallbackContext) -> None:
+def callback_toggle_elections(update: Update, context: CallbackContext[dict, dict, dict]) -> None:
     assert update.effective_message is not None
     assert update.effective_user is not None
 
-    query, action, _ = prepare_callback(update)
+    query, action, args = prepare_callback(update)
 
     if action == 'on':
         if context.bot_data.get('elections', False):
@@ -50,11 +60,21 @@ def callback_toggle_elections(update: Update, context: CallbackContext) -> None:
             )
             return
 
+        msg = 'Ahora el periodo de elecciones está activo ✅'
+
+        if args and args[0] == 'start_clean':
+            updated = (
+                Group
+                .objects
+                .exclude(delegate=None, subdelegate=None)
+                .update(delegate=None, subdelegate=None)
+            )
+
+            msg += f'\n\n¡Se han reiniciado los delegados de {updated} grupos!  💥'
+
         context.bot_data['elections'] = True
 
-        query.edit_message_text(
-            'Ahora el periodo de elecciones está activo ✅'
-        )
+        query.edit_message_text(msg)
     elif action == 'off':
         if not context.bot_data.get('elections', False):
             query.edit_message_text(

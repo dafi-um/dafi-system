@@ -1,6 +1,14 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 29 Sept. 2021
+
+### Bot
+
+* Agregada opción para iniciar `/elecciones` limpiando los delegados actuales
+* Agregado comando `/mencionar` para mencionar a todos los delegados de un curso/grupo
+
+
 ## 27 Sept. 2021
 
 * Varias mejoras y arreglos de errores
