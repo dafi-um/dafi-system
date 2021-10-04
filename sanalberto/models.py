@@ -4,7 +4,10 @@ from datetime import (
     timedelta,
 )
 from decimal import Decimal
-from typing import Iterable
+from typing import (
+    TYPE_CHECKING,
+    Iterable,
+)
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import (
@@ -19,6 +22,10 @@ from django.utils.functional import cached_property
 
 from clubs.models import Club
 from heart.models import DocumentMedia
+
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 
 def date_in_range(start, end):
@@ -126,7 +133,7 @@ class Activity(models.Model):
         'imagen 2', upload_to='activities/', null=True, blank=True
     )
 
-    documents: 'models.ManyToManyField[None, models.Manager[DocumentMedia]]' = models.ManyToManyField(
+    documents: 'models.ManyToManyField[None, RelatedManager[DocumentMedia]]' = models.ManyToManyField(
         DocumentMedia, blank=True,
         verbose_name='documentos'
     )

@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
@@ -11,6 +12,10 @@ from heart.models import (
     DocumentMedia,
     Meeting,
 )
+
+
+if typing.TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 
 class Topic(ModelMeta, models.Model):
@@ -42,12 +47,12 @@ class Topic(ModelMeta, models.Model):
         verbose_name='postura oficial', blank=True, null=True
     )
 
-    documents: 'models.ManyToManyField[None, models.Manager[DocumentMedia]]' = models.ManyToManyField(
+    documents: 'models.ManyToManyField[None, RelatedManager[DocumentMedia]]' = models.ManyToManyField(
         DocumentMedia, verbose_name='documentos relacionados',
         blank=True
     )
 
-    meetings: 'models.ManyToManyField[None, models.Manager[Meeting]]' = models.ManyToManyField(
+    meetings: 'models.ManyToManyField[None, RelatedManager[Meeting]]' = models.ManyToManyField(
         Meeting, verbose_name='asambleas relacionadas',
         blank=True
     )

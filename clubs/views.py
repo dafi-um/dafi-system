@@ -1,5 +1,3 @@
-from typing import cast
-
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.forms.models import ModelForm
 from django.http.response import HttpResponse

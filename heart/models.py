@@ -1,6 +1,9 @@
 from datetime import datetime
 from os.path import basename
-from typing import Iterable
+from typing import (
+    TYPE_CHECKING,
+    Iterable,
+)
 
 from django.core.validators import (
     MaxValueValidator,
@@ -14,6 +17,10 @@ from django.utils.functional import cached_property
 from meta.models import ModelMeta
 
 from users.models import User
+
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 
 class Committee(models.Model):
@@ -235,17 +242,17 @@ class Meeting(ModelMeta, models.Model):
         'el acta se ha aprobado', default=False
     )
 
-    documents: 'models.ManyToManyField[None, models.Manager[DocumentMedia]]' = models.ManyToManyField(
+    documents: 'models.ManyToManyField[None, RelatedManager[DocumentMedia]]' = models.ManyToManyField(
         DocumentMedia, verbose_name='documentos relacionados',
         blank=True
     )
 
-    attendees: 'models.ManyToManyField[None, models.Manager[User]]' = models.ManyToManyField(
+    attendees: 'models.ManyToManyField[None, RelatedManager[User]]' = models.ManyToManyField(
         User, 'meetings_attended',
         verbose_name='asistentes', blank=True
     )
 
-    absents: 'models.ManyToManyField[None, models.Manager[User]]' = models.ManyToManyField(
+    absents: 'models.ManyToManyField[None, RelatedManager[User]]' = models.ManyToManyField(
         User, 'meetings_absent',
         verbose_name='ausencias justificadas', blank=True
     )
@@ -280,7 +287,7 @@ class PeopleGroup(models.Model):
         'nombre', max_length=120, unique=True
     )
 
-    members: 'models.ManyToManyField[None, models.Manager[User]]' = models.ManyToManyField(
+    members: 'models.ManyToManyField[None, RelatedManager[User]]' = models.ManyToManyField(
         User, through='PeopleGroupMember'
     )
 

@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
@@ -7,6 +8,10 @@ from django.templatetags.static import static
 from django.urls import reverse
 
 from meta.models import ModelMeta
+
+
+if typing.TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 
 class Club(ModelMeta, models.Model):
@@ -56,11 +61,11 @@ class Club(ModelMeta, models.Model):
         blank=True, null=True,
     )
 
-    managers: 'models.ManyToManyField[None, models.Manager[AbstractUser]]' = models.ManyToManyField(
+    managers: 'models.ManyToManyField[None, RelatedManager[AbstractUser]]' = models.ManyToManyField(
         get_user_model(), 'managed_clubs', verbose_name='gestores'
     )
 
-    members: 'models.ManyToManyField[None, models.Manager[AbstractUser]]' = models.ManyToManyField(
+    members: 'models.ManyToManyField[None, RelatedManager[AbstractUser]]' = models.ManyToManyField(
         get_user_model(), 'clubs', verbose_name='miembros'
     )
 

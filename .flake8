@@ -8,4 +8,4 @@ ignore =
 per-file-ignores =
     admin.py: E305,
 
-exclude = venv,.git,__pycache__,migrations
+exclude = venv,.git,__pycache__,migrations,trading
