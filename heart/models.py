@@ -364,3 +364,49 @@ class PeopleGroupMember(models.Model):
     @cached_property
     def name(self) -> str:
         return self.user.get_full_name()
+
+
+class Event(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[Event]'
+
+    title: 'models.CharField[str, str]' = models.CharField(
+        'título', max_length=120,
+    )
+
+    description: 'models.TextField[str, str]' = models.TextField(
+        'descripción',
+    )
+
+    place: 'models.TextField[str, str]' = models.TextField(
+        'lugar',
+    )
+
+    start: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
+        'fecha de inicio',
+    )
+
+    end: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
+        'fecha de fin',
+    )
+
+    checkin_points: 'models.PositiveIntegerField[int, int]' = models.PositiveIntegerField(
+        'puntos por participar', default=1,
+    )
+
+    free_points: 'models.PositiveIntegerField[int, int]' = models.PositiveIntegerField(
+        'puntos de libre asignación', default=0,
+    )
+
+    attendees: 'models.ManyToManyField[None, RelatedManager[User]]' = models.ManyToManyField(
+        User, 'events_attended', blank=True,
+        verbose_name='asistentes',
+    )
+
+    class Meta:
+        verbose_name = 'evento'
+
+    def __str__(self) -> str:
+        return f'Evento #{self.id} ({self.title})'

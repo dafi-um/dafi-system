@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'main',
     'heart',
     'blog',
+    'houses',
     'clubs',
     'trading',
     'feedback',

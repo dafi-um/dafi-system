@@ -12,6 +12,12 @@ from django.db import models
 if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
 
+    from houses.models import (
+        House,
+        HouseProfile,
+        PointsTransaction,
+    )
+
 
 def current_year() -> int:
     """Gets the current year.
@@ -28,6 +34,10 @@ class User(AbstractUser):
     objects: 'UserManager[User]'
 
     groups: 'RelatedManager[Group]'
+
+    house_managers: 'RelatedManager[House]'
+    house_points: 'RelatedManager[PointsTransaction]'
+    house_profile: 'HouseProfile | None'
 
     telegram_user: 'models.CharField[str, str]' = models.CharField(
         'usuario de telegram', max_length=64, blank=True

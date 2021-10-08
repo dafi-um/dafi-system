@@ -18,6 +18,7 @@ urlpatterns = [
     path('', include('heart.urls')),
     path('blog/', include('blog.urls')),
     path('clubs/', include('clubs.urls')),
+    path('casas/', include('houses.urls')),
     path('feedback/', include('feedback.urls')),
     path('permutas/', include('trading.urls')),
     path('san-alberto/', include('sanalberto.urls')),

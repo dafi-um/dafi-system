@@ -1,0 +1,40 @@
+{% extends 'houses/base.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+  <h1 class="houses-title">Las Casas de la FIUM</h1>
+
+  <div class="row">
+    {% for house in house_list %}
+      <div class="3u 6u(small) 12u(xsmall)">
+        <div class="house-card">
+          <h2>{{ house.name }}</h2>
+
+          <h4>Puntos: {{ house.points }}</h4>
+
+          {% if user.is_authenticated and house.managers.all %}
+            <hr />
+
+            <div style="text-align: left;">
+              <h5>Gestores</h5>
+
+              {% for manager in house.managers.all %}
+                <p>
+                  <span>{{ manager | nice_name }}</span>
+                  {% if manager.telegram_id %}
+                    <span>
+                      (<a href="https://t.me/{{ manager.telegram_user }}">@{{ manager.telegram_user }}</a>)
+                    </span>
+                  {% endif %}
+                </p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <p>No hay casas para mostrar...</p>
+    {% endfor %}
+  </div>
+{% endblock content %}

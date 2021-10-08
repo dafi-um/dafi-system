@@ -22,6 +22,7 @@ def load_all(dispatcher: Dispatcher, job_queue: JobQueue) -> None:
     from .conversation import cmd_mention
     from .elections import load_all as load_elections_handlers
     from .groups import load_all as load_groups_handlers
+    from .houses import load_all as load_houses_handlers
     from .rooms import (
         callback_dafi,
         cmd_dafi,
@@ -50,4 +51,5 @@ def load_all(dispatcher: Dispatcher, job_queue: JobQueue) -> None:
 
     load_elections_handlers(dispatcher)
     load_groups_handlers(dispatcher)
+    load_houses_handlers(dispatcher)
     load_users_handlers(dispatcher)

@@ -6,6 +6,7 @@ from .models import (
     Committee,
     Degree,
     DocumentMedia,
+    Event,
     Group,
     Meeting,
     PeopleGroup,
@@ -79,3 +80,11 @@ class PeopleGroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_hidden', 'show_in_meetings')
 
     inlines = (PeopleGroupMemberInline,)
+
+
+@admin.register(Event)
+class Event(admin.ModelAdmin):
+
+    list_display = ('title', 'place', 'start')
+
+    search_fields = ('title', 'description', 'place')
