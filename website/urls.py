@@ -8,6 +8,8 @@ from django.urls import (
 )
 from django.views import defaults
 
+import debug_toolbar
+
 
 admin.site.site_header = 'Administración de DAFI'
 
@@ -30,3 +32,4 @@ if settings.DEBUG:
 
     urlpatterns.append(path('404/', not_found))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += path('__debug__/', include(debug_toolbar.urls)),

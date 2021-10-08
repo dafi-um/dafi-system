@@ -66,9 +66,11 @@ INSTALLED_APPS = [
     'markdown_deux',
     'meta',
     'django_cleanup',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -168,9 +170,29 @@ LOGIN_URL = 'login'
 
 LOGIN_REDIRECT_URL = 'profile'
 
+
+# Security
+
 CSRF_COOKIE_SECURE = not DEBUG
 
 SESSION_COOKIE_SECURE = not DEBUG
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+
+# Django Debug Toolbar
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+]
 
 
 # Bot

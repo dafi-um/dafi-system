@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from django.contrib.auth.models import (
     AbstractUser,
@@ -6,6 +7,10 @@ from django.contrib.auth.models import (
     UserManager,
 )
 from django.db import models
+
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 
 def current_year() -> int:
@@ -22,7 +27,7 @@ class User(AbstractUser):
 
     objects: 'UserManager[User]'
 
-    groups: 'models.manager.RelatedManager[Group]'
+    groups: 'RelatedManager[Group]'
 
     telegram_user: 'models.CharField[str, str]' = models.CharField(
         'usuario de telegram', max_length=64, blank=True
