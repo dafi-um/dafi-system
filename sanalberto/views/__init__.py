@@ -14,7 +14,8 @@ from .main import (
 )
 from .polls import (
     DesignCreateView,
-    PollIndexView,
+    PollDetailView,
+    PollVoteCreateView,
 )
 from .shop import (
     ShopClosedView,
@@ -23,18 +24,19 @@ from .shop import (
 
 
 __all__ = [
-    "ActivitiesIndexView",
-    "ActivityDetailView",
-    "ActivityRegisterView",
-    "ActivityRegistrationsView",
-    "DesignCreateView",
-    "IndexView",
-    "InfoView",
-    "PollIndexView",
-    "RegistrationDetailView",
-    "RegistrationListView",
-    "RegistrationPaidView",
-    "RegistrationUpdateView",
-    "ShopClosedView",
-    "ShopIndexView",
+    'ActivitiesIndexView',
+    'ActivityDetailView',
+    'ActivityRegisterView',
+    'ActivityRegistrationsView',
+    'DesignCreateView',
+    'IndexView',
+    'InfoView',
+    'PollDetailView',
+    'PollVoteCreateView',
+    'RegistrationDetailView',
+    'RegistrationListView',
+    'RegistrationPaidView',
+    'RegistrationUpdateView',
+    'ShopClosedView',
+    'ShopIndexView',
 ]

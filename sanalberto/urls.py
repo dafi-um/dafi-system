@@ -18,6 +18,7 @@ urlpatterns = [
     path('info/', views.InfoView.as_view(), name='info'),
     path('tienda/', views.ShopIndexView.as_view(), name='shop'),
     path('tienda/cerrada/', views.ShopClosedView.as_view(), name='shop_closed'),
-    path('<str:slug>/', views.PollIndexView.as_view(), name='poll_index'),
+    path('<str:slug>/', views.PollDetailView.as_view(), name='poll_detail'),
     path('<str:slug>/registrar/', views.DesignCreateView.as_view(), name='design_create'),
+    path('<str:slug>/votar/', views.PollVoteCreateView.as_view(), name='poll_vote'),
 ]

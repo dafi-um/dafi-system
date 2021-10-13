@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/sanalberto.css' %}" />
+{% endblock head %}
+
 {% block main %}
     <section class="sa-nav">
         <div class="inner">
@@ -15,7 +21,7 @@
                    href="{% url 'sanalberto:activities_index' %}">Actividades</a>
 
                 {% for poll in event.polls.all %}
-                    {% url 'sanalberto:poll_index' poll.slug as url %}
+                    {% url 'sanalberto:poll_detail' poll.slug as url %}
 
                     <a class="{% if url in request.path_info %}active{% endif %}"
                        href="{{ url }}">{{ poll.title }}</a>

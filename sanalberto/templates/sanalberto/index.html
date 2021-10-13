@@ -1,76 +1,6 @@
 {% extends 'sanalberto/base.html' %}
 
 {% block content %}
-    <style type="text/css">
-        .alert {
-            align-items: center;
-        }
-
-            .alert p {
-                margin: 0;
-            }
-
-        .day-title {
-            margin: 1rem 0 0.25rem 3rem;
-            text-align: center;
-        }
-
-        .day {
-            position: relative;
-            height: 30rem;
-            margin-left: 3rem;
-            background: #ddd;
-        }
-
-            .day-item {
-                position: absolute;
-                right: 0px;
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 0.5rem;
-                border-top: 1px solid #ddd;
-                border-bottom: 1px solid #ddd;
-                background: #e5474b;
-                color: #fff;
-            }
-
-                .day-item h6 {
-                    margin: 0;
-                    text-align: center;
-                    color: #fff;
-                }
-
-                .day-item .day-start,
-                .day-item .day-end {
-                    position: absolute;
-                    left: -3rem;
-                    width: 3rem;
-                    line-height: 1rem;
-                    text-align: center;
-                    color: #f00;
-                }
-
-                    .day-start {
-                        top: 0px;
-                        top: calc(-0.5em - 1px);
-                    }
-
-                    .day-end {
-                        bottom: 0px;
-                        bottom: calc(-0.5em - 1px);
-                    }
-
-                    .day-no-start .day-start {
-                        display: none;
-                    }
-
-                    .day-no-end .day-end {
-                        display: none;
-                    }
-    </style>
-
     {% if event.shop_enabled %}
         <div class="box wrapper style3 split alert">
             <p>¡Ya está abierta la tienda de productos de San Alberto! Se cerrará el {{ event.selling_end | date:'j M Y \a \l\a\s H:i' }}!</p>
@@ -90,7 +20,7 @@
             <div class="box wrapper style3 split alert">
                 <p>¡Ya puedes votar tu diseño favorito de {{ poll.title }}, se admiten votos hasta el {{ poll.voting_end | date:'j M Y \a \l\a\s H:i' }}!</p>
 
-                <a class="button special" href="{% url 'sanalberto:poll_index' poll.slug %}">Ver diseños</a>
+                <a class="button special" href="{% url 'sanalberto:poll_detail' poll.slug %}">Ver diseños</a>
             </div>
         {% endif %}
     {% endfor %}
@@ -99,7 +29,7 @@
 
     <div class="row">
         {% for items, title in days %}
-            <div class="3u 6u(medium) 12u(small)">
+            <div class="6u 12u(small)">
                 <h4 class="day-title">{{ title | date:'l j M' }}</h4>
 
                 <div class="day">

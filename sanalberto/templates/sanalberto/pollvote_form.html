@@ -22,25 +22,33 @@
         label {
             margin-bottom: 0.25em;
         }
+
+        form > div {
+            margin-bottom: 2em;
+        }
+
+        ul.errorlist {
+            margin-bottom: 0.25em;
+        }
     </style>
 
     <div class="split">
-        <h3>Presentar diseño</h3>
+        <h3>Votar para {{ poll.title }}</h3>
 
         <a class="button small alt" href="{% url 'sanalberto:poll_detail' poll.slug %}">Volver atrás</a>
     </div>
 
     <div class="box wrapper style1">
-        <p><b>Recuerda:</b> al presentar un diseño estás aceptando las bases establecidas por la comisión de organización de San Alberto.</p>
+        <p><b>Recuerda:</b> puedes votar hasta tres diseños, en orden de preferencia descendente (primero el que más te gusta).</p>
     </div>
 
     <div class="box wrapper style3">
-        <form method="post" enctype="multipart/form-data">
-            {{ form.as_p }}
+        <form method="post">
+            {{ form }}
 
             {% csrf_token %}
 
-            <button class="button alt" type="submit">Enviar</button>
+            <button class="button alt" type="submit">Guardar voto</button>
         </form>
     </div>
 {% endblock content %}

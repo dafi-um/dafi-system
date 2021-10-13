@@ -1,6 +1,20 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 13 Oct. 2021
+
+### Clubes
+
+* Actualizada definición de modelos de administración
+
+### San Alberto
+
+* Separados modelos en distintos ficheros
+* Actualizados templates
+* Creado sistema de votación
+* Movido CSS de templates a un fichero estático
+* Renombrado `poll_index` a `poll_detail`
+
 ## 29 Sept. 2021
 
 ### Bot
