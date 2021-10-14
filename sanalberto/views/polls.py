@@ -9,6 +9,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.forms.models import ModelForm
 from django.http import HttpResponse
+from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.generic import (
@@ -44,6 +45,10 @@ class PollMixin(EventMixin):
         # Default method
         return True
 
+    def check_poll_redirect(self, poll: Poll) -> HttpResponseRedirectBase:
+        # Default method
+        return redirect('sanalberto:index')
+
     def dispatch(self, request, *args, **kwargs):
         try:
             slug = kwargs.get('slug')
@@ -51,7 +56,7 @@ class PollMixin(EventMixin):
 
             assert self.check_poll(self.poll) is True
         except (Poll.DoesNotExist, AssertionError):
-            return redirect('sanalberto:index')
+            return self.check_poll_redirect(self.poll)
 
         self.title = self.poll.title
 
@@ -94,7 +99,6 @@ class PollDetailView(EventMixin, MetadataMixin, DetailView):
                 approved_designs.append(design)
 
         my_vote: 'PollVote | None' = None
-        voted_designs: set[PollDesign] = set()
 
         if user.is_authenticated and poll.voting_enabled:
             my_vote = (
@@ -105,19 +109,11 @@ class PollDetailView(EventMixin, MetadataMixin, DetailView):
                 .first()
             )
 
-            if my_vote is not None:
-                voted_designs.update([
-                    my_vote.first,
-                    my_vote.second,
-                    my_vote.third,
-                ])
-
         context = super().get_context_data(**kwargs)
         context['now'] = timezone.now()
         context['approved_designs'] = approved_designs
         context['my_designs'] = my_designs
         context['my_vote'] = my_vote
-        context['voted_designs'] = voted_designs
         return context
 
 
@@ -131,13 +127,16 @@ class DesignCreateView(PollMixin, MetadataMixin, LoginRequiredMixin, CreateView)
     def check_poll(self, poll: Poll) -> bool:
         return poll.register_enabled
 
+    def check_poll_redirect(self, poll: Poll) -> HttpResponseRedirectBase:
+        return redirect('sanalberto:poll_detail', slug=poll.slug)
+
     def form_valid(self, form: 'ModelForm[PollDesign]') -> HttpResponse:
         obj = form.save(commit=False)
         obj.poll = self.poll
         obj.user = cast(AbstractUser, self.request.user)
         obj.save()
 
-        return redirect('sanalberto:poll_detail', slug=obj.poll.slug)
+        return redirect('sanalberto:poll_detail', slug=self.poll.slug)
 
 
 class PollVoteCreateView(
@@ -174,6 +173,9 @@ class PollVoteCreateView(
 
     def check_poll(self, poll: Poll) -> bool:
         return poll.voting_enabled
+
+    def check_poll_redirect(self, poll: Poll) -> HttpResponseRedirectBase:
+        return redirect('sanalberto:poll_detail', slug=poll.slug)
 
     def form_valid(self, form: 'ModelForm[PollVote]') -> HttpResponse:
         obj = form.save(commit=False)

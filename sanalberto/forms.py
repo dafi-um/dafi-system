@@ -2,10 +2,10 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.forms import (
+    ModelChoiceField,
     ModelForm,
     ValidationError,
 )
-from django.forms.models import ModelChoiceField
 from django.forms.widgets import Select
 
 from .models import (
@@ -19,28 +19,20 @@ class CustomSelect(Select):
     template_name = 'sanalberto/widgets/select.html'
 
 
-class CustomModelChoiceField(ModelChoiceField):
-
-    widget = CustomSelect
-
-    def label_from_instance(self, obj: PollDesign) -> str:
-        return obj.title
-
-
 class PollVoteForm(ModelForm):
 
-    first = CustomModelChoiceField(
-        None,
+    first = ModelChoiceField(
+        None, widget=CustomSelect,
         label='Primera opción',
     )
 
-    second = CustomModelChoiceField(
-        None, required=False,
+    second = ModelChoiceField(
+        None, required=False, widget=CustomSelect,
         label='Segunda opción (opcional)',
     )
 
-    third = CustomModelChoiceField(
-        None, required=False,
+    third = ModelChoiceField(
+        None, required=False, widget=CustomSelect,
         label='Tercera opción (opcional)',
     )
 

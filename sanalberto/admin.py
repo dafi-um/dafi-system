@@ -63,6 +63,8 @@ class PollDesignAdmin(admin.ModelAdmin):
 
     search_fields = ('title', 'user', 'poll')
 
+    readonly_fields = ('created',)
+
     # To change the column name from 'Diseño aprobado' to 'Aprobado' (:
     @admin.display(boolean=True, ordering='is_approved', description='Aprobado')
     def approved(self, obj: PollDesign) -> bool:
@@ -76,3 +78,5 @@ class PollVoteAdmin(admin.ModelAdmin):
     list_select_related = ('poll', 'user')
 
     autocomplete_fields = ('poll', 'user', 'first', 'second', 'third')
+
+    readonly_fields = ('created', 'updated')

@@ -74,7 +74,6 @@
 
     .designs {
         display: flex;
-        justify-content: space-between;
         align-items: stretch;
         flex-wrap: wrap;
         margin: 0 -.75em;
@@ -94,7 +93,7 @@
             @media screen and (max-width: 480px) {
 
                 .designs .item {
-                    flex-basis: 100%;
+                    flex-basis: 100% !important;
                 }
 
             }

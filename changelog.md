@@ -3,6 +3,14 @@ DAFI System - Registro de Cambios
 
 ## 13 Oct. 2021
 
+### San Alberto
+
+* Actualizadas alertas de encuestas de diseños para cubrir todos los estados
+* Corregidos algunos errores de diseño
+* Otros cambios y mejoras menores
+
+## 13 Oct. 2021
+
 ### Clubes
 
 * Actualizada definición de modelos de administración

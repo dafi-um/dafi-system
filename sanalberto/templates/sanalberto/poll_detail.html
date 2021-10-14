@@ -16,10 +16,14 @@
   {% endif %}
 
   {% if my_vote %}
-    <div class="box wrapper style3 split alert">
-      <div>
+    <div class="box wrapper style3 alert">
+      <div class="split">
         <h4>Mi voto</h4>
 
+        <p>¡El periodo de votación está abierto hasta el {{ poll.voting_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+      </div>
+
+      <div class="split">
         <ol style="margin-bottom: 0;">
           <li>Primera opción: <b>{{ my_vote.first.title }}</b></li>
 
@@ -31,9 +35,19 @@
             <li>Tercera opción: <b>{{ my_vote.third.title }}</b></li>
           {% endif %}
         </ol>
-      </div>
 
-      <a class="button special" href="{% url 'sanalberto:poll_vote' poll.slug %}">Cambiar voto</a>
+        <a class="button special" href="{% url 'sanalberto:poll_vote' poll.slug %}">Cambiar voto</a>
+      </div>
+    </div>
+  {% elif poll.voting_enabled %}
+    <div class="box wrapper style3 split alert">
+      <p>¡El periodo de votación está abierto hasta el {{ poll.voting_end | date:'j M Y \a \l\a\s H:i' }}!</p>
+
+      <a class="button special" href="{% url 'sanalberto:poll_vote' poll.slug %}">¡Votar!</a>
+    </div>
+  {% elif poll.voting_start > now %}
+    <div class="box wrapper style3 alert">
+      <p>El periodo de votación se abrirá el {{ poll.voting_start | date:'j M Y \a \l\a\s H:i' }}.</p>
     </div>
   {% endif %}
 
@@ -77,8 +91,12 @@
           <h4>{{ design.title }}</h4>
 
           {% if poll.voting_enabled %}
-            {% if design in voted_designs %}
-              <h5>¡Has votado por este diseño!</h5>
+            {% if my_vote and design == my_vote.first %}
+              <h5>Has votado: primera opción 🥇</h5>
+            {% elif my_vote and design == my_vote.second %}
+              <h5>Has votado: segunda opción 🥈</h5>
+            {% elif my_vote and design == my_vote.third %}
+              <h5>Has votado: tercera opción 🥉</h5>
             {% else %}
               <a href="{% url 'sanalberto:poll_vote' poll.slug %}?selected={{ design.id }}"
                  class="button special">¡Votar!</a>
