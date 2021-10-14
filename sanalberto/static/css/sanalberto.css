@@ -141,3 +141,18 @@
         .design a:last-child {
             margin: 1em -1.25em -1.25em;
         }
+
+    .design.winner {
+        max-width: 30em;
+        margin: 0 auto 2em;
+        border-color: #1c1c1c;
+        background-color: #fff;
+    }
+
+        .design.winner h4 {
+            color: #e5474b;
+        }
+
+            .design.winner h4:last-child {
+                margin-top: 1em;
+            }

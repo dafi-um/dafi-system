@@ -70,7 +70,7 @@ class PollDetailView(EventMixin, MetadataMixin, DetailView):
     model = Poll
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('designs')
+        return super().get_queryset().prefetch_related('designs', 'winner__user')
 
     def get_object(self, queryset=None) -> Poll:
         obj: Poll = super().get_object(queryset=queryset)

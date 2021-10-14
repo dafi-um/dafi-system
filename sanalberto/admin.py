@@ -52,6 +52,8 @@ class PollAdmin(admin.ModelAdmin):
 
     search_fields = ('title', 'slug', 'event')
 
+    autocomplete_fields = ('winner',)
+
     prepopulated_fields = {'slug': ('title',)}
 
 

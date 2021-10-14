@@ -1,4 +1,5 @@
 {% extends 'sanalberto/base.html' %}
+{% load users_tags %}
 
 {% block content %}
   <h2>{{ poll.title }}</h2>
@@ -48,6 +49,27 @@
   {% elif poll.voting_start > now %}
     <div class="box wrapper style3 alert">
       <p>El periodo de votación se abrirá el {{ poll.voting_start | date:'j M Y \a \l\a\s H:i' }}.</p>
+    </div>
+  {% endif %}
+
+  {% if poll.voting_end < now %}
+    <div class="box wrapper style1">
+      {% if poll.winner %}
+        <h2 style="text-align: center;">Diseño ganador</h2>
+
+        <div class="design winner">
+          <a class="image square"
+            style="background-image: url('{{ poll.winner.image.url }}');"
+            href="{{ poll.winner.image.url }}"
+            target="_blank"></a>
+
+          <h4>{{ poll.winner.title }}</h4>
+
+          <h4>Por: {{ poll.winner.user | nice_name }}</h4>
+        </div>
+      {% else %}
+        <h5>¡El ganador se anunciará próximamente!</h5>
+      {% endif %}
     </div>
   {% endif %}
 

@@ -52,6 +52,12 @@ class Poll(models.Model):
         'fin de votación'
     )
 
+    winner: 'models.ForeignKey[PollDesign | None, PollDesign | None]' = models.ForeignKey(
+        'PollDesign', models.CASCADE, 'won_polls',
+        blank=True, null=True,
+        verbose_name='diseño ganador',
+    )
+
     class Meta:
         verbose_name = 'encuesta'
 
@@ -95,6 +101,11 @@ class PollDesign(models.Model):
         'imagen', upload_to='designs/'
     )
 
+    voting_image: 'models.ImageField' = models.ImageField(
+        'imagen de camiseta', upload_to='designs-tshirts/',
+        blank=True,
+    )
+
     source_file: 'models.FileField' = models.FileField(
         'fichero fuente', upload_to='designs-sources/'
     )
@@ -118,6 +129,10 @@ class PollDesign(models.Model):
 
     def __str__(self) -> str:
         return f'Diseño #{self.id} `{self.title}` de {self.user}'
+
+    @property
+    def voting_image_url(self) -> 'models.ImageField':
+        return self.voting_image.url if self.voting_image else self.image.url
 
 
 class PollVote(models.Model):

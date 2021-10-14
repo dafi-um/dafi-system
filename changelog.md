@@ -5,6 +5,13 @@ DAFI System - Registro de Cambios
 
 ### San Alberto
 
+* Agregado campo de ganador de encuesta
+* Agregado campo para incluir una imagen de detalle en las votaciones de diseños
+
+## 13 Oct. 2021
+
+### San Alberto
+
 * Actualizadas alertas de encuestas de diseños para cubrir todos los estados
 * Corregidos algunos errores de diseño
 * Otros cambios y mejoras menores
