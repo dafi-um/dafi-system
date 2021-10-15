@@ -9,27 +9,31 @@
   </div>
 
   <div class="split">
-    <table>
-      <thead>
-        <tr>
-          <th>Puesto</th>
-          <th>Diseño</th>
-          <th>Autor</th>
-          <th>Votos</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for design, points in designs %}
+    <div style="flex: 1;">
+      <table>
+        <thead>
           <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ design.title }}</td>
-            <td>{{ design.user | nice_name }}</td>
-            <td>{{ points }}</td>
+            <th>Puesto</th>
+            <th>Diseño</th>
+            <th>Autor</th>
+            <th>Puntos</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+
+        <tbody>
+          {% for design, points in designs %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ design.title }}</td>
+              <td>{{ design.user | nice_name }}</td>
+              <td>{{ points }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <p>Total de votos: {{ votes }}</p>
+    </div>
 
     {% if winner %}
       <div style="margin-left: 2em; flex-basis: 30%;">

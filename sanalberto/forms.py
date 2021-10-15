@@ -72,5 +72,9 @@ class PollVoteForm(ModelForm):
             raise ValidationError({
                 'third': 'No puede ser el mismo que la primera opción',
             })
+        if data['second'] == data['third']:
+            raise ValidationError({
+                'third': 'No puede ser el mismo que la segunda opción',
+            })
 
         return data

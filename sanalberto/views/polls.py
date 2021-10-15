@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import (
     Any,
     cast,
@@ -229,27 +230,26 @@ class PollAdminView(
         context = super().get_context_data(**kwargs)
 
         poll: Poll = context['object']
-        votes: dict[int, int] = {}
+        points: Counter[int] = Counter()
+
+        votes = 0
 
         if poll.voting_start < timezone.now():
+            votes = poll.votes.count()
+
             for field, multiplier in (('first', 3), ('second', 2), ('third', 1)):
                 all_votes = poll.votes.values(field).annotate(count=Count(field))
 
                 for item in all_votes:
-                    if item[field]:
-                        points = item['count'] * multiplier
-
-                        try:
-                            votes[item[field]] += points
-                        except KeyError:
-                            votes[item[field]] = points
+                    points[item[field]] += item['count'] * multiplier
 
         designs = [
-            (obj, votes.get(obj.id, 0)) for obj in poll.designs.all()
+            (obj, points.get(obj.id, 0)) for obj in poll.designs.all()
         ]
         designs.sort(key=lambda obj: obj[1], reverse=True)
 
         context['designs'] = designs
+        context['votes'] = votes
 
         if designs[0][1] > 0:
             context['winner'] = designs[0][0]
