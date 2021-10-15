@@ -2,7 +2,13 @@
 {% load users_tags %}
 
 {% block content %}
-  <h2>{{ poll.title }}</h2>
+  <div class="split">
+    <h2>{{ poll.title }}</h2>
+
+    {% if perms.sanalberto.view_poll and perms.sanalberto.view_pollvote %}
+      <a class="button alt" href="{% url 'sanalberto:poll_admin' poll.slug %}">Administración</a>
+    {% endif %}
+  </div>
 
   {% if poll.register_enabled %}
     <div class="box wrapper style3 split alert">

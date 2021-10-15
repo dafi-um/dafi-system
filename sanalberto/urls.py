@@ -21,4 +21,5 @@ urlpatterns = [
     path('<str:slug>/', views.PollDetailView.as_view(), name='poll_detail'),
     path('<str:slug>/registrar/', views.DesignCreateView.as_view(), name='design_create'),
     path('<str:slug>/votar/', views.PollVoteCreateView.as_view(), name='poll_vote'),
+    path('<str:slug>/admin/', views.PollAdminView.as_view(), name='poll_admin'),
 ]

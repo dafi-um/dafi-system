@@ -1,0 +1,49 @@
+{% extends 'sanalberto/base.html' %}
+{% load users_tags %}
+
+{% block content %}
+  <div class="split">
+    <h2>Administración de {{ poll.title }}</h2>
+
+    <a class="button alt" href="{% url 'sanalberto:poll_detail' poll.slug %}">Volver atrás</a>
+  </div>
+
+  <div class="split">
+    <table>
+      <thead>
+        <tr>
+          <th>Puesto</th>
+          <th>Diseño</th>
+          <th>Autor</th>
+          <th>Votos</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for design, points in designs %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ design.title }}</td>
+            <td>{{ design.user | nice_name }}</td>
+            <td>{{ points }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if winner %}
+      <div style="margin-left: 2em; flex-basis: 30%;">
+        <h4>Ganador {% if poll.voting_enabled %}temporal{% else %}definitivo{% endif %}</h4>
+
+        <div class="design" style="margin: 0;">
+          <a class="image square"
+            style="background-image: url('{{ winner.image.url }}');"
+            href="{{ winner.image.url }}"
+            target="_blank"></a>
+
+          <h4>{{ winner.title }}</h4>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock content %}

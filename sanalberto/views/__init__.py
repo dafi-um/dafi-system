@@ -14,6 +14,7 @@ from .main import (
 )
 from .polls import (
     DesignCreateView,
+    PollAdminView,
     PollDetailView,
     PollVoteCreateView,
 )
@@ -31,6 +32,7 @@ __all__ = [
     'DesignCreateView',
     'IndexView',
     'InfoView',
+    'PollAdminView',
     'PollDetailView',
     'PollVoteCreateView',
     'RegistrationDetailView',

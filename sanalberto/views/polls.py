@@ -3,10 +3,16 @@ from typing import (
     cast,
 )
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+)
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import (
+    Count,
+    Q,
+)
 from django.forms.models import ModelForm
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirectBase
@@ -200,3 +206,52 @@ class PollVoteCreateView(
                 existing.save()
 
         return redirect('sanalberto:poll_detail', slug=obj.poll.slug)
+
+
+class PollAdminView(
+        PollMixin,
+        MetadataMixin,
+        UserPassesTestMixin,
+        DetailView):
+
+    model = Poll
+
+    template_name_suffix = '_admin'
+
+    def test_func(self) -> 'bool | None':
+        user = self.request.user
+        return isinstance(user, AbstractUser) and user.has_perms((
+            'sanalberto.view_poll',
+            'sanalberto.view_pollvote',
+        ))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        poll: Poll = context['object']
+        votes: dict[int, int] = {}
+
+        if poll.voting_start < timezone.now():
+            for field, multiplier in (('first', 3), ('second', 2), ('third', 1)):
+                all_votes = poll.votes.values(field).annotate(count=Count(field))
+
+                for item in all_votes:
+                    if item[field]:
+                        points = item['count'] * multiplier
+
+                        try:
+                            votes[item[field]] += points
+                        except KeyError:
+                            votes[item[field]] = points
+
+        designs = [
+            (obj, votes.get(obj.id, 0)) for obj in poll.designs.all()
+        ]
+        designs.sort(key=lambda obj: obj[1], reverse=True)
+
+        context['designs'] = designs
+
+        if designs[0][1] > 0:
+            context['winner'] = designs[0][0]
+
+        return context

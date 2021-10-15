@@ -1,7 +1,13 @@
 DAFI System - Registro de Cambios
 =================================
 
-## 13 Oct. 2021
+## 15 Oct. 2021
+
+### San Alberto
+
+* Agregado panel de administración de encuestas de San Alberto
+
+## 14 Oct. 2021
 
 ### San Alberto
 

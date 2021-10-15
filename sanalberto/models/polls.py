@@ -102,7 +102,8 @@ class PollDesign(models.Model):
     )
 
     voting_image: 'models.ImageField' = models.ImageField(
-        'imagen de camiseta', upload_to='designs-tshirts/',
+        'imagen de votación', upload_to='designs-tshirts/',
+        help_text='Esta imagen se mostrará solamente en el formulario de votación',
         blank=True,
     )
 
