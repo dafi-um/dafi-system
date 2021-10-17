@@ -27,11 +27,7 @@
         </div>
     </header>
 
-    {% if success %}
-        <div class="box wrapper style3">
-            <h5 style="margin-bottom: 0;">¡Todos los cambios se han guardado!</h5>
-        </div>
-    {% endif %}
+    {% include 'messages.html' %}
 
     <div class="row">
         <div class="6u 12u(small)">

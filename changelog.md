@@ -1,6 +1,11 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 17 Oct. 2021
+
+* Mejorado el sistema de mensajes de sesión
+* Algunos cambios y mejoras menores
+
 ## 15 Oct. 2021
 
 ### San Alberto

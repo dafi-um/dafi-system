@@ -1,9 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
-from django.http.response import HttpResponse
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
@@ -27,31 +28,21 @@ class ProfileView(LoginRequiredMixin, MetadataMixin, TemplateView):
 
     title = 'Mi Perfil - DAFI'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.success = False
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        if 'profile_form' not in context:
-            context['profile_form'] = ProfileUserForm(instance=self.request.user)
-
-        if 'telegram_form' not in context:
-            context['telegram_form'] = ProfileTelegramForm(instance=self.request.user)
-
-        context['success'] = self.success
-
+        context['profile_form'] = ProfileUserForm(instance=self.request.user)
+        context['telegram_form'] = ProfileTelegramForm(instance=self.request.user)
         return context
 
     def post(self, request: AuthenticatedRequest, **kwargs) -> HttpResponse:
+        success = False
+
         if 'profile_form' in request.POST:
             form = ProfileUserForm(request.POST, instance=request.user)
 
             if form.has_changed() and form.is_valid():
-                user = form.save()
-                self.success = True
+                form.save()
+                success = True
         elif 'telegram_form' in request.POST:
             form = ProfileTelegramForm(request.POST, instance=request.user)
 
@@ -59,14 +50,25 @@ class ProfileView(LoginRequiredMixin, MetadataMixin, TemplateView):
                 user: User = form.save(commit=False)
                 user.telegram_user = user.telegram_user.replace('@', '')
                 user.telegram_id = None
-                user.save()
+                user.save(update_fields=('telegram_user', 'telegram_id'))
 
-                self.success = True
+                success = True
         elif 'telegram_unlink' in request.POST and request.user.telegram_id:
             request.user.telegram_id = None
-            request.user.save()
+            request.user.save(update_fields=('telegram_id',))
 
-        return super().get(request, **kwargs)
+            messages.info(
+                request,
+                'Cuenta de Telegram desvinculada correctamente',
+            )
+
+        if success:
+            messages.success(
+                request,
+                '¡Perfil actualizado con éxito!',
+            )
+
+        return redirect('profile')
 
 
 class SignUpView(UserPassesTestMixin, MetadataMixin, FormView):
