@@ -4,11 +4,22 @@ from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
+from django.contrib.auth.tokens import default_token_generator
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+)
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
-from django.views.generic.edit import FormView
+from django.utils import timezone
+from django.views.generic import (
+    FormView,
+    TemplateView,
+    View,
+)
 
+from djoser import utils
+from djoser.email import ActivationEmail
 from meta.views import MetadataMixin
 
 from .forms import (
@@ -61,6 +72,17 @@ class ProfileView(LoginRequiredMixin, MetadataMixin, TemplateView):
                 request,
                 'Cuenta de Telegram desvinculada correctamente',
             )
+        elif 'verify_email' in request.POST and request.user.can_send_verify_email():
+            email = ActivationEmail(self.request, {'user': request.user})
+            email.send([request.user.email])
+
+            request.user.verify_email_sent = timezone.now()
+            request.user.save(update_fields=('verify_email_sent',))
+
+            messages.info(
+                request,
+                'Se ha enviado un correo de verificación a tu dirección de e-mail',
+            )
 
         if success:
             messages.success(
@@ -75,7 +97,7 @@ class SignUpView(UserPassesTestMixin, MetadataMixin, FormView):
 
     template_name = 'users/signup.html'
     form_class = SignUpForm
-    success_url = reverse_lazy('profile')
+    success_url = reverse_lazy('signup_success')
 
     title = 'Crear Cuenta - DAFI'
     description = 'Crear una cuenta en la Delegación de Estudiantes de Informática'
@@ -88,11 +110,42 @@ class SignUpView(UserPassesTestMixin, MetadataMixin, FormView):
         user: User = form.save(commit=False)
 
         user.username = user.email
-        # TODO: Create an email confirmation system
-        # user.is_active = False
+        user.is_active = False
         user.save()
 
+        email = ActivationEmail(self.request, {'user': user})
+        email.send([user.email])
+
         return super().form_valid(form)
+
+
+class SignUpSuccessView(MetadataMixin, TemplateView):
+
+    template_name = 'users/signup_success.html'
+
+    title = 'Cuenta creada - DAFI'
+    description = 'Cuenta creada en la Delegación de Estudiantes de Informática'
+    image = 'images/favicon.png'
+
+
+class VerifyEmailView(View):
+
+    def get(self, request: HttpRequest, *args, **kwargs: dict[str, str]) -> HttpResponse:
+        try:
+            uid = utils.decode_uid(kwargs['uid'])
+            user = User.objects.get(pk=uid)
+        except (User.DoesNotExist, ValueError, TypeError, OverflowError):
+            return redirect('main:index')
+
+        if not default_token_generator.check_token(user, kwargs['token']):
+            return redirect('main:index')
+
+        user.is_active = True
+        user.is_verified = True
+        user.verify_email_sent = timezone.now()
+        user.save(update_fields=('is_active', 'is_verified'))
+
+        return redirect('login')
 
 
 class LoginView(MetadataMixin, auth_views.LoginView):

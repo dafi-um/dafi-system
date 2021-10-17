@@ -9,6 +9,8 @@ from . import views
 urlpatterns = [
     path('', views.ProfileView.as_view(), name='profile'),
     path('crear/', views.SignUpView.as_view(), name='signup'),
+    path('crear/exito/', views.SignUpSuccessView.as_view(), name='signup_success'),
+    path('verificar/<uid>/<token>', views.VerifyEmailView.as_view(), name='verify'),
 ]
 
 urls: list[tuple[str, str, Type[View]]] = [

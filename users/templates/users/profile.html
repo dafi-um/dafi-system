@@ -29,6 +29,24 @@
 
     {% include 'messages.html' %}
 
+    {% if not user.is_verified %}
+        <div class="box wrapper style3 split" style="align-items: center;">
+            <p style="margin: 0;">
+                <b>Tu dirección de correo electrónico no está verificada.</b>
+            </p>
+
+            {% if user.can_send_verify_email %}
+                <form method="post">
+                    {% csrf_token %}
+
+                    <input class="button alt" type="submit" name="verify_email" value="Enviar correo de verificación" />
+                </form>
+            {% else %}
+                <p style="margin: 0;">Revisa tu bandeja de entrada.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
     <div class="row">
         <div class="6u 12u(small)">
             <form method="post">

@@ -143,6 +143,8 @@ if not DEBUG:
 
     EMAIL_CONFIG = env.email_url('EMAIL')
     vars().update(EMAIL_CONFIG)
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Auth
@@ -171,6 +173,13 @@ LOGIN_REDIRECT_URL = 'profile'
 CSRF_COOKIE_SECURE = not DEBUG
 
 SESSION_COOKIE_SECURE = not DEBUG
+
+
+# Djoser
+
+DJOSER = {
+    'ACTIVATION_URL': 'cuenta/verificar/{uid}/{token}',
+}
 
 
 # Bot

@@ -1,0 +1,11 @@
+{% extends 'generic.html' %}
+
+{% block content %}
+    <header class="major special">
+        <h1>Confirma tu e-mail</h1>
+    </header>
+
+    <p>Tu cuenta de DAFI se ha creado correctamente, pero es necesario que verifiques tu dirección de correo electrónico para poder continuar.</p>
+
+    <p>En tu <b>bandeja de entrada</b> deberías haber recibido un correo de <b>dafi@um.es</b> con instrucciones para continuar. Una vez hayas verificado tu e-mail, podrás <a href="{% url 'login' %}">iniciar sesión</a>.</p>
+{% endblock content %}

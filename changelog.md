@@ -3,6 +3,7 @@ DAFI System - Registro de Cambios
 
 ## 17 Oct. 2021
 
+* Agregado sistema de verificación de correo
 * Mejorado el sistema de mensajes de sesión
 * Algunos cambios y mejoras menores
 

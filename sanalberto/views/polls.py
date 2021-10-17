@@ -4,19 +4,25 @@ from typing import (
     cast,
 )
 
+from django.contrib import messages
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     UserPassesTestMixin,
 )
-from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.db.models import (
     Count,
     Q,
 )
 from django.forms.models import ModelForm
-from django.http import HttpResponse
-from django.http.response import HttpResponseRedirectBase
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+)
+from django.http.response import (
+    HttpResponseBase,
+    HttpResponseRedirectBase,
+)
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.generic import (
@@ -28,6 +34,7 @@ from django.views.generic import (
 from meta.views import MetadataMixin
 
 from sanalberto.forms import PollVoteForm
+from users.models import User
 
 from ..models import (
     Poll,
@@ -140,7 +147,7 @@ class DesignCreateView(PollMixin, MetadataMixin, LoginRequiredMixin, CreateView)
     def form_valid(self, form: 'ModelForm[PollDesign]') -> HttpResponse:
         obj = form.save(commit=False)
         obj.poll = self.poll
-        obj.user = cast(AbstractUser, self.request.user)
+        obj.user = cast(User, self.request.user)
         obj.save()
 
         return redirect('sanalberto:poll_detail', slug=self.poll.slug)
@@ -198,7 +205,7 @@ class PollVoteCreateView(
 
             if existing is None:
                 obj.poll = self.poll
-                obj.user = cast(AbstractUser, self.request.user)
+                obj.user = cast(User, self.request.user)
                 obj.save()
             else:
                 existing.first = obj.first
@@ -207,6 +214,17 @@ class PollVoteCreateView(
                 existing.save()
 
         return redirect('sanalberto:poll_detail', slug=obj.poll.slug)
+
+    def dispatch(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponseBase:
+        if isinstance(request.user, User) and not request.user.is_verified:
+            messages.error(
+                request,
+                'Debes verificar tu e-mail para poder votar',
+                extra_tags='show_profile_btn'
+            )
+            return redirect('sanalberto:poll_detail', kwargs['slug'])
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class PollAdminView(
@@ -221,7 +239,7 @@ class PollAdminView(
 
     def test_func(self) -> 'bool | None':
         user = self.request.user
-        return isinstance(user, AbstractUser) and user.has_perms((
+        return isinstance(user, User) and user.has_perms((
             'sanalberto.view_poll',
             'sanalberto.view_pollvote',
         ))
