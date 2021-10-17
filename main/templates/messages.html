@@ -1,0 +1,10 @@
+{% for message in messages %}
+    <div class="box wrapper split {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}style1{% else %}style3{% endif %}"
+         style="align-items: center;">
+        <h5 style="margin-bottom: 0;">{{ message }}</h5>
+
+        {% if 'show_profile_btn' in message.tags %}
+            <a class="button alt" href="{% url 'profile' %}">Ir a Mi Perfil</a>
+        {% endif %}
+    </div>
+{% endfor %}

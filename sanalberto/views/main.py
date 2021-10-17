@@ -1,5 +1,6 @@
 import datetime
 
+from django.utils import timezone
 from django.views.generic import TemplateView
 
 from meta.views import MetadataMixin
@@ -87,6 +88,7 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
         # days_list = sorted(days, key=lambda x: x[1]) # TODO: Fix this sorting method
 
         context = super().get_context_data(**kwargs)
+        context['now'] = timezone.now()
         context['days'] = days_list
         context['polls'] = polls
         return context

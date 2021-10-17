@@ -17,15 +17,7 @@
         <p>Creada el {{ object.creation_date | date:'j M Y H:i' }} por {{ object.user | nice_name }}</p>
     </header>
 
-    {% if messages %}
-        <div class="box wrapper style3">
-            <ul class="alt">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
+    {% include 'messages.html' %}
 
     <form id="app" method="post">
         {% for line, groups in lines %}

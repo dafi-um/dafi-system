@@ -1,0 +1,21 @@
+{% block subject %}
+Activa tu cuenta de DAFI
+{% endblock subject %}
+
+{% block text_body %}
+Estás recibiendo este e-mail porque has creado una cuenta en el sitio web de DAFI o has solicitado la verificación de tu cuenta. Para confirmar esta dirección de correo electrónico accede al siguiente enlace: {{ protocol }}://{{ domain }}/{{ url|safe }}
+
+Si crees que has recibido este correo por error, ignóralo. Si se repite, contacta con nosotros en esta misma dirección de correo.
+
+¡Gracias por confiar en DAFI!
+{% endblock text_body %}
+
+{% block html_body %}
+<p>Estás recibiendo este e-mail porque has creado una cuenta en el sitio web de DAFI o has solicitado la verificación de tu cuenta. Para confirmar esta dirección de correo electrónico accede al siguiente enlace:</p>
+
+<p><a href="{{ protocol }}://{{ domain }}/{{ url|safe }}">{{ protocol }}://{{ domain }}/{{ url|safe }}</a></p>
+
+<p>Si crees que has recibido este correo por error, ignóralo. Si se repite, contacta con nosotros en esta misma dirección de correo.</p>
+
+<p>¡Gracias por confiar en DAFI!</p>
+{% endblock html_body %}

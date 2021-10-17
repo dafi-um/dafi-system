@@ -1,0 +1,80 @@
+{% extends 'sanalberto/base.html' %}
+
+{% block content %}
+    <style type="text/css">
+        .split {
+            align-items: center;
+            margin-bottom: 1em;
+        }
+
+            .split h3 {
+                margin: 0;
+            }
+
+        .box.style1 {
+            margin-bottom: 1em;
+        }
+
+        .box.style3 {
+            border-width: 2px;
+        }
+
+        .designs {
+            margin-bottom: 1em;
+        }
+
+            .designs .item {
+                flex-basis: 25%;
+            }
+
+        label {
+            margin-bottom: 0.25em;
+        }
+
+        form > div {
+            margin-bottom: 2em;
+        }
+
+        ul.errorlist {
+            margin-bottom: 0.25em;
+        }
+    </style>
+
+    <div class="split">
+        <h3>Votar diseño para {{ poll.title }}</h3>
+
+        <a class="button small alt" href="{% url 'sanalberto:poll_detail' poll.slug %}">Volver atrás</a>
+    </div>
+
+    <div class="box wrapper style1">
+        <p><b>Recuerda:</b> puedes votar hasta tres diseños, en orden de preferencia descendente (primero el que más te gusta).</p>
+    </div>
+
+    <div class="designs">
+      {% for design in designs %}
+        <div class="item">
+          <div class="design">
+            <div class="image square" style="background-image: url('{{ design.voting_image_url }}');"></div>
+
+            <h4>{{ design.title }}</h4>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if object %}
+        <h4>Modificar voto</h4>
+    {% else %}
+        <h4>Crear voto</h4>
+    {% endif %}
+
+    <div class="box wrapper style3">
+        <form method="post">
+            {{ form }}
+
+            {% csrf_token %}
+
+            <button class="button alt" type="submit">Guardar voto</button>
+        </form>
+    </div>
+{% endblock content %}

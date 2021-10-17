@@ -1,6 +1,47 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 17 Oct. 2021
+
+* Agregado sistema de verificación de correo
+* Mejorado el sistema de mensajes de sesión
+* Algunos cambios y mejoras menores
+
+## 15 Oct. 2021
+
+### San Alberto
+
+* Agregado panel de administración de encuestas de San Alberto
+
+## 14 Oct. 2021
+
+### San Alberto
+
+* Agregado campo de ganador de encuesta
+* Agregado campo para incluir una imagen de detalle en las votaciones de diseños
+
+## 13 Oct. 2021
+
+### San Alberto
+
+* Actualizadas alertas de encuestas de diseños para cubrir todos los estados
+* Corregidos algunos errores de diseño
+* Otros cambios y mejoras menores
+
+## 13 Oct. 2021
+
+### Clubes
+
+* Actualizada definición de modelos de administración
+
+### San Alberto
+
+* Separados modelos en distintos ficheros
+* Actualizados templates
+* Creado sistema de votación
+* Movido CSS de templates a un fichero estático
+* Renombrado `poll_index` a `poll_detail`
+
 ## 29 Sept. 2021
 
 ### Bot

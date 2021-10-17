@@ -11,6 +11,8 @@ class ClubAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'slug', 'telegram_group_link')
 
+    search_fields = ('name', 'slug')
+
     prepopulated_fields = {'slug': ('name',)}
 
 
@@ -18,4 +20,5 @@ class ClubAdmin(admin.ModelAdmin):
 class ClubMeetingAdmin(admin.ModelAdmin):
 
     list_display = ('title', 'club', 'place', 'moment')
-    list_filter = ['club', 'place', 'moment']
+    list_filter = ('club', 'place', 'moment')
+    list_select_related = ('club',)

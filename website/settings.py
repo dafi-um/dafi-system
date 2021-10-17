@@ -146,6 +146,8 @@ if not DEBUG:
 
     EMAIL_CONFIG = env.email_url('EMAIL')
     vars().update(EMAIL_CONFIG)
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Auth
@@ -194,6 +196,13 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.templates.TemplatesPanel',
     'debug_toolbar.panels.cache.CachePanel',
 ]
+
+
+# Djoser
+
+DJOSER = {
+    'ACTIVATION_URL': 'cuenta/verificar/{uid}/{token}',
+}
 
 
 # Bot
