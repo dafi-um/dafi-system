@@ -145,6 +145,12 @@ class VerifyEmailView(View):
         user.verify_email_sent = timezone.now()
         user.save(update_fields=('is_active', 'is_verified'))
 
+        if request.user.is_authenticated:
+            messages.success(
+                request, '¡Se ha verificado tu dirección de e-mail correctamente!',
+            )
+            return redirect('profile')
+
         return redirect('login')
 
 
