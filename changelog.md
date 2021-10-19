@@ -1,6 +1,12 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 19 Oct. 2021
+
+### San Alberto
+
+* Redirección temporal de los usuarios de la tienda hacia HanzoBot
+
 ## 17 Oct. 2021
 
 * Agregado sistema de verificación de correo
