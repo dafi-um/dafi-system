@@ -2,10 +2,16 @@
 
 {% block content %}
     <div class="box wrapper style1" style="font-weight: bold;">
+        <p>La tienda se ha trasladado a Telegram temporalmente, ejecuta /dafistore en @HanzoBot:</p>
+
+        <a class="button alt" href="http://t.me/HanzoBot?start=dafistore">@HanzoBot</a>
+
+        {% comment %}
         {% if soon %}
             <p>La tienda se abrirá el {{ event.selling_start | date:'j M Y \a \l\a\s H:i' }}.</p>
         {% else %}
             <p>La venta de artículos de San Alberto ha finalizado.</p>
         {% endif %}
+        {% endcomment %}
     </div>
 {% endblock content %}
