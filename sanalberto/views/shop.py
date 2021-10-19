@@ -36,7 +36,7 @@ class ShopClosedView(EventMixin, MetadataMixin, TemplateView):
 
     template_name = 'sanalberto/shop_closed.html'
 
-    title = 'Tienda cerrada'
+    title = 'Tienda trasladada'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
