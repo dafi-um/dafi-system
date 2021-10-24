@@ -28,7 +28,7 @@
                     <p>
                         <span>{{ group.delegate | nice_name }}</span>
                         {% if group.delegate.telegram_id %}
-                            <span> - <i class="fa fa-send"></i> @{{ group.delegate.telegram_user }}</span>
+                            <span> - <i class="fas fa-paper-plane"></i> @{{ group.delegate.telegram_user }}</span>
                         {% endif %}
                     </p>
                 {% endif %}
@@ -38,7 +38,7 @@
                     <p>
                         <span>{{ group.subdelegate | nice_name }}</span>
                         {% if group.subdelegate.telegram_id %}
-                            <span> - <i class="fa fa-send"></i> @{{ group.subdelegate.telegram_user }}</span>
+                            <span> - <i class="fas fa-paper-plane"></i> @{{ group.subdelegate.telegram_user }}</span>
                         {% endif %}
                     </p>
                 {% endif %}

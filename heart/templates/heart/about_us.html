@@ -28,7 +28,7 @@
                     {% endif %}
 
                     {% if member.user.telegram_id %}
-                        <p style="opacity: 0.8;"><i class="fa fa-send"></i> @{{ member.user.telegram_user }}</p>
+                        <p style="opacity: 0.8;"><i class="fas fa-paper-plane"></i> @{{ member.user.telegram_user }}</p>
                     {% endif %}
                 </div>
             {% endfor %}
@@ -48,7 +48,7 @@
             <div class="split">
                 <h4>{{ committee.name }}</h4>
 
-                <p style="margin-bottom: 1em;">Responsable: {{ committee.manager.get_full_name }}{% if committee.manager.telegram_id %} - <i class="fa fa-send"></i> @{{ committee.manager.telegram_user }}{% endif %}</p>
+                <p style="margin-bottom: 1em;">Responsable: {{ committee.manager.get_full_name }}{% if committee.manager.telegram_id %} - <i class="fas fa-paper-plane"></i> @{{ committee.manager.telegram_user }}{% endif %}</p>
             </div>
 
             <p style="margin-bottom: 0;">{{ committee.description }}</p>
