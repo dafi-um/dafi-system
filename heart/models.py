@@ -16,6 +16,7 @@ from django.utils.functional import cached_property
 
 from meta.models import ModelMeta
 
+from clubs.models import Club
 from users.models import User
 
 
@@ -366,11 +367,11 @@ class PeopleGroupMember(models.Model):
         return self.user.get_full_name()
 
 
-class Event(models.Model):
+class Activity(models.Model):
 
     id: 'models.AutoField[int, int]'
 
-    objects: 'models.Manager[Event]'
+    objects: 'models.Manager[Activity]'
 
     title: 'models.CharField[str, str]' = models.CharField(
         'título', max_length=120,
@@ -392,6 +393,12 @@ class Event(models.Model):
         'fecha de fin',
     )
 
+    club: 'models.ForeignKey[Club, Club]' = models.ForeignKey(
+        Club, models.CASCADE, related_name='activities',
+        blank=True, null=True,
+        verbose_name='club organizador',
+    )
+
     checkin_points: 'models.PositiveIntegerField[int, int]' = models.PositiveIntegerField(
         'puntos por participar', default=1,
     )
@@ -401,12 +408,13 @@ class Event(models.Model):
     )
 
     attendees: 'models.ManyToManyField[None, RelatedManager[User]]' = models.ManyToManyField(
-        User, 'events_attended', blank=True,
+        User, 'activities_attended',
+        blank=True,
         verbose_name='asistentes',
     )
 
     class Meta:
-        verbose_name = 'evento'
+        verbose_name = 'actividad'
 
     def __str__(self) -> str:
-        return f'Evento #{self.id} ({self.title})'
+        return f'Actividad #{self.id} ({self.title})'

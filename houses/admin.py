@@ -29,9 +29,9 @@ class HouseProfileAdmin(admin.ModelAdmin):
 @admin.register(PointsTransaction)
 class PointsTransactionAdmin(admin.ModelAdmin):
 
-    list_display = ('__str__', 'house', 'event', 'user', 'points')
-    list_select_related = ('user', 'house', 'event')
+    list_display = ('__str__', 'house', 'activity', 'user', 'points')
+    list_select_related = ('user', 'house', 'activity')
 
-    search_fields = ('user', 'house', 'event')
+    search_fields = ('user', 'house', 'activity')
 
-    autocomplete_fields = ('user', 'house', 'event')
+    autocomplete_fields = ('user', 'house', 'activity')

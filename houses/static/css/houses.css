@@ -1,24 +1,84 @@
-body {
-    background: #1c1c1c;
-}
+/* Adjustements */
 
-#main {
-    padding-bottom: 4rem;
-    min-height: calc(100vh - 14.58em);
-}
+    body {
+        background: #1c1c1c;
+    }
 
-.houses-title {
-    margin-bottom: 2rem;
-    text-align: center;
-}
+    #header .submenu-wrapper > .submenu {
+        transition: border-color 0.25s ease-in-out, max-height 0.25s ease-in-out;
+        border: 1px solid transparent;
+    }
 
-.house-card {
-    flex: 1;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    border-radius: .5rem;
-    border: 1px solid #e5474b;
-    background-color: #f0f0f0;
-    color: #111111;
-    text-align: center;
-}
+        #header .submenu-wrapper:hover > .submenu {
+            transition: border-color 0.25s ease-in-out, max-height 0.25s ease-in-out;
+            border-color: #fff;
+        }
+
+    #main {
+        padding-bottom: 4rem;
+        min-height: calc(100vh - 14.58em);
+    }
+
+/* Houses */
+
+    .houses-navbar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2em;
+    }
+
+        .houses-navbar h1 {
+            margin: 0;
+            text-align: center;
+        }
+
+        .houses-navbar .left,
+        .houses-navbar .right {
+            flex: 1;
+        }
+
+        .houses-navbar .right {
+            text-align: right;
+        }
+
+        @media screen and (max-width: 480px) {
+
+            .houses-navbar {
+                flex-direction: column;
+            }
+
+                .houses-navbar .right {
+                    order: -1;
+                    margin-bottom: 1em;
+                }
+
+        }
+
+    .house-card {
+        flex: 1;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        border-radius: .25rem;
+        border: 1px solid #e5474b;
+        background-color: #f0f0f0;
+        color: #111111;
+        text-align: center;
+    }
+
+    .best-house h1 {
+        margin: 0;
+        text-align: center;
+        font-size: 4em;
+    }
+
+    .best-house .house-card {
+        box-shadow: 0 0 0 4px #e5474b;
+    }
+
+    @media screen and (min-width: 481px) {
+
+        .has-best-house :not(.best-house) .house-card {
+            margin-top: 6em;
+        }
+
+    }

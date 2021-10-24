@@ -3,10 +3,10 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from .models import (
+    Activity,
     Committee,
     Degree,
     DocumentMedia,
-    Event,
     Group,
     Meeting,
     PeopleGroup,
@@ -82,8 +82,8 @@ class PeopleGroupAdmin(admin.ModelAdmin):
     inlines = (PeopleGroupMemberInline,)
 
 
-@admin.register(Event)
-class Event(admin.ModelAdmin):
+@admin.register(Activity)
+class Activity(admin.ModelAdmin):
 
     list_display = ('title', 'place', 'start')
 

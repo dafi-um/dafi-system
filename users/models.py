@@ -66,6 +66,15 @@ class User(AbstractUser):
     def __str__(self):
         return f'{self.first_name} {self.last_name} - {self.email}'
 
+    @property
+    def display_name(self) -> str:
+        """Gets the display name for this user.
+
+        The display name is either the full name of the username. This
+        method always returns a non-blank string.
+        """
+        return self.get_full_name() or self.username
+
     def can_send_verify_email(self) -> bool:
         """Checks if the user can send a verify email.
         """

@@ -7,7 +7,7 @@ from django.db import models
 from django.db.models import F
 from django.db.transaction import atomic
 
-from heart.models import Event
+from heart.models import Activity
 from users.models import User
 
 
@@ -56,9 +56,9 @@ class PointsTransaction(models.Model):
         verbose_name='casa',
     )
 
-    event: 'models.ForeignKey[Event, Event]' = models.ForeignKey(
-        Event, models.CASCADE, 'house_points_transactions',
-        verbose_name='evento',
+    activity: 'models.ForeignKey[Activity, Activity]' = models.ForeignKey(
+        Activity, models.CASCADE, 'house_points_transactions',
+        verbose_name='actividad',
     )
 
     user: 'models.ForeignKey[User | None, User | None]' = models.ForeignKey(
@@ -89,18 +89,18 @@ class HouseProfile(models.Model):
 
     objects: 'models.Manager[HouseProfile]'
 
-    house: 'models.ForeignKey[House, House]' = models.ForeignKey(
-        House, models.CASCADE, 'members',
-        verbose_name='casa',
-    )
-
     user: 'models.OneToOneField[User, User]' = models.OneToOneField(
         User, models.CASCADE, related_name='house_profile',
         verbose_name='usuario',
     )
 
+    house: 'models.ForeignKey[House, House]' = models.ForeignKey(
+        House, models.CASCADE, related_name='members',
+        verbose_name='casa',
+    )
+
     points: 'models.IntegerField[int, int]' = models.IntegerField(
-        'puntos',
+        'puntos', default=0,
     )
 
     rank: 'models.CharField[str, str]' = models.CharField(
@@ -118,7 +118,12 @@ class HouseProfile(models.Model):
     def __str__(self) -> str:
         return f'Perfil de Casa #{self.id}: {self.user} en {self.house}'
 
-    def _add_points(self, event: Event, points: int) -> 'PointsTransaction | None':
+    def display_name(self) -> str:
+        """Gets the display name for this profile user.
+        """
+        return self.nickname or self.user.display_name
+
+    def _add_points(self, activity: Activity, points: int) -> 'PointsTransaction | None':
         """Atomically adds points to this profile.
 
         WARNING: Must be run inside an atomic transaction!!
@@ -129,7 +134,7 @@ class HouseProfile(models.Model):
             house=self.house,
             user=self.user,
             points=points,
-            event=event,
+            activity=activity,
         )
 
         # Type the F-expression as Any to avoid typing issues
@@ -151,34 +156,34 @@ class HouseProfile(models.Model):
 
         return transaction
 
-    def check_in(self, event: Event) -> 'PointsTransaction | None':
-        """Adds check-in points to this profile from the given event.
+    def check_in(self, activity: Activity) -> 'PointsTransaction | None':
+        """Adds check-in points to this profile from the given activity.
 
         Returns `None` if no action was taken.
         """
-        if not event.checkin_points:
+        if not activity.checkin_points:
             return None
 
         with atomic():
-            return self._add_points(event, event.checkin_points)
+            return self._add_points(activity, activity.checkin_points)
 
-    def give_points(self, event: Event, points: int) -> 'PointsTransaction | None':
-        """Adds points to this profile from the free points of an event.
+    def give_points(self, activity: Activity, points: int) -> 'PointsTransaction | None':
+        """Adds points to this profile from the free points of an activity.
 
         Returns `None` if no action was taken.
         """
         with atomic():
-            # If the event has enough points, atomically subtract the
+            # If the activity has enough points, atomically subtract the
             # specified ones
             updated = (
-                Event
+                Activity
                 .objects
-                .filter(id=event.id, free_points__gte=points)
+                .filter(id=activity.id, free_points__gte=points)
                 .update(points=F('points') - points)
             )
 
             if not updated:
-                # The event doesn't have more points available
+                # The activity doesn't have more points available
                 return None
 
-            return self._add_points(event, points)
+            return self._add_points(activity, points)

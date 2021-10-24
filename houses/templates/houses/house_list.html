@@ -1,13 +1,27 @@
 {% extends 'houses/base.html' %}
 
-{% load users_tags %}
-
 {% block content %}
-  <h1 class="houses-title">Las Casas de la FIUM</h1>
+  <div class="houses-navbar">
+    <div class="left"></div>
 
-  <div class="row">
+    <h1>Las Casas de la FIUM</h1>
+
+    <div class="right">
+      {% if user.is_authenticated %}
+        <a class="button alt" href="{% url 'houses:profile' %}">Mi Perfil</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row {% if best_house %}has-best-house{% endif %}">
     {% for house in house_list %}
-      <div class="3u 6u(small) 12u(xsmall)">
+      <div class="3u 6u(small) 12u(xsmall) {% if house == best_house %}best-house{% endif %}">
+        {% if house == best_house %}
+          <h1>
+            <i class="fas fa-crown"></i>
+          </h1>
+        {% endif %}
+
         <div class="house-card">
           <h2>{{ house.name }}</h2>
 
@@ -21,10 +35,10 @@
 
               {% for manager in house.managers.all %}
                 <p>
-                  <span>{{ manager | nice_name }}</span>
+                  <span>{{ manager.display_name }}</span>
                   {% if manager.telegram_id %}
                     <span>
-                      (<a href="https://t.me/{{ manager.telegram_user }}">@{{ manager.telegram_user }}</a>)
+                      (<a href="https://t.me/{{ manager.telegram_user }}" target="_blank">@{{ manager.telegram_user }}</a>)
                     </span>
                   {% endif %}
                 </p>
