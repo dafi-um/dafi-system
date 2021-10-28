@@ -22,7 +22,11 @@
           </h1>
         {% endif %}
 
-        <div class="house-card">
+        <div class="houses-card">
+          <div class="house-logo">
+            <div style="background-image: url({{ house.logo.url }});"></div>
+          </div>
+
           <h2>{{ house.name }}</h2>
 
           <h4>Puntos: {{ house.points }}</h4>

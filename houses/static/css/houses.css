@@ -15,7 +15,7 @@
         }
 
     #main {
-        padding-bottom: 4rem;
+        padding-bottom: 4em;
         min-height: calc(100vh - 14.58em);
     }
 
@@ -54,16 +54,31 @@
 
         }
 
-    .house-card {
+    .houses-card {
         flex: 1;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        border-radius: .25rem;
+        margin-bottom: 1.5em;
+        padding: 1em;
+        border-radius: .25em;
         border: 1px solid #e5474b;
         background-color: #f0f0f0;
         color: #111111;
         text-align: center;
     }
+
+/* Houses list */
+
+    .house-logo {
+        width: 100%;
+        max-width: 10em;
+        margin: 0 auto 1em;
+    }
+
+        .house-logo > div {
+            padding-top: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
 
     .best-house h1 {
         margin: 0;
@@ -71,13 +86,13 @@
         font-size: 4em;
     }
 
-    .best-house .house-card {
+    .best-house .houses-card {
         box-shadow: 0 0 0 4px #e5474b;
     }
 
     @media screen and (min-width: 481px) {
 
-        .has-best-house :not(.best-house) .house-card {
+        .has-best-house :not(.best-house) .houses-card {
             margin-top: 6em;
         }
 

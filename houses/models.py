@@ -1,3 +1,5 @@
+from functools import partial
+from os import path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -15,6 +17,13 @@ if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
 
 
+def house_logo_path(base: str, instance: 'House', filename: str) -> str:
+    """Generates a path for a house logo.
+    """
+    ext = path.splitext(filename)[1] or '.png'
+    return f'{base}/{instance.id}{ext}'
+
+
 class House(models.Model):
 
     id: 'models.AutoField[int, int]'
@@ -23,6 +32,15 @@ class House(models.Model):
 
     name: 'models.CharField[str, str]' = models.CharField(
         'nombre', max_length=64,
+    )
+
+    logo: 'models.ImageField' = models.ImageField(
+        'logo', upload_to=partial(house_logo_path, 'houses/logos/'),
+    )
+
+    plain_logo: 'models.ImageField' = models.ImageField(
+        'logo plano', upload_to=partial(house_logo_path, 'houses/plain-logos/'),
+        help_text='Se utilizará como fondo en los perfiles',
     )
 
     points: 'models.PositiveIntegerField[int, int]' = models.PositiveIntegerField(
@@ -118,6 +136,7 @@ class HouseProfile(models.Model):
     def __str__(self) -> str:
         return f'Perfil de Casa #{self.id}: {self.user} en {self.house}'
 
+    @property
     def display_name(self) -> str:
         """Gets the display name for this profile user.
         """
