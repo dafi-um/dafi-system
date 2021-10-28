@@ -1,0 +1,72 @@
+{% extends 'houses/base.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+  <div class="houses-navbar">
+    <div class="left"></div>
+
+    <h1>Las Casas de la FIUM</h1>
+
+    <div class="right">
+      <a class="button alt" href="{% url 'houses:list' %}"><i class="fas fa-arrow-left"></i>Las Casas</a>
+    </div>
+  </div>
+
+  <div class="houses-card houses-profile">
+    <div class="houses-profile-background" style="background-image: url({{ profile.house.plain_logo.url }});"></div>
+
+    <div>
+      <img class="houses-profile-image" src="{{ profile.user | gravatar }}" alt="Gravatar de {{ profile.user.email }}" />
+
+      <h3>{{ profile.display_name }}</h3>
+      <h4>{{ profile.rank }}</h4>
+    </div>
+
+    <div class="houses-profile-info">
+      {% if user.is_authenticated %}
+        <h4>Sobre {{ profile.display_name }}</h4>
+
+        <dl>
+          <dt>Nombre</dt>
+          <dd>{{ profile.user.display_name }}</dd>
+
+          {% if profile.user.telegram_id %}
+            <dt>Telegram</dt>
+            <dd>
+              <a href="https://t.me/{{ profile.user.telegram_user }}" target="_blank">
+                @{{ profile.user.telegram_user }}
+              </a>
+            </dd>
+          {% endif %}
+
+          {% if user.is_staff %}
+            <dt>Email</dt>
+            <dd>
+              <a href="mailto:{{ profile.user.email }}" target="_blank">
+                {{ profile.user.email }}
+              </a>
+            </dd>
+          {% endif %}
+        </dl>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="houses-profile-house">
+        <div class="house-logo">
+          <div style="background-image: url({{ profile.house.logo.url }});"></div>
+        </div>
+      </div>
+
+      {% if my_profile or user.is_staff %}
+        <div class="houses-profile-points">
+          <h4>Puntos</h4>
+
+          <p>Mis puntos: <b>{{ profile.points }}</b></p>
+          <p>Mi casa: <b>{{ profile.house.points }}</b></p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock content %}

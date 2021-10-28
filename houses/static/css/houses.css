@@ -41,6 +41,10 @@
             text-align: right;
         }
 
+            .houses-navbar .right a i {
+                margin-right: .25em;
+            }
+
         @media screen and (max-width: 480px) {
 
             .houses-navbar {
@@ -97,3 +101,102 @@
         }
 
     }
+
+/* Houses profiles */
+
+    .houses-profile {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.5em;
+    }
+
+        .houses-profile > div:last-child {
+            flex-basis: 10em;
+        }
+
+        .houses-profile > div:not(:first-child) {
+            z-index: 1; /* To be over the background (first div) */
+        }
+
+        .houses-profile-image {
+            width: 150px; /* From the Gravatar filter */
+            border-radius: 100%;
+        }
+
+        .houses-profile-image + h3 {
+            margin: 0;
+        }
+
+        .houses-profile-info,
+        .houses-profile-points {
+            text-align: left;
+        }
+
+            .houses-profile-info h4,
+            .houses-profile-points h4 {
+                width: 80%;
+                margin-bottom: .5em;
+                border-bottom: 2px solid #e5474b;
+                font-weight: normal;
+            }
+
+        .houses-profile-info {
+            flex: 1;
+        }
+
+        .houses-profile-house {
+            width: 6em;
+            margin: .5em auto 1.5em;
+        }
+
+        .houses-profile-points p {
+            margin: 0;
+        }
+
+        @media screen and (max-width: 480px) {
+
+            .houses-profile {
+                flex-direction: column;
+            }
+
+            .houses-profile-house {
+                margin: 1em auto 0;
+            }
+
+            .houses-profile-background {
+                display: none;
+            }
+
+        }
+
+        @media screen and (min-width: 481px) {
+
+            .houses-profile {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .houses-profile-info {
+                margin: 0 2em;
+            }
+
+            .houses-profile-background {
+                position: absolute;
+                top: -5%;
+                right: -15em;
+                width: 35em;
+                height: 110%;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                filter: blur(1em);
+                opacity: .6;
+            }
+
+            .houses-profile-points {
+                padding: .5em 1em;
+                border-radius: .25em;
+                background: rgba(240, 240, 240, .6);
+            }
+
+        }

@@ -7,8 +7,10 @@
     <h1>Las Casas de la FIUM</h1>
 
     <div class="right">
-      {% if user.is_authenticated %}
-        <a class="button alt" href="{% url 'houses:profile' %}">Mi Perfil</a>
+      {% if profile %}
+        <a class="button alt" href="{% url 'houses:profile' profile.id %}">Mi Perfil</a>
+      {% elif user.is_authenticated %}
+        <a class="button alt" href="{% url 'houses:selector' %}">Crear Perfil</a>
       {% endif %}
     </div>
   </div>

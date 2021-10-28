@@ -1,0 +1,23 @@
+{% extends 'houses/base.html' %}
+
+{% load users_tags %}
+
+{% block content %}
+  <div class="houses-navbar">
+    <div class="left"></div>
+
+    <h1>El Algoritmo Seleccionador</h1>
+
+    <div class="right">
+      <a class="button alt" href="{% url 'houses:list' %}"><i class="fas fa-arrow-left"></i>Las Casas</a>
+    </div>
+  </div>
+
+  <div class="houses-card">
+    <h4>¡Bienvenid@ joven picacódigos!</h4>
+
+    <p>Es hora de que se te asigne una casa en la FIUM, y para ello, nuestros mejores desarrolladores han creado ¡el <b>Algoritmo Seleccionador</b>!</p>
+
+    <button class="button alt">¡Comenzar!</button>
+  </div>
+{% endblock content %}

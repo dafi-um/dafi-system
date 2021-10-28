@@ -2532,12 +2532,21 @@
 		dl dt {
 			display: block;
 			font-weight: 700;
-			margin: 0 0 1em 0;
+			color: #e5474b;
 		}
 
 		dl dd {
-			margin-left: 2em;
+			display: inline-block;
+			margin-left: .25em;
 		}
+
+			dl dd:before {
+				margin-right: .25em;
+				content: "\f054"; /* chevron right */
+				font-family: "Font Awesome 5 Free";
+				font-weight: 900; /* For FA to work */
+				color: #e5474b;
+			}
 
 	ul.alt li {
 		border-top-color: #e5474b;
