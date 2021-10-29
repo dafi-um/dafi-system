@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.shortcuts import redirect
 from django.views.generic.base import (
     ContextMixin,
@@ -11,38 +13,27 @@ class EventMixin(ContextMixin, View):
     """Current event mixin.
     """
 
-    _current_event: Event
-
-    title = 'Inicio'
+    subtitle = 'Inicio'
     description = 'San Alberto: Fiestas patronales de la Facultad de Informática'
     image = 'images/favicon.png'
 
     check_event_redirect = 'sanalberto:info'
 
-    def get_current_event(self) -> Event:
-        try:
-            return self._current_event
-        except AttributeError:
-            self._current_event = (
-                Event.objects
-                .order_by('-date')
-                .prefetch_related('polls')
-                .get()
-            )
-
-            return self._current_event
+    event: Event
 
     def get_context_data(self, **kwargs):
-        ev = self.get_current_event()
+        context = super().get_context_data(**kwargs)
+        context['event'] = self.event
+        return context
 
-        self.title = '{} - San Alberto {} - DAFI'.format(
-            self.title,
-            ev.date.year
+    def get_meta_title(self, context: dict[str, Any]) -> str:
+        return '{} - San Alberto {} - DAFI'.format(
+            self.get_subtitle(context),
+            self.event.date.year
         )
 
-        context = super().get_context_data(**kwargs)
-        context['event'] = ev
-        return context
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        return self.subtitle
 
     def check_event(self, event: Event) -> bool:
         # Default method
@@ -50,9 +41,17 @@ class EventMixin(ContextMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            event = self.get_current_event()
+            event = (
+                Event.objects
+                .order_by('-date')
+                .prefetch_related('polls')
+                .first()
+            )
+            assert event is not None
             assert self.check_event(event)
-        except (Event.DoesNotExist, AssertionError):
+        except AssertionError:
             return redirect(self.check_event_redirect)
+
+        self.event = event
 
         return super().dispatch(request, *args, **kwargs)

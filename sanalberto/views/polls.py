@@ -55,6 +55,9 @@ class PollMixin(EventMixin):
         context['poll'] = self.poll
         return context
 
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        return self.poll.title
+
     def check_poll(self, poll: Poll) -> bool:
         # Default method
         return True
@@ -72,8 +75,6 @@ class PollMixin(EventMixin):
         except (Poll.DoesNotExist, AssertionError):
             return self.check_poll_redirect(self.poll)
 
-        self.title = self.poll.title
-
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -86,10 +87,8 @@ class PollDetailView(EventMixin, MetadataMixin, DetailView):
     def get_queryset(self):
         return super().get_queryset().prefetch_related('designs', 'winner__user')
 
-    def get_object(self, queryset=None) -> Poll:
-        obj: Poll = super().get_object(queryset=queryset)
-        self.title = obj.title
-        return obj
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        return cast(Poll, context['object']).title
 
     def get_context_data(self, **kwargs):
         poll = self.get_object()
@@ -144,6 +143,10 @@ class DesignCreateView(PollMixin, MetadataMixin, LoginRequiredMixin, CreateView)
     def check_poll_redirect(self, poll: Poll) -> HttpResponseRedirectBase:
         return redirect('sanalberto:poll_detail', slug=poll.slug)
 
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        title = cast(Poll, context['object']).title
+        return f'Presentar diseño para {title}'
+
     def form_valid(self, form: 'ModelForm[PollDesign]') -> HttpResponse:
         obj = form.save(commit=False)
         obj.poll = self.poll
@@ -171,6 +174,10 @@ class PollVoteCreateView(
         context = super().get_context_data(**kwargs)
         context['designs'] = self.poll.designs.all()
         return context
+
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        title = cast(Poll, context['object']).title
+        return f'Votar diseño para {title}'
 
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
@@ -243,6 +250,10 @@ class PollAdminView(
             'sanalberto.view_poll',
             'sanalberto.view_pollvote',
         ))
+
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        title = cast(Poll, context['object']).title
+        return f'Administrar encuesta para {title}'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

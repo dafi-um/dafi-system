@@ -1,6 +1,14 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 29 Oct. 2021
+
+### San Alberto
+
+* Corregidos errores
+* Actualizado flujo de pago de inscripciones
+* Mejorada gestión de objetos en la jerarquía de vistas
+
 ## 19 Oct. 2021
 
 ### San Alberto
