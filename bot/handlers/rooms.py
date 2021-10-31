@@ -109,7 +109,7 @@ def cmd_dafi(update: Update, context: CallbackContext[dict, dict, dict]) -> None
         context.bot_data['room_queue'] = queue
 
     if action == RoomActions.ON:
-        if user.telegram_id in members:
+        if user in members:
             update.effective_message.reply_text(
                 'Ya tenía constancia de que estás en DAFI ⚠️'
             )
@@ -201,15 +201,13 @@ def callback_dafi(update: Update, context: CallbackContext[dict, dict, dict]) ->
             )
             return
 
-        group_id = Config.get(Config.MAIN_GROUP_ID)
-
         try:
-            assert group_id is not None
+            for member_id in members_ids:
+                context.bot.send_message(
+                    member_id,
+                    f'¡{update.effective_user.name} está de camino a DAFI!',
+                )
 
-            context.bot.send_message(
-                group_id,
-                f'¡{update.effective_user.name} está de camino a DAFI!',
-            )
         except (TelegramError, AssertionError):
             update.effective_message.reply_text(
                 'No he podido avisarles 😓'
