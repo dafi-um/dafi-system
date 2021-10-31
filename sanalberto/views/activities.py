@@ -263,12 +263,9 @@ class RegistrationPayView(EventMixin, LoginRequiredMixin, View):
                 try:
                     intent.cancel()
                 except StripeError:
-                    messages.error(
-                        request,
-                        'No se pudo cancelar la sesión de pago existente. '
-                        f'Contacta con nosotros indicando este ID: R-{obj.id}'
-                    )
-                    return redirect('sanalberto:registration_detail', obj.id)
+                    # If we cannot cancel it, the most probable cause is
+                    # because it already expired - so we don't care ^^
+                    pass
 
             try:
                 session = create_registration_checkout(obj)

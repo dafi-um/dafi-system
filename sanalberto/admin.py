@@ -38,7 +38,7 @@ class ActivityRegistrationAdmin(admin.ModelAdmin):
     list_filter = ('is_paid',)
     list_select_related = ('activity', 'user')
 
-    search_fields = ('activity', 'user')
+    search_fields = ('id', 'activity__id', 'activity__title', 'user__id', 'user__email')
 
     autocomplete_fields = ('activity', 'user')
 
