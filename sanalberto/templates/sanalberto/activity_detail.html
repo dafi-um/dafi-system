@@ -69,16 +69,18 @@
         </div>
 
         {% if user_registration %}
-            <div style="margin-top: 1rem;text-align: center;">
+            <div style="margin-top: 1.5em;text-align: center;">
                 <a class="button alt"
                    href="{% url 'sanalberto:registration_detail' user_registration.id %}"
                    title="Ver mi inscripción">Ver mi inscripción</a>
             </div>
         {% elif user.is_authenticated and object.accepts_registration %}
-            <div style="margin-top: 1rem;text-align: center;">
-                <a class="button alt"
+            <div style="margin-top: 1.5em;text-align: center;">
+                <a class="button special"
                    href="{% url 'sanalberto:activity_register' object.id %}"
                    title="Realizar inscripción">Realizar inscripción</a>
+
+                <p style="margin: .5em 0 0">Cierre de inscripciones: {{ object.registration_end_date | date:'j M Y H:i' }}</p>
             </div>
         {% endif %}
 
