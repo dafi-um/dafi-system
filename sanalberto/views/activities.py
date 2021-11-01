@@ -74,7 +74,8 @@ class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         activity: Activity = context['object']
-        context['user_registration'] = activity.registrations.filter(user=self.request.user).first()
+        if self.request.user.is_authenticated:
+            context['user_registration'] = activity.registrations.filter(user=self.request.user).first()
 
         return context
 
