@@ -109,7 +109,7 @@ def cmd_dafi(update: Update, context: CallbackContext[dict, dict, dict]) -> None
         context.bot_data['room_queue'] = queue
 
     if action == RoomActions.ON:
-        if user in members:
+        if user.telegram_id in members_ids:
             update.effective_message.reply_text(
                 'Ya tenía constancia de que estás en DAFI ⚠️'
             )
@@ -195,24 +195,28 @@ def callback_dafi(update: Update, context: CallbackContext[dict, dict, dict]) ->
     members = list(User.objects.filter(telegram_id__in=members_ids))
 
     if action == 'omw':
+        failed_messages = 0
         if not members:
             query.edit_message_text(
                 'Ahora mismo no hay nadie en DAFI 😓'
             )
             return
 
-        try:
-            for member_id in members_ids:
+        for member_id in members_ids:
+            try:    
                 context.bot.send_message(
                     member_id,
                     f'¡{update.effective_user.name} está de camino a DAFI!',
                 )
 
-        except (TelegramError, AssertionError):
+            except:
+                failed_messages += 1
+                return
+        
+        if failed_messages > 0:
             update.effective_message.reply_text(
-                'No he podido avisarles 😓'
-            )
-            return
+                    'No he podido avisarles 😓'
+                )
 
         query.edit_message_reply_markup() # To remove the button
 
