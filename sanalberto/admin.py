@@ -28,7 +28,7 @@ class ActivityAdmin(admin.ModelAdmin):
 
     search_fields = ('title', 'club', 'event')
 
-    autocomplete_fields = ('event', 'club', 'organisers')
+    autocomplete_fields = ('event', 'club', 'organisers', 'documents')
 
 
 @admin.register(ActivityRegistration)

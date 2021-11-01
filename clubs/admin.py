@@ -13,6 +13,8 @@ class ClubAdmin(admin.ModelAdmin):
 
     search_fields = ('name', 'slug')
 
+    autocomplete_fields = ('managers', 'members')
+
     prepopulated_fields = {'slug': ('name',)}
 
 

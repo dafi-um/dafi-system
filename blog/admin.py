@@ -12,6 +12,8 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'pub_date')
     list_filter = ['pub_date']
 
+    autocomplete_fields = ('author',)
+
     formfield_overrides = {
         models.TextField: {
             'widget': AdminPagedownWidget
