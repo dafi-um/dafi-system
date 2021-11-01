@@ -8,9 +8,9 @@ from django.contrib import messages
 from django.contrib.auth.mixins import (
     AccessMixin,
     LoginRequiredMixin,
-    UserPassesTestMixin,
 )
 from django.db import transaction
+from django.db.models import QuerySet
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -64,6 +64,9 @@ class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
 
     model = Activity
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('organisers', 'documents')
+
     def get_subtitle(self, context: dict[str, Any]) -> str:
         return cast(Activity, context['object']).title
 
@@ -71,12 +74,12 @@ class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         activity: Activity = context['object']
-        context['user_registration'] = activity.get_user_registration(self.request.user)
+        context['user_registration'] = activity.registrations.filter(user=self.request.user).first()
 
         return context
 
 
-class ActivityRegistrationsView(EventMixin, MetadataMixin, UserPassesTestMixin, DetailView):
+class ActivityRegistrationsView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):
     """Activity registrations view.
     """
 
@@ -84,14 +87,11 @@ class ActivityRegistrationsView(EventMixin, MetadataMixin, UserPassesTestMixin, 
 
     template_name = 'sanalberto/activity_registrations.html'
 
+    def get_queryset(self) -> QuerySet[Activity]:
+        return super().get_queryset().filter(organisers=self.request.user)
+
     def get_subtitle(self, context: dict[str, Any]) -> str:
         return 'Inscripciones para ' + cast(Activity, context['object']).title
-
-    def test_func(self) -> bool:
-        user = self.request.user
-
-        # TODO: We shouldn't be getting the object twice, make this check in dispatch by hand
-        return user.is_authenticated and user in self.get_object().get_organisers
 
 
 class ActivityRegisterView(EventMixin, MetadataMixin, AccessMixin, DetailView):
@@ -112,12 +112,12 @@ class ActivityRegisterView(EventMixin, MetadataMixin, AccessMixin, DetailView):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
 
-        self.activity = self.get_object()
+        self.activity = cast(Activity, self.get_object())
 
         if not self.activity.accepts_registration:
             return redirect('sanalberto:activity_detail', self.activity.id)
 
-        existing = self.activity.get_user_registration(self.request.user)
+        existing = self.activity.registrations.filter(user=self.request.user).first()
 
         if existing:
             return redirect('sanalberto:registration_detail', existing.id)

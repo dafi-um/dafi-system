@@ -26,7 +26,7 @@
         <a class="button small alt" href="{% url 'sanalberto:activities_index' %}">Volver a la lista</a>
     </div>
 
-    {% if user.is_authenticated and user in object.get_organisers %}
+    {% if user.is_authenticated and user in object.organisers.all %}
         <div class="box wrapper style3 split" style="align-items: center;">
             <p style="margin: 0;">Estás registrado como organizador de esta actividad.</p>
 
@@ -46,26 +46,25 @@
                 <h4>Organización {% if object.club %}({{ object.club.name }}){% endif %}</h4>
 
                 <ul class="alt">
-                    {% for organiser in object.get_organisers %}
+                    {% for organiser in object.organisers.all %}
                         <li>
                             <span>{{ organiser | nice_name }}</span>
                             {% if organiser.telegram_id %}
                                 <span>- <span class="icon fa-send"></span> @{{ organiser.telegram_user }}</span>
-                            {% endif %}</li>
-                    {% empty %}
-                        <li>No hay organizadores registrados.</li>
+                            {% endif %}
+                        </li>
                     {% endfor %}
                 </ul>
 
-                <h4>Documentos</h4>
+                {% if object.documents.exists %}
+                    <h4>Documentos</h4>
 
-                <ul class="alt" style="margin: 0;">
-                    {% for doc in object.documents.all %}
-                        <li>{{ doc.name }}: <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name }}</a></li>
-                    {% empty %}
-                        <li>No hay documentos para mostrar.</li>
-                    {% endfor %}
-                </ul>
+                    <ul class="alt" style="margin: 0;">
+                        {% for doc in object.documents.all %}
+                            <li>{{ doc.name }}: <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
             </div>
         </div>
 

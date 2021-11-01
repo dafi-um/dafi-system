@@ -22,13 +22,13 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
 
-    list_display = ('title', 'event', 'start', 'end', 'club', 'organiser', 'is_public')
+    list_display = ('title', 'event', 'start', 'end', 'club', 'is_public')
     list_filter = ('event', 'is_public')
-    list_select_related = ('event', 'club', 'organiser')
+    list_select_related = ('event', 'club')
 
     search_fields = ('title', 'club', 'event')
 
-    autocomplete_fields = ('event', 'club', 'organiser')
+    autocomplete_fields = ('event', 'club', 'organisers')
 
 
 @admin.register(ActivityRegistration)

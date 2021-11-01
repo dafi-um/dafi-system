@@ -1,6 +1,14 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 1 Nov. 2021
+
+### San Alberto
+
+* Ahora es posible registrar múltiples organizadores (_breaking change_)
+* Agregada fecha de cierre de inscripciones (por defecto: 10 min antes del inicio de la actividad)
+* Corregida comprobación de registro de inscripciones
+
 ## 29 Oct. 2021
 
 ### San Alberto
