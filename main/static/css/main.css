@@ -2127,9 +2127,9 @@
 		.select-wrapper:before {
 			-moz-osx-font-smoothing: grayscale;
 			-webkit-font-smoothing: antialiased;
-			font-family: FontAwesome;
+			font-family: "Font Awesome 5 Free";
 			font-style: normal;
-			font-weight: normal;
+			font-weight: bold;
 			text-transform: none !important;
 		}
 
@@ -2191,9 +2191,9 @@
 			input[type="radio"] + label:before {
 				-moz-osx-font-smoothing: grayscale;
 				-webkit-font-smoothing: antialiased;
-				font-family: FontAwesome;
+				font-family: "Font Awesome 5 Free";
 				font-style: normal;
-				font-weight: normal;
+				font-weight: bold;
 				text-transform: none !important;
 			}
 
@@ -2326,9 +2326,9 @@
 		.icon:before {
 			-moz-osx-font-smoothing: grayscale;
 			-webkit-font-smoothing: antialiased;
-			font-family: FontAwesome;
+			font-family: "Font Awesome 5 Free";
 			font-style: normal;
-			font-weight: normal;
+			font-weight: bold;
 			text-transform: none !important;
 		}
 
@@ -3329,9 +3329,9 @@
 		.navPanelToggle:before {
 			-moz-osx-font-smoothing: grayscale;
 			-webkit-font-smoothing: antialiased;
-			font-family: FontAwesome;
+			font-family: "Font Awesome 5 Free";
 			font-style: normal;
-			font-weight: normal;
+			font-weight: bold;
 			text-transform: none !important;
 			color: #fff;
 			display: block;
@@ -3445,9 +3445,9 @@
 			#navPanel .close:before {
 				-moz-osx-font-smoothing: grayscale;
 				-webkit-font-smoothing: antialiased;
-				font-family: FontAwesome;
+				font-family: "Font Awesome 5 Free";
 				font-style: normal;
-				font-weight: normal;
+				font-weight: bold;
 				text-transform: none !important;
 				content: '\f00d';
 				width: 3em;
