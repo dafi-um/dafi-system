@@ -2,24 +2,15 @@ from datetime import (
     datetime,
     timedelta,
 )
-from typing import (
-    TYPE_CHECKING,
-    Iterable,
-)
+from typing import TYPE_CHECKING
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    AbstractUser,
-    AnonymousUser,
-)
 from django.db import models
 from django.urls.base import reverse
 from django.utils import timezone
-from django.utils.functional import cached_property
 
 from clubs.models import Club
 from heart.models import DocumentMedia
+from users.models import User
 
 from .event import Event
 
@@ -51,13 +42,14 @@ class Activity(models.Model):
         verbose_name='evento'
     )
 
-    organiser: 'models.ForeignKey[AbstractUser, AbstractUser]' = models.ForeignKey(
-        get_user_model(), models.SET_NULL, blank=True, null=True,
-        verbose_name='usuario organizador'
+    organisers: 'models.ManyToManyField[RelatedManager[User], RelatedManager[User]]' = models.ManyToManyField(
+        User, 'organised_sa_activities',
+        verbose_name='organizadores'
     )
 
     club: 'models.ForeignKey[Club, Club]' = models.ForeignKey(
-        Club, models.CASCADE, blank=True, null=True,
+        Club, models.SET_NULL,
+        blank=True, null=True,
         verbose_name='club organizador'
     )
 
@@ -75,6 +67,11 @@ class Activity(models.Model):
 
     has_registration: 'models.BooleanField[bool, bool]' = models.BooleanField(
         'necesaria inscripción', default=True
+    )
+
+    registration_end: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
+        'cierre de inscripciones',
+        null=True, blank=True,
     )
 
     registration_price: 'models.IntegerField[int, int]' = models.IntegerField(
@@ -102,25 +99,14 @@ class Activity(models.Model):
     def __str__(self) -> str:
         return f'Actividad {self.title}'
 
-    @cached_property
-    def get_organisers(self) -> Iterable[AbstractUser]:
-        if not self.organiser and not self.club:
-            return []
+    @property
+    def registration_end_date(self) -> 'datetime | None':
+        return (self.registration_end or self.start + timedelta(minutes=10)) if self.has_registration else None
 
-        return [self.organiser] if self.organiser else self.club.managers.all()
-
-    @cached_property
+    @property
     def accepts_registration(self) -> bool:
-        return (
-            self.has_registration
-            and timezone.now() < self.start + timedelta(minutes=10)
-        )
-
-    def get_user_registration(self, user: 'AbstractBaseUser | AnonymousUser') -> 'ActivityRegistration | None':
-        if not user.is_authenticated:
-            return None
-
-        return self.registrations.filter(user=user).first()
+        end_date = self.registration_end_date
+        return end_date is not None and end_date >= timezone.now()
 
 
 class ActivityRegistration(models.Model):
@@ -136,8 +122,8 @@ class ActivityRegistration(models.Model):
         verbose_name='actividad'
     )
 
-    user: 'models.ForeignKey[AbstractUser, AbstractUser]' = models.ForeignKey(
-        get_user_model(), models.CASCADE,
+    user: 'models.ForeignKey[User, User]' = models.ForeignKey(
+        User, models.CASCADE,
         verbose_name='usuario'
     )
 
@@ -145,12 +131,8 @@ class ActivityRegistration(models.Model):
         'pagado', default=False
     )
 
-    created: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
-        'fecha de creación', auto_now_add=True
-    )
-
     comments: 'models.TextField[str | None, str | None]' = models.TextField(
-        'comentarios', max_length=500,
+        'comentarios', max_length=1000,
         null=True, blank=True
     )
 
@@ -162,6 +144,14 @@ class ActivityRegistration(models.Model):
     payment_error: 'models.CharField[str | None, str | None]' = models.CharField(
         'error del proceso de pago', max_length=256,
         null=True, blank=True
+    )
+
+    created: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
+        'fecha de creación', auto_now_add=True
+    )
+
+    updated: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
+        'fecha de última actualización', auto_now=True
     )
 
     class Meta:

@@ -21,10 +21,8 @@ class IndexView(EventMixin, MetadataMixin, TemplateView):
     template_name = 'sanalberto/index.html'
 
     def get_context_data(self, **kwargs):
-        event = self.get_current_event()
-
-        activities = event.activities.filter(is_public=True).order_by('start')
-        polls = event.polls.all()
+        activities = self.event.activities.filter(is_public=True).order_by('start')
+        polls = self.event.polls.all()
 
         days: dict[int, list[dict]] = {}
 

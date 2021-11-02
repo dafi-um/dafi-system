@@ -9,9 +9,9 @@
 
     {% if object.payment_error %}
         <div class="box wrapper style1">
-            <h4>Ha ocurrido un error con esta inscripción:</h4>
+            <h4>¡Ha ocurrido un error con esta inscripción!</h4>
 
-            <p>{{ object.payment_error }}</p>
+            <h5>Contacta con nosotros indicando este ID: R-{{ object.id }}</h5>
         </div>
     {% endif %}
 
@@ -25,17 +25,29 @@
         {% if object.comments %}
             <pre>{{ object.comments }}</pre>
         {% else %}
-            <p>Sin commentarios</p>
+            <p>Sin comentarios</p>
         {% endif %}
     </div>
 
     {% if not object.is_paid %}
-        {% if object.payment_id %}
-            <p>Para finalizar la inscripción debes abonar {% widthratio object.activity.registration_price 100 1 %}€ mediante la plataforma segura de pagos Stripe:</p>
+        <p>Para finalizar la inscripción debes abonar <b>{% widthratio object.activity.registration_price 100 1 %}€</b> mediante la plataforma segura de pagos Stripe. Si ya habías comenzado una sesión de pago, se creará una nueva sesión y la anterior se cancelará.</p>
 
-            <button class="button special" id="gotostripe">Pagar en Stripe</button>
-        {% else %}
-            <p>No se pudo obtener una sesión en la plataforma de pagos. Solicite ayuda a la administración de este sitio web.</p>
+        <form action="{% url 'sanalberto:registration_pay' object.id %}" method="post">
+            {% csrf_token %}
+
+            <button class="button special" type="submit">Pagar en Stripe</button>
+        </form>
+
+        {% if old %}
+            <div class="box wrapper style1">
+                <p>¿Has pagado ya pero la inscripción sigue apareciendo como no pagada? Haz click en este botón, si el pago se procesó correctamente, se actualizará la inscripción; si no, te redirigiremos a la web de Stripe para completar el proceso de pago.</p>
+
+                <form action="{% url 'sanalberto:registration_pay' object.id %}" method="post">
+                    {% csrf_token %}
+
+                    <button class="button alt" type="submit">Comprobar pago</button>
+                </form>
+            </div>
         {% endif %}
     {% else %}
         <div class="box wrapper style3">
@@ -43,32 +55,5 @@
 
             <p>Se ha confirmado el pago de tu inscripción. No olvides que la actividad comienza el {{ object.activity.start | date:'j M Y H:i' }}.</p>
         </div>
-    {% endif %}
-
-    {% if not object.is_paid %}
-    <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
-    <script type="text/javascript">
-        var stripe = Stripe('{{ STRIPE_PK }}');
-
-        var button = document.getElementById('gotostripe');
-
-        button.addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            ev.preventDefault();
-
-            button.disabled = 'disabled';
-
-            stripe
-                .redirectToCheckout({ sessionId: '{{ object.payment_id }}' })
-                .then(function(result) {
-                    if (result.error) {
-                        window.alert('Ha ocurrido un error inesperado: ' + result.error.message);
-                    }
-                })
-                .catch(function(error) {
-                    window.alert('Ha ocurrido un error inesperado: ' + error);
-                });
-        });
-    </script>
     {% endif %}
 {% endblock content %}

@@ -15,7 +15,7 @@ class ShopMixin(EventMixin):
     """Shop mixin.
     """
 
-    title = 'Tienda'
+    subtitle = 'Tienda'
 
     check_event_redirect = 'sanalberto:shop_closed'
 
@@ -36,9 +36,9 @@ class ShopClosedView(EventMixin, MetadataMixin, TemplateView):
 
     template_name = 'sanalberto/shop_closed.html'
 
-    title = 'Tienda trasladada'
+    subtitle = 'Tienda trasladada'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['soon'] = self.get_current_event().selling_start > timezone.now()
+        context['soon'] = self.event.selling_start > timezone.now()
         return context

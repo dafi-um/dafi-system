@@ -1,13 +1,23 @@
-from typing import cast
-
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    UserPassesTestMixin,
+from datetime import timedelta
+from typing import (
+    Any,
+    cast,
 )
-from django.contrib.auth.models import AbstractUser
-from django.http.request import HttpRequest
-from django.http.response import HttpResponse
+
+from django.contrib import messages
+from django.contrib.auth.mixins import (
+    AccessMixin,
+    LoginRequiredMixin,
+)
+from django.db import transaction
+from django.db.models import QuerySet
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+)
+from django.http.response import HttpResponseBase
 from django.shortcuts import redirect
+from django.utils import timezone
 from django.views.generic import (
     DetailView,
     TemplateView,
@@ -17,9 +27,11 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 
 from meta.views import MetadataMixin
+from stripe.api_resources import PaymentIntent
+from stripe.api_resources.checkout.session import Session
+from stripe.error import StripeError
 
 from users.utils import AuthenticatedRequest
-from website.settings import STRIPE_PK
 
 from ..models import (
     Activity,
@@ -38,15 +50,11 @@ class ActivitiesIndexView(EventMixin, MetadataMixin, TemplateView):
 
     template_name = 'sanalberto/activity_list.html'
 
-    title = 'Actividades'
+    subtitle = 'Actividades'
 
     def get_context_data(self, **kwargs):
-        event = self.get_current_event()
-
-        activities = Activity.objects.filter(event=event).order_by('start')
-
         context = super().get_context_data(**kwargs)
-        context['activities'] = activities
+        context['activities'] = self.event.activities.order_by('start')
         return context
 
 
@@ -56,22 +64,23 @@ class ActivityDetailView(EventMixin, MetadataMixin, DetailView):
 
     model = Activity
 
-    def get_object(self, queryset=None) -> Activity:
-        obj: Activity = super().get_object(queryset=queryset)
-        self.title = obj.title
-        return obj
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('organisers', 'documents')
+
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        return cast(Activity, context['object']).title
 
     def get_context_data(self, **kwargs):
-        activity = self.get_object()
-
-        registration = activity.get_user_registration(self.request.user)
-
         context = super().get_context_data(**kwargs)
-        context['user_registration'] = registration
+
+        activity: Activity = context['object']
+        if self.request.user.is_authenticated:
+            context['user_registration'] = activity.registrations.filter(user=self.request.user).first()
+
         return context
 
 
-class ActivityRegistrationsView(EventMixin, MetadataMixin, UserPassesTestMixin, DetailView):
+class ActivityRegistrationsView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):
     """Activity registrations view.
     """
 
@@ -79,18 +88,14 @@ class ActivityRegistrationsView(EventMixin, MetadataMixin, UserPassesTestMixin, 
 
     template_name = 'sanalberto/activity_registrations.html'
 
-    def get_object(self, queryset=None) -> Activity:
-        obj: Activity = super().get_object(queryset=queryset)
-        self.title = 'Inscripciones para ' + obj.title
-        return obj
+    def get_queryset(self) -> QuerySet[Activity]:
+        return super().get_queryset().filter(organisers=self.request.user)
 
-    def test_func(self) -> bool:
-        user = self.request.user
-
-        return user.is_authenticated and cast(AbstractUser, user) in self.get_object().get_organisers
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        return 'Inscripciones para ' + cast(Activity, context['object']).title
 
 
-class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):
+class ActivityRegisterView(EventMixin, MetadataMixin, AccessMixin, DetailView):
     """Activity create registration view.
     """
 
@@ -98,47 +103,36 @@ class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, Detail
 
     template_name = 'sanalberto/activity_register.html'
 
-    def get_object(self, queryset=None) -> Activity:
-        obj: Activity = super().get_object(queryset=queryset)
-        self.title = 'Inscripción ' + obj.title
-        return obj
+    activity: Activity
 
-    def get(self, request, *args, **kwargs) -> HttpResponse:
-        activity = self.get_object()
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        title = cast(Activity, context['object']).title
+        return f'Inscripción para {title}'
 
-        if not activity.accepts_registration:
-            return redirect('sanalberto:activity_detail', activity.id)
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
 
-        already = activity.get_user_registration(self.request.user)
+        self.activity = cast(Activity, self.get_object())
 
-        if already:
-            return redirect('sanalberto:registration_detail', already.id)
+        if not self.activity.accepts_registration:
+            return redirect('sanalberto:activity_detail', self.activity.id)
 
-        return super().get(request, *args, **kwargs)
+        existing = self.activity.registrations.filter(user=self.request.user).first()
+
+        if existing:
+            return redirect('sanalberto:registration_detail', existing.id)
+
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not self.get_current_event():
-            return redirect('sanalberto:index')
-
-        activity = self.get_object()
-
-        already = activity.get_user_registration(request.user)
-
-        if already:
-            return redirect('sanalberto:registration_detail', already.id)
-
         obj = ActivityRegistration(
-            activity=activity,
+            activity=self.activity,
             user=self.request.user,
             comments=request.POST.get('comments')
         )
 
-        try:
-            obj.save()
-        except Exception: # TODO: Which errors can raise here??
-            # TODO: Display error
-
-            return redirect('sanalberto:activity_detail', activity.id)
+        obj.save()
 
         try:
             session = create_registration_checkout(obj)
@@ -147,9 +141,16 @@ class ActivityRegisterView(EventMixin, MetadataMixin, LoginRequiredMixin, Detail
         except Exception as e:
             obj.payment_error = str(e)
 
-        obj.save()
+            messages.error(
+                request,
+                f'¡No se pudo crear la sesión de pago! Contacta con nosotros indicando este ID: R-{obj.id}'
+            )
 
-        return redirect('sanalberto:registration_detail', obj.id)
+            return redirect('sanalberto:registration_detail', obj.id)
+        finally:
+            obj.save(update_fields=('payment_id', 'payment_error'))
+
+        return redirect(session.url)
 
 
 class RegistrationListView(EventMixin, MetadataMixin, LoginRequiredMixin, ListView):
@@ -158,8 +159,13 @@ class RegistrationListView(EventMixin, MetadataMixin, LoginRequiredMixin, ListVi
 
     model = ActivityRegistration
 
+    subtitle = 'Mis inscripciones'
+
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset().filter(
+            activity__event=self.event,
+            user=self.request.user
+        )
 
 
 class RegistrationDetailView(EventMixin, MetadataMixin, LoginRequiredMixin, DetailView):
@@ -169,17 +175,27 @@ class RegistrationDetailView(EventMixin, MetadataMixin, LoginRequiredMixin, Deta
     model = ActivityRegistration
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
-
-    def get_object(self, queryset=None) -> ActivityRegistration:
-        obj = super().get_object(queryset=queryset)
-        self.title = 'Mi inscripción para ' + obj.activity.title
-        return obj
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                activity__event=self.event,
+                user=self.request.user
+            )
+            .prefetch_related('activity', 'user')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['STRIPE_PK'] = STRIPE_PK
+
+        created = cast(ActivityRegistration, context['object']).created
+        context['old'] = created < timezone.now() - timedelta(seconds=3600 * 2)
+
         return context
+
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        title = cast(ActivityRegistration, context['object']).activity.title
+        return f'Mi inscripción para {title}'
 
 
 class RegistrationUpdateView(EventMixin, MetadataMixin, LoginRequiredMixin, UpdateView):
@@ -190,37 +206,119 @@ class RegistrationUpdateView(EventMixin, MetadataMixin, LoginRequiredMixin, Upda
     fields = ('comments',)
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                activity__event=self.event,
+                user=self.request.user
+            )
+            .prefetch_related('activity', 'user')
+        )
 
-    def get_object(self, queryset=None) -> ActivityRegistration:
-        obj: ActivityRegistration = super().get_object(queryset=queryset)
-        self.title = 'Editar mi inscripción para ' + obj.activity.title
-        return obj
+    def get_subtitle(self, context: dict[str, Any]) -> str:
+        title = cast(ActivityRegistration, context['object']).activity.title
+        return f'Editar mi inscripción para {title}'
+
+
+class RegistrationPayView(EventMixin, LoginRequiredMixin, View):
+
+    def post(self, request: AuthenticatedRequest, *args, **kwargs):
+        with transaction.atomic():
+            try:
+                obj = (
+                    ActivityRegistration
+                    .objects
+                    .filter(
+                        activity__event=self.event,
+                        user=request.user,
+                        pk=kwargs['pk']
+                    )
+                    .select_for_update()
+                    .prefetch_related('user')
+                    .get()
+                )
+            except ActivityRegistration.DoesNotExist:
+                return redirect('sanalberto:index')
+
+            if obj.is_paid:
+                messages.success(
+                    request, '¡El pago se ha procesado correctamente!'
+                )
+                return redirect('sanalberto:registration_detail', obj.id)
+
+            if obj.payment_id:
+                existing_session: Session = Session.retrieve(
+                    obj.payment_id,
+                    expand=('payment_intent',)
+                )
+
+                if existing_session['payment_status'] == 'paid':
+                    obj.is_paid = True
+                    obj.payment_error = None
+                    obj.save(update_fields=('is_paid', 'payment_error'))
+                    return redirect('sanalberto:registration_detail', obj.id)
+
+                intent: PaymentIntent = existing_session['payment_intent']
+
+                try:
+                    intent.cancel()
+                except StripeError:
+                    # If we cannot cancel it, the most probable cause is
+                    # because it already expired - so we don't care ^^
+                    pass
+
+            try:
+                session = create_registration_checkout(obj)
+
+                obj.payment_id = session.id
+                obj.payment_error = None
+            except Exception as e:
+                obj.payment_error = str(e)
+
+                messages.error(
+                    request,
+                    '¡No se pudo crear la sesión de pago! '
+                    f'Contacta con nosotros indicando este ID: R-{obj.id}'
+                )
+
+                return redirect('sanalberto:registration_detail', obj.id)
+            finally:
+                obj.save(update_fields=('payment_id', 'payment_error'))
+
+        return redirect(session.url)
 
 
 class RegistrationPaidView(EventMixin, LoginRequiredMixin, View):
     """Activity registration paid view"""
 
     def get(self, request: AuthenticatedRequest, *args, **kwargs) -> HttpResponse:
-        if not self.get_current_event():
-            return redirect('sanalberto:index')
+        with transaction.atomic():
+            try:
+                obj = (
+                    ActivityRegistration
+                    .objects
+                    .filter(
+                        activity__event=self.event,
+                        user=request.user,
+                        pk=kwargs['pk']
+                    )
+                    .select_for_update()
+                    .prefetch_related('user')
+                    .get()
+                )
+            except ActivityRegistration.DoesNotExist:
+                return redirect('sanalberto:index')
 
-        obj_id = kwargs['pk']
+            if obj.is_paid or not obj.payment_id:
+                return redirect('sanalberto:registration_detail', obj.id)
 
-        obj = ActivityRegistration.objects.filter(user=request.user, pk=obj_id).first()
+            if is_checkout_paid(obj.payment_id):
+                obj.payment_error = None
+                obj.is_paid = True
+            else:
+                obj.payment_error = 'El pago no se ha verificado'
 
-        if not obj:
-            return redirect('sanalberto:index')
-
-        if obj.is_paid:
-            return redirect('sanalberto:registration_detail', obj.id)
-
-        if is_checkout_paid(obj.payment_id):
-            obj.payment_error = None
-            obj.is_paid = True
-        else:
-            obj.payment_error = 'El pago no se ha verificado'
-
-        obj.save()
+            obj.save(update_fields=('payment_error', 'is_paid'))
 
         return redirect('sanalberto:registration_detail', obj.id)

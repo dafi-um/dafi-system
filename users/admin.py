@@ -19,6 +19,8 @@ class CustomUserAdmin(UserAdmin):
         )}),
     ) # type: ignore
 
+    search_fields = UserAdmin.search_fields + ('telegram_user',) # type: ignore
+
     @admin.display(ordering='first_name', description='Nombre completo')
     def full_name(self, obj: User) -> str:
         return f'{obj.first_name} {obj.last_name}' if obj.first_name else obj.username

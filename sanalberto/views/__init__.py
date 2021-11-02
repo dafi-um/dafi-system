@@ -6,6 +6,7 @@ from .activities import (
     RegistrationDetailView,
     RegistrationListView,
     RegistrationPaidView,
+    RegistrationPayView,
     RegistrationUpdateView,
 )
 from .main import (
@@ -38,6 +39,7 @@ __all__ = [
     'RegistrationDetailView',
     'RegistrationListView',
     'RegistrationPaidView',
+    'RegistrationPayView',
     'RegistrationUpdateView',
     'ShopClosedView',
     'ShopIndexView',

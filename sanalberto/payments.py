@@ -13,7 +13,7 @@ stripe.api_key = settings.STRIPE_SK
 
 
 def create_checkout_session(email: str, items: list[dict], success_url: str, cancel_url: str) -> Session:
-    return stripe.checkout.Session.create(
+    return Session.create(
         customer_email=email,
         payment_method_types=['card'],
         line_items=items,
@@ -43,5 +43,7 @@ def create_registration_checkout(registration: ActivityRegistration) -> Session:
     return create_checkout_session(registration.user.email, items, success_url, cancel_url)
 
 
-def is_checkout_paid(session_id) -> bool:
-    return stripe.checkout.Session.retrieve(session_id)['payment_status'] == 'paid'
+def is_checkout_paid(session_id: str) -> bool:
+    """Checks if a checkout session is paid.
+    """
+    return Session.retrieve(session_id)['payment_status'] == 'paid'

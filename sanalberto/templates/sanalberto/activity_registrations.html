@@ -3,10 +3,7 @@
 
 {% block content %}
     <div class="split">
-        <div>
-            <h3 style="margin: 0;">Inscripciones para {{ object.title }}</h3>
-            <p>Organización: <b>{% if activity.club %}{{ activity.club.name }}{% else %}{{ activity.organiser | nice_name }}{% endif %}</b></p>
-        </div>
+        <h3>Inscripciones para {{ object.title }}</h3>
 
         <a class="button small alt" href="{% url 'sanalberto:activity_detail' object.id %}">Volver a la actividad</a>
     </div>
