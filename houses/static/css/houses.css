@@ -200,3 +200,49 @@
             }
 
         }
+
+/* Selector algorithm */
+
+    .selector-question {
+        display: none;
+        text-align: left;
+    }
+
+    #selector-loading {
+        display: none;
+        margin-bottom: .5em;
+        font-size: 5em;
+        color: #e5474b;
+    }
+
+    .selector-actions button {
+        display: none;
+    }
+
+        #selector-prev {
+            float: left;
+        }
+
+        #selector-next {
+            float: right;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+    @media screen and (max-width: 480px) {
+
+        .selector-actions button span {
+            display: none;
+        }
+
+    }
+
+    @media screen and (min-width: 481px) {
+
+        .selector-actions button :first-child {
+            margin-right: .5em;
+        }
+
+    }

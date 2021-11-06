@@ -1,6 +1,9 @@
+from random import shuffle
 from typing import Any
 
+from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin
+from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.http.response import HttpResponseBase
@@ -13,9 +16,14 @@ from django.views.generic import (
 
 from meta.views import MetadataMixin
 
+from users.utils import AuthenticatedRequest
+
 from .models import (
     House,
     HouseProfile,
+    SelectorQuestion,
+    SelectorResult,
+    SelectorResultPoints,
 )
 
 
@@ -92,7 +100,94 @@ class SelectorAlgorithmView(AccessMixin, MetadataMixin, TemplateView):
         if not self.request.user.is_authenticated:
             return self.handle_no_permission()
 
+        if SelectorResult.objects.filter(user=self.request.user).exists():
+            return redirect('houses:selector_done')
+
         if HouseProfile.objects.filter(user=self.request.user).exists():
             return redirect('houses:profile')
 
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        questions = list(
+            SelectorQuestion
+            .objects
+            .filter(options__points__isnull=False)
+            .prefetch_related('options')
+            .distinct()
+        )
+
+        shuffle(questions)
+
+        context = super().get_context_data(**kwargs)
+        context['questions'] = questions[:30]
+        return context
+
+    def post(self, request: AuthenticatedRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        questions_queryset = (
+            SelectorQuestion
+            .objects
+            .filter(options__points__isnull=False)
+            .prefetch_related('options__points')
+            .distinct()
+        )
+
+        houses = House.objects.all()
+        questions = {q.id: q for q in questions_queryset}
+
+        points = {house: 0 for house in houses}
+
+        count = 0
+
+        for key, value in request.POST.items():
+            if not key.startswith('q-'):
+                continue
+
+            try:
+                question = questions[int(key.removeprefix('q-'))]
+                option = next(o for o in question.options.all() if o.id == int(value))
+            except (ValueError, KeyError, StopIteration):
+                messages.error(request, 'No se pudo analizar la respuesta enviada')
+                return redirect('houses:selector')
+
+            for opt_points in option.points.all():
+                points[opt_points.house] += opt_points.points
+
+            count += 1
+
+        if count != len(questions):
+            messages.error(request, 'No se pudo analizar la respuesta enviada')
+            return redirect('houses:selector')
+
+        with transaction.atomic():
+            try:
+                result = (
+                    SelectorResult
+                    .objects
+                    .filter(user=request.user)
+                    .select_for_update()
+                    .get()
+                )
+
+                result.points.delete()
+            except SelectorResult.DoesNotExist:
+                result = SelectorResult.objects.create(user=request.user)
+
+            for house, points_num in points.items():
+                if points_num != 0:
+                    SelectorResultPoints.objects.create(
+                        result=result,
+                        house=house,
+                        points=points_num,
+                    )
+
+        return redirect('houses:selector_done')
+
+
+class SelectorAlgorithmDoneView(MetadataMixin, TemplateView):
+
+    template_name = 'houses/selector_algorithm_done.html'
+
+    title = 'Algoritmo Seleccionador - Las Casas de la FIUM'
+    description = META_DESCRIPTION
+    image = META_IMAGE

@@ -59,7 +59,7 @@
         </div>
       </div>
 
-      {% if my_profile or user.is_staff %}
+      {% if my_profile or perms.houses.view_houseprofile %}
         <div class="houses-profile-points">
           <h4>Puntos</h4>
 

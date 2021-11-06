@@ -1,6 +1,14 @@
 {% extends 'houses/base.html' %}
 
-{% load users_tags %}
+{% load static %}
+
+{% block beforebody %}
+  <script>
+    const MAX_QUESTIONS = {{ questions | length }};
+  </script>
+
+  <script src="{% static 'js/houses-selector.js' %}"></script>
+{% endblock beforebody %}
 
 {% block content %}
   <div class="houses-navbar">
@@ -14,10 +22,59 @@
   </div>
 
   <div class="houses-card">
-    <h4>¡Bienvenid@ joven picacódigos!</h4>
+    {% include 'messages.html' %}
 
-    <p>Es hora de que se te asigne una casa en la FIUM, y para ello, nuestros mejores desarrolladores han creado ¡el <b>Algoritmo Seleccionador</b>!</p>
+    <div>
+      <h4>¡Bienvenid@ joven picacódigos!</h4>
 
-    <button class="button alt">¡Comenzar!</button>
+      <p style="margin: 1em;">Es hora de que se te asigne una casa en la FIUM, y para ello, nuestros mejores desarrolladores han creado ¡el <b>Algoritmo Seleccionador</b>!</p>
+
+      <p>Solamente tienes que completar un sencillo cuestionario de {{ questions | length }} preguntas para que el algoritmo pueda conocerte mejor.</p>
+
+      <button class="button special" id="selector-start">¡Comenzar!</button>
+    </div>
+
+    <form method="post">
+      {% for question in questions %}
+        <div class="selector-question" question="{{ forloop.counter0 }}">
+          <h4 {% if not forloop.first %}style="margin-top: 1em;"{% endif %}>
+            {{ forloop.counter }}. {{ question.question }}
+          </h4>
+
+          {% for option in question.options.all %}
+            <input type="radio" name="q-{{ question.id }}" id="option-{{ option.id }}" value="{{ option.id }}" />
+            <label for="option-{{ option.id }}">{{ option.text }}</label>
+            <br />
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <div class="selector-question" question="{{ questions | length }}">
+        <p><b>¡Enhorabuena!</b> Has completado el cuestionario del Algoritmo Seleccionador. Haz click en <i>Finalizar</i> para enviar tus resultados al servidor y que el algoritmo te asigne una casa en la FIUM.</p>
+
+        <div style="text-align: center;">
+          <button class="button special" id="selector-finish" type="submit">
+            <i class="fas fa-check"></i>
+            <span style="margin-left: .5em;">Finalizar</span>
+          </button>
+
+          <i class="fas fa-spinner fa-spin" id="selector-loading"></i>
+        </div>
+      </div>
+
+      {% csrf_token %}
+    </form>
+  </div>
+
+  <div class="selector-actions">
+    <button class="button alt" id="selector-prev">
+      <i class="fas fa-arrow-left"></i><span>Anterior</span>
+    </button>
+
+    <button class="button alt" id="selector-next">
+      <span>Siguiente</span><i class="fas fa-arrow-right"></i>
+    </button>
+
+    <div class="clearfix"></div>
   </div>
 {% endblock content %}

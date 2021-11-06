@@ -9,4 +9,5 @@ urlpatterns = [
     path('', views.HousesListView.as_view(), name='list'),
     path('perfil/<int:pk>/', views.HouseProfileDetailView.as_view(), name='profile'),
     path('algoritmo-seleccionador/', views.SelectorAlgorithmView.as_view(), name='selector'),
+    path('algoritmo-seleccionador/exito/', views.SelectorAlgorithmDoneView.as_view(), name='selector_done'),
 ]

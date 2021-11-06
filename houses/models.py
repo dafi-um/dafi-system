@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import partial
 from os import path
 from typing import (
@@ -206,3 +207,133 @@ class HouseProfile(models.Model):
                 return None
 
             return self._add_points(activity, points)
+
+
+class SelectorQuestion(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[SelectorQuestion]'
+
+    options: 'models.Manager[SelectorOption]'
+
+    question: 'models.TextField[str, str]' = models.TextField(
+        'pregunta',
+    )
+
+    category: 'models.CharField[str, str]' = models.CharField(
+        'categoría', max_length=120,
+    )
+
+    class Meta:
+        verbose_name = 'pregunta del seleccionador'
+        verbose_name_plural = 'preguntas del seleccionador'
+
+    def __str__(self) -> str:
+        return f'Pregunta #{self.id} - {self.question}'
+
+
+class SelectorOption(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[SelectorOption]'
+
+    points: 'models.Manager[SelectorOptionPoints]'
+
+    question: 'models.ForeignKey[SelectorQuestion, SelectorQuestion]' = models.ForeignKey(
+        SelectorQuestion, models.CASCADE, related_name='options',
+        verbose_name='pregunta',
+    )
+
+    text: 'models.CharField[str, str]' = models.CharField(
+        'respuesta', max_length=300,
+    )
+
+    class Meta:
+        verbose_name = 'opción de pregunta'
+        verbose_name_plural = 'opciones de pregunta'
+
+    def __str__(self) -> str:
+        return f'Opción #{self.id}'
+
+
+class SelectorOptionPoints(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[SelectorOptionPoints]'
+
+    option: 'models.ForeignKey[SelectorOption, SelectorOption]' = models.ForeignKey(
+        SelectorOption, models.CASCADE, related_name='points',
+        verbose_name='opción',
+    )
+
+    house: 'models.ForeignKey[House, House]' = models.ForeignKey(
+        House, models.CASCADE, related_name='options_points',
+        verbose_name='casa',
+    )
+
+    points: 'models.IntegerField' = models.IntegerField(
+        'puntos',
+    )
+
+    class Meta:
+        verbose_name = 'puntos de opción'
+        verbose_name_plural = 'puntos de opción'
+
+    def __str__(self) -> str:
+        return f'Puntos #{self.id}'
+
+
+class SelectorResult(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[SelectorResult]'
+
+    points: 'models.Manager[SelectorResultPoints]'
+
+    user: 'models.OneToOneField[User, User]' = models.OneToOneField(
+        User, models.CASCADE, related_name='selector_result',
+        verbose_name='usuario',
+    )
+
+    created: 'models.DateTimeField[datetime, datetime]' = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'resultado del seleccionador'
+        verbose_name_plural = 'resultados del seleccionador'
+
+    def __str__(self) -> str:
+        return f'Resultado #{self.id}'
+
+
+class SelectorResultPoints(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[SelectorResultPoints]'
+
+    result: 'models.ForeignKey[SelectorResult, SelectorResult]' = models.ForeignKey(
+        SelectorResult, models.CASCADE, related_name='points',
+        verbose_name='resultado',
+    )
+
+    house: 'models.ForeignKey[House, House]' = models.ForeignKey(
+        House, models.CASCADE,
+        verbose_name='casa',
+    )
+
+    points: 'models.IntegerField' = models.IntegerField(
+        'puntos',
+    )
+
+    class Meta:
+        verbose_name = 'puntos de resultado'
+        verbose_name_plural = 'puntos de resultado'
+
+    def __str__(self) -> str:
+        return f'Puntos #{self.id}'
