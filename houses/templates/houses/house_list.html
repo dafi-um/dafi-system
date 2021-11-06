@@ -9,7 +9,7 @@
     <div class="right">
       {% if profile %}
         <a class="button alt" href="{% url 'houses:profile' profile.id %}">Mi Perfil</a>
-      {% elif user.is_authenticated %}
+      {% else %}
         <a class="button alt" href="{% url 'houses:selector' %}">Crear Perfil</a>
       {% endif %}
     </div>

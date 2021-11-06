@@ -35,7 +35,7 @@ class CommitteeAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'manager')
 
-    autocomplete_fields= ('manager',)
+    autocomplete_fields = ('manager',)
 
 
 @admin.register(DocumentMedia)
@@ -69,7 +69,7 @@ class GroupAdmin(admin.ModelAdmin):
         'delegate', 'subdelegate', 'telegram_group_link'
     )
 
-    autocomplete_fields= ('delegate', 'subdelegate')
+    autocomplete_fields = ('delegate', 'subdelegate')
 
     def get_degree(self, obj):
         return obj.year.degree
@@ -82,14 +82,14 @@ class MeetingAdmin(admin.ModelAdmin):
 
     list_display = ('date', 'is_ordinary', 'minutes_approved')
 
-    autocomplete_fields= ('documents', 'attendees', 'absents')
+    autocomplete_fields = ('documents', 'attendees', 'absents')
 
 
 class PeopleGroupMemberInline(admin.TabularInline):
 
     model = PeopleGroup.members.through
 
-    autocomplete_fields= ('user',)
+    autocomplete_fields = ('user',)
 
 
 @admin.register(PeopleGroup)
