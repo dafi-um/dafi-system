@@ -105,8 +105,10 @@ class SelectorAlgorithmView(AccessMixin, MetadataMixin, TemplateView):
         if SelectorResult.objects.filter(user=self.request.user).exists():
             return redirect('houses:selector_done')
 
-        if HouseProfile.objects.filter(user=self.request.user).exists():
-            return redirect('houses:profile')
+        profile = HouseProfile.objects.filter(user=self.request.user).first()
+
+        if profile is not None:
+            return redirect('houses:profile', profile.id)
 
         return super().dispatch(request, *args, **kwargs)
 
