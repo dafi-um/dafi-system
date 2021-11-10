@@ -19,6 +19,8 @@ class HouseAdmin(admin.ModelAdmin):
 
     search_fields = ('name',)
 
+    autocomplete_fields = ('managers',)
+
 
 @admin.register(HouseProfile)
 class HouseProfileAdmin(admin.ModelAdmin):

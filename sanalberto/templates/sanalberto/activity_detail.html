@@ -74,7 +74,7 @@
                    href="{% url 'sanalberto:registration_detail' user_registration.id %}"
                    title="Ver mi inscripción">Ver mi inscripción</a>
             </div>
-        {% elif user.is_authenticated and object.accepts_registration %}
+        {% elif object.accepts_registration %}
             <div style="margin-top: 1.5em;text-align: center;">
                 <a class="button special"
                    href="{% url 'sanalberto:activity_register' object.id %}"

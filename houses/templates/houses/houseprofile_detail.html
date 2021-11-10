@@ -49,6 +49,8 @@
             </dd>
           {% endif %}
         </dl>
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}">Inicia sesión para ver más detalles</a>
       {% endif %}
     </div>
 

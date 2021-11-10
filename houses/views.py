@@ -52,11 +52,13 @@ class HousesListView(MetadataMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         houses: list[House] = context['object_list']
-        best_house: House = max(houses, key=lambda h: h.points)
 
-        # Only show the best house if it's really the best one
-        if not any(house != best_house and house.points == best_house.points for house in houses):
-            context['best_house'] = best_house
+        if houses:
+            best_house: House = max(houses, key=lambda h: h.points)
+
+            # Only show the best house if it's really the best one
+            if not any(house != best_house and house.points == best_house.points for house in houses):
+                context['best_house'] = best_house
 
         if self.request.user.is_authenticated:
             context['profile'] = HouseProfile.objects.filter(user=self.request.user).first()
