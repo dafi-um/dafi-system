@@ -1,6 +1,17 @@
 DAFI System - Registro de Cambios
 =================================
 
+## 10 Nov. 2021
+
+### Casas
+
+* Creada aplicación de las casas
+* Creado algoritmo seleccionador
+
+### Main
+
+* Agregado modelo de entradas de menú para controlar el menú principal dinámicamente
+
 ## 1 Nov. 2021
 
 ### San Alberto

@@ -8,6 +8,10 @@ class Config(models.Model):
     MAIN_GROUP_ID = 'main_telegram_group'
     ALT_GROUP_ID = 'alt_telegram_group'
 
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[Config]'
+
     key: 'models.CharField[str, str]' = models.CharField(
         'clave', max_length=64, primary_key=True
     )
@@ -40,3 +44,46 @@ class Config(models.Model):
         entry: 'Config | None' = cls.objects.filter(key=key).first()
 
         return entry.value if entry else None
+
+
+class MenuEntry(models.Model):
+
+    id: 'models.AutoField[int, int]'
+
+    objects: 'models.Manager[MenuEntry]'
+
+    text: 'models.CharField[str, str]' = models.CharField(
+        'texto', max_length=64,
+    )
+
+    title: 'models.CharField[str, str]' = models.CharField(
+        'título', max_length=200,
+        help_text='Se utilizará cómo título del enlace.',
+    )
+
+    url: 'models.CharField[str, str]' = models.CharField(
+        'URL', max_length=200,
+    )
+
+    internal: 'models.BooleanField[bool, bool]' = models.BooleanField(
+        'es un enlace interno', default=True,
+        help_text='Los enlaces internos se pasarán al gestor de URLs de Django',
+    )
+
+    blank: 'models.BooleanField[bool, bool]' = models.BooleanField(
+        'abrir en nueva pestaña', default=False,
+    )
+
+    order: 'models.IntegerField[int, int]' = models.IntegerField(
+        'orden', default=0,
+        help_text='Los enlaces se ordenarán de izquierda a derecha en orden ascendente',
+    )
+
+    class Meta:
+        verbose_name = 'entrada de menú'
+        verbose_name_plural = 'entradas de menú'
+
+        ordering = ('order',)
+
+    def __str__(self) -> str:
+        return f'Entrada #{self.id}'
