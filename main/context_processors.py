@@ -7,5 +7,5 @@ from .models import MenuEntry
 
 def menu(request: HttpRequest) -> dict[str, Any]:
     return {
-        'menu': MenuEntry.objects.all(),
+        'menu': MenuEntry.objects.filter(visible=True),
     }

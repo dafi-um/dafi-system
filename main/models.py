@@ -74,6 +74,10 @@ class MenuEntry(models.Model):
         'abrir en nueva pestaña', default=False,
     )
 
+    visible: 'models.BooleanField[bool, bool]' = models.BooleanField(
+        'es visible', default=True,
+    )
+
     order: 'models.IntegerField[int, int]' = models.IntegerField(
         'orden', default=0,
         help_text='Los enlaces se ordenarán de izquierda a derecha en orden ascendente',

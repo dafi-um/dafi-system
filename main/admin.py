@@ -18,8 +18,8 @@ class ConfigAdmin(admin.ModelAdmin):
 @admin.register(MenuEntry)
 class MenuEntryAdmin(admin.ModelAdmin):
 
-    list_display = ('__str__', 'text', 'internal', 'order')
-    list_filter = ('internal', 'blank')
+    list_display = ('__str__', 'text', 'internal', 'visible', 'order')
+    list_filter = ('internal', 'visible', 'blank')
 
 
 class PageAdmin(FlatPageAdmin):
