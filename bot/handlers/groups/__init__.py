@@ -7,7 +7,9 @@ from telegram.ext import (
 def load_all(dispatcher: Dispatcher) -> None:
     from .link import (
         cmd_linkgroup,
+        cmd_linkyear,
         cmd_unlinkgroup,
+        cmd_unlinkyear,
     )
     from .list import cmd_listgroups
 
@@ -15,3 +17,6 @@ def load_all(dispatcher: Dispatcher) -> None:
 
     dispatcher.add_handler(CommandHandler('vinculargrupo', cmd_linkgroup))
     dispatcher.add_handler(CommandHandler('desvinculargrupo', cmd_unlinkgroup))
+
+    dispatcher.add_handler(CommandHandler('vincularanyo', cmd_linkyear))
+    dispatcher.add_handler(CommandHandler('desvincularanyo', cmd_unlinkyear))

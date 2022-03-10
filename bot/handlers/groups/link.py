@@ -2,7 +2,10 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from bot.utils import generate_invite_link
-from heart.models import Group
+from heart.models import (
+    Group,
+    Year,
+)
 from users.models import User
 
 from ...decorators import (
@@ -77,6 +80,80 @@ def cmd_unlinkgroup(update: Update, context: CallbackContext, user: User) -> Non
     if not updated:
         update.effective_message.reply_text(
             '⚠️ Este chat de Telegram no está vinculado a ningún grupo ⚠️'
+        )
+        return
+
+    update.effective_message.reply_text(
+        '¡Grupo desvinculado correctamente! ✅'
+    )
+
+
+@limit_chat_type('group')
+@bot_admin_required()
+@auth_required('heart.can_link_group')
+def cmd_linkyear(update: Update, context: CallbackContext, user: User) -> None:
+    assert context.args is not None
+    assert update.effective_chat is not None
+    assert update.effective_message is not None
+
+    try:
+        degree_id = context.args[0]
+        year_id = int(context.args[1])
+    except (ValueError, IndexError):
+        update.effective_message.reply_markdown(
+            'Uso: `/vincularanyo <grado> <año>`\n'
+            'Ejemplo: `/vincularanyo GII 2` para segundo curso de GII'
+        )
+        return
+
+    existing = Year.objects.filter(telegram_group=update.effective_chat.id).first()
+
+    if existing:
+        update.effective_message.reply_text(
+            f'Este chat de Telegram ya está vinculado al año {existing.year} de {existing.degree.name} ⚠️'
+        )
+
+    try:
+        year = Year.objects.filter(degree__id=degree_id, id=year_id).get()
+    except Year.DoesNotExist:
+        update.effective_message.reply_text(
+            'No se ha encontrado el grado o año indicados ❌'
+        )
+        return
+
+    invite_link = generate_invite_link(update.effective_chat, context.bot)
+
+    if not invite_link:
+        update.effective_message.reply_text(
+            'Ha ocurrido un error inesperado durante la vinculación ⚠️'
+        )
+        return
+
+    year.telegram_group = update.effective_chat.id
+    year.telegram_group_link = invite_link
+    year.save(update_fields=('telegram_group', 'telegram_group_link'))
+
+    update.effective_message.reply_text(
+        '¡Grupo vinculado correctamente! 🎉'
+    )
+
+
+@limit_chat_type('group')
+@auth_required('heart.can_link_group')
+def cmd_unlinkyear(update: Update, context: CallbackContext, user: User) -> None:
+    assert update.effective_chat is not None
+    assert update.effective_message is not None
+
+    updated = (
+        Year
+        .objects
+        .filter(telegram_group=update.effective_chat.id)
+        .update(telegram_group=None, telegram_group_link=None)
+    )
+
+    if not updated:
+        update.effective_message.reply_text(
+            '⚠️ Este chat de Telegram no está vinculado a ningún año ⚠️'
         )
         return
 
