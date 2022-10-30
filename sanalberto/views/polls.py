@@ -280,7 +280,7 @@ class PollAdminView(
         context['designs'] = designs
         context['votes'] = votes
 
-        if designs[0][1] > 0:
+        if designs and designs[0][1] > 0:
             context['winner'] = designs[0][0]
 
         return context

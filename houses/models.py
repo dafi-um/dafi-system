@@ -92,7 +92,7 @@ class PointsTransaction(models.Model):
 
     class Meta:
         verbose_name = 'transacción de puntos'
-        verbose_name = 'transacciones de puntos'
+        verbose_name_plural = 'transacciones de puntos'
 
         permissions = (
             ('can_give_points', 'Puede dar puntos a una casa'),

@@ -415,6 +415,7 @@ class Activity(models.Model):
 
     class Meta:
         verbose_name = 'actividad'
+        verbose_name_plural = 'actividades'
 
     def __str__(self) -> str:
         return f'Actividad #{self.id} ({self.title})'
